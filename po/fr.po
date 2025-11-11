@@ -1,13 +1,13 @@
 #
-# Matthieu Lorier <loriermatthieu@gmail.com>, 2025.
+#  <>, 2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gsconnect\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-13 14:44-0400\n"
-"PO-Revision-Date: 2025-09-13 18:59\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2025-11-11 18:57+0100\n"
+"Last-Translator: Matthieu Lorier <ton.email@example.com>\n"
 "Language-Team: French\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -17,10 +17,10 @@ msgstr ""
 "X-Crowdin-Project: gsconnect\n"
 "X-Crowdin-Project-ID: 327933\n"
 "X-Crowdin-Language: fr\n"
-"X-Crowdin-File: /[GSConnect.gnome-shell-extension-gsconnect] main/po/org."
-"gnome.Shell.Extensions.GSConnect.pot\n"
+"X-Crowdin-File: /[GSConnect.gnome-shell-extension-gsconnect] main/po/"
+"org.gnome.Shell.Extensions.GSConnect.pot\n"
 "X-Crowdin-File-ID: 18\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #. TRANSLATORS: Extension name
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:12
@@ -163,7 +163,7 @@ msgstr "Envoyer le message"
 
 #: data/ui/messaging-conversation.ui:92 src/shell/notification.js:88
 msgid "Type a message"
-msgstr "Taper un message"
+msgstr "Tapez un message"
 
 #: data/ui/messaging-conversation.ui:99
 msgid "Message Entry"
@@ -270,11 +270,11 @@ msgstr "Enregistrer les fichiers dans"
 
 #: data/ui/preferences-device-panel.ui:510
 msgid "Links"
-msgstr ""
+msgstr "Liens"
 
 #: data/ui/preferences-device-panel.ui:562
 msgid "Automatically open received URLs"
-msgstr ""
+msgstr "Ouvrir automatiquement les URLs reçues"
 
 #: data/ui/preferences-device-panel.ui:623
 #: data/ui/preferences-device-panel.ui:2286
@@ -554,13 +554,21 @@ msgstr "Découverte désactivée"
 
 #: data/ui/preferences-window.ui:826
 msgid "Retry"
-msgstr ""
+msgstr "Réessayer"
 
 #: data/ui/preferences-window.ui:858
-msgid "The <tt>openssl</tt> command-line tool does not appear to be installed.\n"
+msgid ""
+"The <tt>openssl</tt> command-line tool does not appear to be installed.\n"
 "Use your distro's package manager to install it.\n"
-"For more information, visit <a href=\"https://github.com/gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-found\">the GSConnect wiki</a>."
+"For more information, visit <a href=\"https://github.com/gsconnect/gnome-"
+"shell-extension-gsconnect/wiki/Error#openssl-not-found\">the GSConnect wiki</"
+"a>."
 msgstr ""
+"L’outil en ligne de commande <tt>openssl</tt> ne semble pas installé.\n"
+"Utilisez le gestionnaire de paquets de votre distribution pour l’installer.\n"
+"Pour plus d’informations, consultez la <a href=\"https://github.com/"
+"gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-"
+"found\">wiki de GSConnect</a>."
 
 #: data/ui/preferences-window.ui:874 src/service/init.js:361
 msgid "OpenSSL not found"
@@ -693,8 +701,12 @@ msgid "translator-credits"
 msgstr "Mickaël Coiraton <mickael.coiraton@gmail.com>"
 
 #: src/preferences/service.js:415
-msgid "Debug messages are being logged. Take any steps necessary to reproduce a problem then review the log."
-msgstr "Les messages de dépannage sont enregistrés. Faites le nécessaire pour reproduire le problème puis vérifiez le fichier de log."
+msgid ""
+"Debug messages are being logged. Take any steps necessary to reproduce a "
+"problem then review the log."
+msgstr ""
+"Les messages de dépannage sont enregistrés. Faites le nécessaire pour "
+"reproduire le problème puis vérifiez le fichier de log."
 
 #: src/preferences/service.js:418
 msgid "Review Log"
@@ -702,13 +714,16 @@ msgstr "Vérifier les logs"
 
 #: src/preferences/service.js:443
 msgid "Invalid Device Name"
-msgstr ""
+msgstr "Nom de l'appareil invalide"
 
 #. TRANSLATOR: %s is a list of forbidden characters
 #: src/preferences/service.js:445
 #, javascript-format
-msgid "Device name must not contain any of %s and have a length of 1-32 characters"
+msgid ""
+"Device name must not contain any of %s and have a length of 1-32 characters"
 msgstr ""
+"Le nom de l'appareil ne doit pas contenir %s et doit avoir un nombre de "
+"caractère compris entre 1 et 32"
 
 #: src/preferences/service.js:516
 msgid "Laptop"
@@ -745,11 +760,15 @@ msgstr "En attente du service…"
 #. Notify the user
 #: src/service/daemon.js:99
 msgid "Settings Migrated"
-msgstr ""
+msgstr "Paramètres déplacés"
 
 #: src/service/daemon.js:100
-msgid "GSConnect has updated to support changes to the KDE Connect protocol. Some devices may need to be re-paired."
+msgid ""
+"GSConnect has updated to support changes to the KDE Connect protocol. Some "
+"devices may need to be re-paired."
 msgstr ""
+"GSConnect a été mis à jour pour prendre en charge les modifications du "
+"protocole KDE Connect. Certains appareils devront peut-être être réappairés."
 
 #: src/service/daemon.js:241
 msgid "Click for help troubleshooting"
@@ -862,14 +881,15 @@ msgstr "Accepter"
 #: src/service/device.js:960
 #, javascript-format
 msgid "Failed to pair with %s"
-msgstr ""
+msgstr "Impossible d'appairer avec %s"
 
 #: src/service/device.js:961
 msgid "Device clocks are out of sync"
-msgstr ""
+msgstr "Les horloges des appareils ne sont pas synchronisées"
 
 #: src/service/manager.js:178
-msgid "Discovery has been disabled due to the number of devices on this network."
+msgid ""
+"Discovery has been disabled due to the number of devices on this network."
 msgstr ""
 "La découverte a été désactivée en raison du nombre de périphériques sur ce "
 "réseau."
@@ -1180,8 +1200,11 @@ msgid "PulseAudio not found"
 msgstr "PulseAudio introuvable"
 
 #: src/service/plugins/telephony.js:17
-msgid "Be notified about calls and adjust system volume during ringing/ongoing calls"
-msgstr "Être notifié des appels et régler le volume du système pendant la sonnerie/les appels en cours"
+msgid ""
+"Be notified about calls and adjust system volume during ringing/ongoing calls"
+msgstr ""
+"Être notifié des appels et régler le volume du système pendant la sonnerie/"
+"les appels en cours"
 
 #. TRANSLATORS: Silence the actively ringing call
 #: src/service/plugins/telephony.js:29
