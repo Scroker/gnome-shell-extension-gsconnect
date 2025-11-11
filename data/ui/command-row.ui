@@ -31,12 +31,12 @@ SPDX-License-Identifier: GPL-2.0-or-later
         <property name="icon-name">user-trash-symbolic</property>
         <property name="has-tooltip">True</property>
         <property name="tooltip-text" translatable="yes">Delete Command</property>
-        <accessibility>
-          <property name="label" translatable="yes">Delete Command</property>
-        </accessibility>
         <style>
           <class name="destructive-action"/>
         </style>
+        <accessibility>
+          <property name="label" translatable="yes">Delete Command</property>
+        </accessibility>
       </object>
     </child>
   </template>

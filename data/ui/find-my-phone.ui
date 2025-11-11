@@ -11,20 +11,26 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <requires lib="Adw" version="1.0"/>
 
   <template class="GSConnectFindMyPhoneDialog" parent="AdwApplicationWindow">
+    <property name="title" translatable="yes">Find my Phone</property>
+
     <property name="default-width">800</property>
     <property name="default-height">600</property>
     <property name="width-request">360</property>
     <property name="height-request">640</property>
+
     <property name="content">
       <object class="AdwToolbarView">
+        <property name="visible">True</property>
         <child type="top">
           <object class="AdwHeaderBar">
+            <property name="visible">True</property>
             <property name="show-start-title-buttons">False</property>
             <property name="show-end-title-buttons">False</property>  
           </object>
         </child>
         <child>
           <object class="AdwStatusPage">
+            <property name="visible">True</property>
             <property name="title" translatable="yes">You found me!</property>
             <property name="icon-name">phone-vibrate-symbolic</property>
           </object>

@@ -1074,7 +1074,7 @@ export const DevicePairPage = GObject.registerClass({
     GTypeName: 'GSConnectDevicePairPage',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-device-pair.ui',
     Children: [
-        'pair_label', 'spinner',  'pair-button',
+        'pair_page', 'spinner', 'pair_button',
     ],
 }, class DevicePairPage extends Adw.NavigationPage {
 
@@ -1082,7 +1082,7 @@ export const DevicePairPage = GObject.registerClass({
         super._init();
         Object.assign(this, params);
 
-        this.pair_label.label = this.device.name;
+        this.pair_page.set_title(this.device.name);
         this.actions = new Gio.SimpleActionGroup();
         this.insert_action_group('settings', this.actions);
 
@@ -1113,7 +1113,7 @@ export const DevicePairPage = GObject.registerClass({
      */
     _pairDevice() {
         this.device.action_group.activate_action('pair', null);
-        this.spinner.set_visible(true);
+        this.pair_page.set_paintable(this.spinner);
         this.pair_button.set_visible(false);
         this._stopSpinner();
     }
@@ -1132,7 +1132,7 @@ export const DevicePairPage = GObject.registerClass({
     _stopSpinner() {
         const PAIR_SPINNER_MILLIS = PAIR_SPINNER_SEC * 1000;
         GLib.timeout_add(GLib.PRIORITY_DEFAULT, PAIR_SPINNER_MILLIS, () => {
-            this.spinner.set_visible(false);
+            this.pair_page.set_icon_name('network-wireless-hotspot-symbolic');
             this.pair_button.set_visible(true);
             return false;
         });

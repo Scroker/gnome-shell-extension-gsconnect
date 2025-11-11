@@ -12,7 +12,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 
   <template class="GSConnectConnectDialog" parent="AdwDialog">
     <property name="title" translatable="yes">Connect to…</property>
-    <property name="content-width">500</property>
+    <property name="content-width">600</property>
     <child>
       <object class="AdwToolbarView">
         <property name="visible">True</property>
@@ -32,6 +32,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="spacing">24</property>
             <child>
               <object class="AdwClamp">
+                <property name="visible">True</property>
                 <property name="child">
                   <object class="GtkBox">
                     <property name="visible">True</property>

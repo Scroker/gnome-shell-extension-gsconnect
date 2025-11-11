@@ -9,6 +9,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 <interface domain="org.gnome.Shell.Extensions.GSConnect">
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
+
   <template class="GSConnectMessagingTextInput" parent="GtkBox">
     <property name="visible">True</property>
     <property name="orientation">horizontal</property>
@@ -21,11 +22,12 @@ SPDX-License-Identifier: GPL-2.0-or-later
       <object class="GtkMenuButton" id="emoji-button">
         <property name="visible">True</property>
         <property name="icon-name">emoji-people-symbolic</property>
-        <property name="valign">end</property>
+        <property name="has-tooltip">True</property>
+        <property name="tooltip-text">Add emojis</property>
         <property name="popover">
-        <object class="GtkEmojiChooser" id="emoji_chooser">
-          <signal name="emoji-picked" handler="_onEmojiPicked"/>
-        </object>
+          <object class="GtkEmojiChooser" id="emoji_chooser">
+            <signal name="emoji-picked" handler="_onEmojiPicked"/>
+          </object>
         </property>
         <style>
           <class name="flat"/>
@@ -34,13 +36,13 @@ SPDX-License-Identifier: GPL-2.0-or-later
     </child>
     <child>
       <object class="GtkScrolledWindow">
-        <property name="vexpand">True</property>
-        <property name="hexpand">True</property>
+        <property name="visible">True</property>
         <property name="vscrollbar-policy">external</property>
         <property name="max-content-height">200</property>
         <property name="propagate-natural-height">True</property>
-        <property name="child">
+        <child>
           <object class="GtkTextView" id="message-entry">
+            <property name="visible">True</property>
             <property name="hexpand">True</property>
             <property name="accepts-tab">False</property>
             <property name="wrap-mode">word</property>
@@ -52,19 +54,19 @@ SPDX-License-Identifier: GPL-2.0-or-later
               <class name="message-entry"/>
             </style>
           </object>
-        </property>
+        </child>
       </object>
     </child>
     <child>
       <object class="GtkButton" id="send-text">
+        <property name="visible">True</property>
         <property name="icon-name">paper-plane-symbolic</property>
         <property name="sensitive">False</property>
-        <property name="valign">end</property>
         <property name="has-tooltip">True</property>
-        <property name="tooltip-text" translatable="yes">Send</property>
+        <property name="tooltip-text" translatable="yes">Send message</property>
         <signal name="clicked" handler="_onSendMessage" swapped="no"/>
         <accessibility>
-          <property name="label" translatable="yes">Send</property>
+          <property name="label" translatable="yes">Send Message</property>
         </accessibility>
         <style>
           <class name="suggested-action"/>

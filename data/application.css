@@ -168,8 +168,24 @@
 
 .keyboard-text-view {
   padding: 10px;
+  background-color: var(--card-bg-color);
 }
 
 .message-entry {
   padding: 8px;
+  background-color: var(--card-bg-color);
+}
+
+.time-label {
+  font-weight: bold;
+  font-size: 85%;
+}
+
+.notification-title {
+  font-weight: bold;
+}
+
+.error-view {
+  padding: 8px;
+  background-color: var(--card-bg-color);
 }

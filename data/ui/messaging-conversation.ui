@@ -11,7 +11,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <requires lib="Adw" version="1.0"/>
 
   <template class="GSConnectMessagingConversation" parent="AdwNavigationPage">
-    <property name="title" translatable="no">Messaging Conversation</property>
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">Conversation</property>
     <child>
       <object class="AdwToolbarView">
         <property name="visible">True</property>
@@ -20,8 +21,12 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="visible">True</property>
             <property name="title-widget">
               <object class="GtkButton" id ="partecipants-button">
+                <property name="visible">True</property>
                 <property name="has-tooltip">True</property>
                 <property name="tooltip-text" translatable="yes">Show partecipants</property>
+                <style>
+                  <class name="flat"/>
+                </style>
                 <accessibility>
                   <property name="label" translatable="yes">Show partecipants</property>
                 </accessibility>
@@ -39,14 +44,10 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     <child>
                       <object class="AdwWindowTitle" id="content-title">
                         <property name="visible">True</property>
-                        <property name="title" translatable="no">Contact Name</property>
                       </object>
                     </child>
                   </object>
                 </child>
-                <style>
-                  <class name="flat"/>
-                </style>
               </object>
             </property>
           </object>
@@ -57,6 +58,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="hscrollbar-policy">never</property>
             <child>
               <object class="AdwClamp">
+                <property name="visible">True</property>
                 <property name="maximum-size">800</property>
                 <child>
                   <object class="GtkListBox" id="list">
@@ -72,7 +74,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     <child>
                       <object class="GtkListBoxRow" id="spinner">
                         <property name="visible">True</property>
-                        <property name="can-focus">True</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
                         <property name="activatable">False</property>
@@ -88,9 +89,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                             <property name="height-request">60</property>
                           </object>
                         </child>
-                        <style>
-                          <class name="messages-loading"/>
-                        </style>
                       </object>
                     </child>
                     <child>
@@ -123,6 +121,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </property>
         <child type="bottom">
           <object class="AdwClamp" id="bottom-bar">
+            <property name="visible">True</property>
             <property name="maximum-size">800</property>
           </object>
         </child>

@@ -11,9 +11,11 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <requires lib="Adw" version="1.0"/>
 
   <template class="GSConnectServiceErrorDialog" parent="AdwApplicationWindow">
-    <property name="title" translatable="yes">An Error Occured…</property>
+    <property name="title" translatable="yes">Error Occurred</property>
+
     <property name="height-request">550</property>
     <property name="width-request">500</property>
+
     <child>
       <object class="AdwToolbarView">
         <property name="visible">True</property>
@@ -22,36 +24,34 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="visible">True</property>
             <property name="show-end-title-buttons">False</property>
             <property name="title-widget">
-              <object class="AdwWindowTitle" id="title-widget"/>
+              <object class="AdwWindowTitle" id="title-widget">
+                <property name="visible">True</property>
+              </object>
             </property>
             <child>
               <object class="GtkButton">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Cancel</property>
-                <signal name="clicked" handler="_onClicked" swapped="no"/>
-                <property name="has-tooltip">True</property>
-                <property name="tooltip-text" translatable="yes">Cancel</property>
-                <accessibility>
-                  <property name="label" translatable="yes">Cancel</property>
-                </accessibility>
                 <style>
                   <class name="destructive-action"/>
                 </style>
+                <signal name="clicked" handler="_onClicked" swapped="no"/>
+                <accessibility>
+                  <property name="label" translatable="yes">Cancel</property>
+                </accessibility>
               </object>
             </child>
             <child type="end">
               <object class="GtkButton" id ="report-button">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Report</property>
-                <signal name="clicked" handler="_onClicked" swapped="no"/>
-                <property name="has-tooltip">True</property>
-                <property name="tooltip-text" translatable="yes">Report</property>
-                <accessibility>
-                  <property name="label" translatable="yes">Report</property>
-                </accessibility>
                 <style>
                   <class name="suggested-action"/>
                 </style>
+                <signal name="clicked" handler="_onClicked" swapped="no"/>
+                <accessibility>
+                  <property name="label" translatable="yes">Report</property>
+                </accessibility>
               </object>
             </child>
           </object>
@@ -64,6 +64,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="icon-name">sad-computer-symbolic</property>
             <child>
               <object class="GtkListBox">
+                <property name="visible">True</property>
+                <property name="selection-mode">none</property>
                 <style>
                   <class name="boxed-list"/>
                 </style>
@@ -90,6 +92,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                         <property name="wrap-mode">word</property>
                         <style>
                           <class name="card"/>
+                          <class name="error-view"/>
                         </style>
                       </object>
                     </child>

@@ -12,13 +12,17 @@ SPDX-License-Identifier: GPL-2.0-or-later
 
   <template class="GSConnectSettingsDialog" parent="AdwPreferencesDialog">
     <property name="title" translatable="yes">Settings</property>
+    <property name="content-width">600</property>
     <child>
       <object class="AdwPreferencesPage">
+        <property name="visible">True</property>
         <child>
           <object class="AdwPreferencesGroup">
+            <property name="visible">True</property>
             <property name="title" translatable="yes">This device</property>
             <child>
               <object class="AdwEntryRow" id="rename-entry">
+                <property name="visible">True</property>
                 <property name="title" translatable="yes">Hostname</property>
                 <property name="show-apply-button">True</property>
                 <signal name="apply" handler="_onSetServiceName" swapped="no"/>
@@ -26,6 +30,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             </child>
             <child>
               <object class="AdwSwitchRow">
+                <property name="visible">True</property>
                 <property name="title" translatable="yes">GSConnect remains active when GNOME Shell is locked</property>
                 <property name="action-name">win.keep-alive-when-locked</property>
               </object>
@@ -34,24 +39,25 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </child>
         <child>
           <object class="AdwPreferencesGroup">
-            <property name="title" translatable="yes">Apparence</property>
+            <property name="visible">True</property>
+            <property name="title" translatable="yes">Appearence</property>
             <child>
               <object class="AdwActionRow">
+                <property name="visible">True</property>
                 <property name="title" translatable="yes">Display Mode</property>
                 <child>
                   <object class="AdwToggleGroup" id="display-mode-toggle">
+                    <property name="visible">True</property>
                     <property name="valign">center</property>
                     <child>
                       <object class="AdwToggle">
                         <property name="label" translatable="yes">Panel</property>
-                        <property name="tooltip">Panel</property>
                         <property name="name">panel</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwToggle">
                         <property name="label" translatable="yes">User Menu</property>
-                        <property name="tooltip">User Menu</property>
                         <property name="name">user-menu</property>
                       </object>
                     </child>
@@ -63,11 +69,16 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </child>
         <child>
           <object class="AdwPreferencesGroup">
+            <property name="visible">True</property>
             <property name="title" translatable="yes">Support</property>
             <child>
               <object class="AdwButtonRow">
+                <property name="visible">True</property>
                 <property name="title" translatable="yes">Generate Support Log</property>
                 <property name="action-name">win.support-log</property>
+                <style>
+                  <class name="accent"/>
+                </style>
               </object>
             </child>  
           </object>

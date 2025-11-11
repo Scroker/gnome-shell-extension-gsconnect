@@ -9,20 +9,21 @@ SPDX-License-Identifier: GPL-2.0-or-later
 <interface domain="org.gnome.Shell.Extensions.GSConnect">
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
+
   <template class="GSConnectPreferencesShortcutEditor" parent="AdwDialog">
     <property name="title" translatable="yes">Set Shortcut</property>
-    <property name="content-width">500</property>
+    <property name="content-width">600</property>
     <child>
       <object class="AdwToolbarView">
+        <property name="visible">True</property>
         <child type="top">
           <object class="AdwHeaderBar">
-            <property name="show-end-title-buttons">false</property>
+            <property name="visible">True</property>
+            <property name="show-end-title-buttons">False</property>
             <child type="start">
               <object class="GtkButton" id="cancel-button">
-                <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">False</property>
-                <property name="has-tooltip">True</property>
-                <property name="tooltip-text" translatable="yes">Cancel</property>
+                <property name="label" translatable="yes">Cancel</property>
                 <accessibility>
                   <property name="label" translatable="yes">Cancel</property>
                 </accessibility>
@@ -33,10 +34,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
             </child>
             <child type="end">
               <object class="GtkButton" id="set-button">
-                <property name="label" translatable="yes">Set</property>
                 <property name="visible">False</property>
-                <property name="has-tooltip">True</property>
-                <property name="tooltip-text" translatable="yes">Set</property>
+                <property name="label" translatable="yes">Set</property>
                 <accessibility>
                   <property name="label" translatable="yes">Set</property>
                 </accessibility>
@@ -49,16 +48,17 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </child>
         <property name="content">
           <object class="GtkBox">
-            <property name="spacing">18</property>
-            <property name="margin_top">12</property>
-            <property name="margin_bottom">12</property>
-            <property name="margin_start">12</property>
-            <property name="margin_end">12</property>
+            <property name="visible">True</property>
             <property name="orientation">vertical</property>
+            <property name="spacing">18</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">12</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
             <child>
               <object class="GtkLabel" id="summary-label">
-                <property name="use-markup">True</property>
                 <property name="visible">True</property>
+                <property name="use-markup">True</property>
                 <property name="wrap">True</property>
               </object>
             </child>
@@ -69,26 +69,29 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <property name="transition-duration">100</property>
                 <child>
                   <object class="AdwStatusPage">
-                    <property name="icon-name">preferences-desktop-keyboard-shortcuts-symbolic</property>
                     <property name="visible">True</property>
+                    <property name="icon-name">preferences-desktop-keyboard-shortcuts-symbolic</property>
                     <property name="description" translatable="yes" comments="Keys for cancelling (␛) or resetting (␈) a shortcut">Press Esc to cancel or Backspace to reset the keyboard shortcut.</property>
                   </object>
                 </child>
                 <child>
                   <object class="AdwStatusPage" id="confirm">
+                    <property name="visible">True</property>
                     <child>
                       <object class="GtkBox">
+                        <property name="visible">True</property>
                         <property name="orientation">vertical</property>
                         <child>
                           <object class="GtkShortcutLabel" id="shortcut-label">
+                            <property name="visible">True</property>
                             <property name="halign">center</property>
                             <property name="hexpand">True</property>
-                            <property name="visible">True</property>
                             <property name="margin-bottom">10</property>
                           </object>
                         </child>
                         <child>
                           <object class="GtkLabel" id="conflict-label">
+                            <property name="visible">True</property>
                             <property name="margin-top">10</property>
                             <property name="halign">center</property>
                             <property name="hexpand">True</property>
@@ -105,4 +108,4 @@ SPDX-License-Identifier: GPL-2.0-or-later
       </object>
     </child>
   </template>
-</interface>                   
+</interface>
