@@ -9,10 +9,10 @@ SPDX-License-Identifier: GPL-2.0-or-later
 <interface domain="org.gnome.Shell.Extensions.GSConnect">
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
-  
+
   <template class="GSConnectMessagingConversationParticipants" parent="AdwDialog">
     <property name="title" translatable="yes">Participants</property>
-    <property name="content-width">500</property>
+    <property name="content-width">600</property>
     <child>
       <object class="AdwToolbarView">
         <child type="top">
@@ -21,12 +21,13 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </child>
         <property name="content">
           <object class="AdwClamp">
-            <property name="margin-top">10</property>
-            <property name="margin-bottom">20</property>
-            <property name="margin-start">10</property>
-            <property name="margin-end">10</property>
+            <property name="margin-top">12</property>
+            <property name="margin-bottom">24</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
             <child>
               <object class="GtkListBox" id="contacts-list">
+                <property name="selection-mode">none</property>
                 <style>
                   <class name="boxed-list"/>
                 </style>

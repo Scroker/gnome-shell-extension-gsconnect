@@ -18,21 +18,16 @@ SPDX-License-Identifier: GPL-2.0-or-later
       <object class="AdwAvatar" id="avatar">
         <property name="visible">True</property>
         <property name="valign">center</property>
-        <property name="size">40</property>
+        <property name="size">30</property>
         <property name="show-initials">True</property>
       </object>
     </child>
     <child>
-      <object class="GtkBox">
-        <property name="valign">end</property>
-        <property name="margin-bottom">5</property>
-        <child>
-          <object class="GtkLabel" id="type-label">
-            <style>
-              <class name="caption"/>
-            </style>
-          </object>
-        </child>
+      <object class="GtkLabel" id="type-label">
+        <property name="valign">center</property>
+        <style>
+          <class name="caption"/>
+        </style>
       </object>
     </child>
   </template>

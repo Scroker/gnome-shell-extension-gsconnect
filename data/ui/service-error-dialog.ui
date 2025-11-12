@@ -11,7 +11,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <requires lib="Adw" version="1.0"/>
 
   <template class="GSConnectServiceErrorDialog" parent="AdwApplicationWindow">
-    <property name="title" translatable="yes">An Error Occured…</property>
+    <property name="title" translatable="yes">Error Occurred</property>
     <property name="height-request">550</property>
     <property name="width-request">500</property>
     <child>
@@ -64,6 +64,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="icon-name">sad-computer-symbolic</property>
             <child>
               <object class="GtkListBox">
+                <property name="selection-mode">none</property>
                 <style>
                   <class name="boxed-list"/>
                 </style>
@@ -90,6 +91,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                         <property name="wrap-mode">word</property>
                         <style>
                           <class name="card"/>
+                          <class name="error-view"/>
                         </style>
                       </object>
                     </child>

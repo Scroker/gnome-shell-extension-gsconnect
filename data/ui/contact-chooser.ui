@@ -48,8 +48,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                         <property name="hexpand">True</property>
                         <property name="placeholder-text" translatable="yes">Search for names or phone numbers</property>
                         <property name="search-delay">100</property>
-                        <property name="has-tooltip">True</property>
-                        <property name="tooltip-text" translatable="yes">Search contacts from names or phone numbers</property>
                         <accessibility>
                           <property name="label" translatable="yes">Search contacts from names or phone numbers</property>
                         </accessibility>
@@ -66,8 +64,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="visible">True</property>
             <child>
               <object class="AdwClamp">
-                <property name="margin-top">20</property>
-                <property name="margin-bottom">20</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">24</property>
                 <property name="margin-start">12</property>
                 <property name="margin-end">12</property>
                 <child>

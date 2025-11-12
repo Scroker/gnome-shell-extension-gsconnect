@@ -12,7 +12,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
   
   <template class="GSConnectPreferencesCommandEditor" parent="AdwDialog">
     <property name="title" translatable="yes">Edit Command</property>
-    <property name="content-width">500</property>
+    <property name="content-width">600</property>
     <child>
       <object class="AdwToolbarView">
         <property name="visible">True</property>
@@ -36,7 +36,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
-                    <property name="margin-top">12</property>
+                    <property name="margin-top">24</property>
                     <property name="margin-bottom">24</property>
                     <property name="margin-start">12</property>
                     <property name="margin-end">12</property>

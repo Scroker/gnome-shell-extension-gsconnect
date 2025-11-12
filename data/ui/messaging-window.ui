@@ -57,7 +57,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                                 <property name="visible">True</property>
                                 <property name="icon-name">list-add-symbolic</property>
                                 <property name="has-tooltip">True</property>
-                                <property name="tooltip-text" translatable="yes">New Conversation</property>
+                                <property name="tooltip-text" translatable="yes">New conversation</property>
                                 <accessibility>
                                   <property name="label" translatable="yes">New Conversation</property>
                                 </accessibility>
@@ -84,8 +84,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                                     <property name="hexpand">True</property>
                                     <property name="placeholder-text" translatable="yes">Search for names, phone numbers or message</property>
                                     <property name="search-delay">100</property>
-                                    <property name="has-tooltip">True</property>
-                                    <property name="tooltip-text" translatable="yes">Search contacts from names, phone numbers or message</property>
                                     <accessibility>
                                       <property name="label" translatable="yes">Search contacts from names, phone numbers or message</property>
                                     </accessibility>
