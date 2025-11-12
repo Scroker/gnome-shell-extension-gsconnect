@@ -7,7 +7,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
 -->
 
 <interface domain="org.gnome.Shell.Extensions.GSConnect">
-  <requires lib="gtk+" version="3.24"/>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="Adw" version="1.0"/>
+
   <template class="GSConnectOpenSSLAlertDialog" parent="AdwAlertDialog">
     <property name="heading" translatable="yes">The &lt;tt&gt;openssl&lt;/tt&gt; command-line tool does not appear to be installed.</property>
     <property name="body" translatable="yes">Use your distro's package manager to install it. For more information, visit &lt;a href="https://github.com/gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-found"&gt;the GSConnect wiki&lt;/a&gt;.</property>

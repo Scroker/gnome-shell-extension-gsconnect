@@ -200,6 +200,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                                 <child>
                                   <object class="GtkListBox">
                                     <property name="visible">True</property>
+                                    <property name="selection-mode">none</property>
                                     <child>
                                       <object class="AdwActionRow">
                                         <property name="visible">True</property>
@@ -241,7 +242,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                                     <child>
                                       <object class="AdwActionRow">
                                         <property name="visible">True</property>
-                                        <property name="title">IOS</property>
+                                        <property name="title">iOS</property>
                                         <property name="activatable-widget">kdeconnect-appstore</property>
                                         <child>
                                           <object class="GtkLinkButton" id="kdeconnect-appstore">

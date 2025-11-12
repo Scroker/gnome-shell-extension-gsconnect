@@ -44,14 +44,12 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     <child>
                       <object class="AdwToggle">
                         <property name="label" translatable="yes">Panel</property>
-                        <property name="tooltip">Panel</property>
                         <property name="name">panel</property>
                       </object>
                     </child>
                     <child>
                       <object class="AdwToggle">
                         <property name="label" translatable="yes">User Menu</property>
-                        <property name="tooltip">User Menu</property>
                         <property name="name">user-menu</property>
                       </object>
                     </child>
@@ -68,6 +66,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
               <object class="AdwButtonRow">
                 <property name="title" translatable="yes">Generate Support Log</property>
                 <property name="action-name">win.support-log</property>
+                <style>
+                  <class name="accent"/>
+                </style>
               </object>
             </child>  
           </object>

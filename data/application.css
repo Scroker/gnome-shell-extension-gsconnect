@@ -168,8 +168,14 @@
 
 .keyboard-text-view {
   padding: 10px;
+  background-color: var(--card-bg-color);
 }
 
 .message-entry {
   padding: 8px;
+  background-color: var(--card-bg-color);
+}
+
+.error-view {
+  background-color: var(--card-bg-color);
 }
