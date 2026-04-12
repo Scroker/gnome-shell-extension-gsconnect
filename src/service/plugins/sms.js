@@ -8,8 +8,9 @@ import GObject from 'gi://GObject';
 
 import Plugin from '../plugin.js';
 import LegacyMessagingDialog from '../ui/legacyMessaging.js';
-import {MessagingWindow, ConversationChooser} from '../ui/messaging.js';
+import { MessagingWindow, ConversationChooser } from '../ui/messaging.js';
 import SmsURI from '../utils/uri.js';
+import { parsePhoneNumber } from '../utils/phone.js';
 
 
 export const Metadata = {
@@ -286,7 +287,7 @@ const SMSPlugin = GObject.registerClass({
             if (thread_ids.some(id => id !== thread_ids[0])) {
                 for (let i = 0, len = messages.length; i < len; i++)
                     this._handleThread([messages[i]]);
-            // Otherwise, handle as a thread chunk.
+                // Otherwise, handle as a thread chunk.
             } else {
                 this._handleThread(messages);
             }
@@ -303,7 +304,7 @@ const SMSPlugin = GObject.registerClass({
      * @param {number} earliestTimestamp - The timestamp of the earliest message
      */
     _requestConversation(thread_id, numberToGet = -1, earliestTimestamp = -1) {
-        const pkt_body = {threadID: thread_id};
+        const pkt_body = { threadID: thread_id };
 
         if (numberToGet > 0)
             pkt_body['numberToRequest'] = numberToGet;
@@ -410,7 +411,7 @@ const SMSPlugin = GObject.registerClass({
             window.present();
             window.setMessage(url);
 
-        // If there are active threads, show the chooser dialog
+            // If there are active threads, show the chooser dialog
         } else if (Object.values(this.threads).length > 0) {
             const window = new ConversationChooser({
                 application: Gio.Application.get_default(),
@@ -421,7 +422,7 @@ const SMSPlugin = GObject.registerClass({
 
             window.present();
 
-        // Otherwise show the window and wait for a contact to be chosen
+            // Otherwise show the window and wait for a contact to be chosen
         } else {
             this.window.present();
             this.window.setMessage(url, true);
@@ -446,7 +447,7 @@ const SMSPlugin = GObject.registerClass({
 
             // Lookup contacts
             const addresses = uri.recipients.map(number => {
-                return {address: number.toPhoneNumber()};
+                return { address: parsePhoneNumber(number).number };
             });
             const contacts = this.device.contacts.lookupAddresses(addresses);
 
@@ -464,10 +465,10 @@ const SMSPlugin = GObject.registerClass({
     }
 
     _messageHasAddress(message, addressObj) {
-        const number = addressObj.address.toPhoneNumber();
+        const number = parsePhoneNumber(addressObj.address).number;
 
         for (const taddressObj of message.addresses) {
-            const tnumber = taddressObj.address.toPhoneNumber();
+            const tnumber = parsePhoneNumber(taddressObj.address).number;
 
             if (number.endsWith(tnumber) || tnumber.endsWith(number))
                 return true;

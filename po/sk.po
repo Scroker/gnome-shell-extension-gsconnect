@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: org.gnome.Shell.Extensions.GSConnect\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-03 13:38-0500\n"
+"POT-Creation-Date: 2026-03-15 17:02+0100\n"
 "PO-Revision-Date: 2022-04-28 22:33+0200\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: \n"
@@ -18,7 +18,7 @@ msgstr ""
 
 #. TRANSLATORS: Extension name
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:12
-#: webextension/gettext.js:30
+#: src/preferences/service.js:585 webextension/gettext.js:29
 msgid "GSConnect"
 msgstr "GSConnect"
 
@@ -86,509 +86,536 @@ msgstr "Spustiť predpripravené príkazy"
 msgid "And more…"
 msgstr "A viac…"
 
-#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:141
-msgid "GSConnect in GNOME Shell"
-msgstr "GSConnect v GNOME Shelli"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:180
+#, fuzzy
+msgid "GSConnect Overview"
+msgstr "Tím GSConnect"
 
-#: data/ui/connect-dialog.ui:20
-msgid "Connect to…"
-msgstr "Pripojiť k…"
-
-#: data/ui/connect-dialog.ui:26 data/ui/legacy-messaging-dialog.ui:20
-#: data/ui/legacy-messaging-dialog.ui:24
-#: data/ui/notification-reply-dialog.ui:19
-#: data/ui/notification-reply-dialog.ui:23
-#: data/ui/preferences-command-editor.ui:21
-#: data/ui/preferences-command-editor.ui:157
-#: data/ui/preferences-shortcut-editor.ui:19
-#: data/ui/service-device-chooser.ui:21 data/ui/service-device-chooser.ui:25
-#: data/ui/service-error-dialog.ui:20 data/ui/service-error-dialog.ui:28
-#: src/preferences/service.js:405 src/service/plugins/share.js:161
-#: src/service/plugins/share.js:297 src/service/plugins/share.js:428
-msgid "Cancel"
-msgstr "Zrušiť"
-
-#: data/ui/connect-dialog.ui:33
-msgid "Connect"
-msgstr "Pripojiť"
-
-#: data/ui/connect-dialog.ui:80
-msgid "IP Address"
-msgstr "IP adresa"
-
-#: data/ui/contact-chooser.ui:56
-msgid "No contacts"
-msgstr "Žiadne kontakty"
-
-#: data/ui/contact-chooser.ui:68 data/ui/messaging-window.ui:103
-#: data/ui/mousepad-input-dialog.ui:56 data/ui/preferences-window.ui:847
-msgid "Help"
-msgstr "Pomocník"
-
-#: data/ui/contact-chooser.ui:109
-msgid "Type a phone number or name"
-msgstr "Zadajte telefónne číslo alebo meno"
-
-#. TRANSLATORS: All other phone number types
-#: data/ui/contacts-address-row.ui:71 src/service/ui/contacts.js:149
-msgid "Other"
-msgstr "Iné"
-
-#. TRANSLATORS: Share URL by SMS
-#: data/ui/legacy-messaging-dialog.ui:15 src/service/daemon.js:274
-#: src/service/daemon.js:388 src/service/plugins/sms.js:62
-#: webextension/gettext.js:42
-msgid "Send SMS"
-msgstr "Odoslať SMS"
-
-#: data/ui/legacy-messaging-dialog.ui:32 data/ui/legacy-messaging-dialog.ui:36
-#: data/ui/notification-reply-dialog.ui:31
-#: data/ui/notification-reply-dialog.ui:35 src/service/plugins/share.js:429
-msgid "Send"
-msgstr "Odoslať"
-
-#: data/ui/legacy-messaging-dialog.ui:69 data/ui/messaging-window.ui:263
-#: data/ui/notification-reply-dialog.ui:68
-msgid "Device is disconnected"
-msgstr "Zariadenie je odpojené"
-
-#: data/ui/messaging-conversation.ui:91 src/service/plugins/sms.js:54
-msgid "Send Message"
-msgstr "Odoslať správu"
-
-#: data/ui/messaging-conversation.ui:92 src/shell/notification.js:84
-msgid "Type a message"
-msgstr "Zadajte správu"
-
-#: data/ui/messaging-conversation.ui:99
-msgid "Message Entry"
-msgstr "Zadanie správy"
-
-#: data/ui/messaging-conversation.ui:100
-msgid "Type a message and press Enter to send"
-msgstr "Zadajte správu a stlačením klávesu Enter ju odošlite"
-
-#: data/ui/messaging-window.ui:21 src/service/plugins/sms.js:30
-#: src/service/ui/messaging.js:1057
-msgid "Messaging"
-msgstr "Písanie správ"
-
-#: data/ui/messaging-window.ui:30 data/ui/messaging-window.ui:43
-#: src/service/ui/messaging.js:1268
-msgid "New Conversation"
-msgstr "Nová konverzácia"
-
-#: data/ui/messaging-window.ui:120
-msgid "No Conversations"
-msgstr "Žiadna konverzácia"
-
-#: data/ui/messaging-window.ui:180
-msgid "No conversation selected"
-msgstr "Nie je vybraná konverzácia"
-
-#: data/ui/messaging-window.ui:196
-msgid "Select or start a conversation"
-msgstr "Vyberte alebo začnite novú konverzáciu"
-
-#: data/ui/mousepad-input-dialog.ui:97
-msgid ""
-"Touchpad.\n"
-"Drag on this area to move mouse cursor.\n"
-"Press long to drag to drag mouse cursor.\n"
-"\n"
-"Simple click will be sent to paired device.\n"
-"Left, middle, right button, and wheel scrolls."
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:184
+msgid "Preferences Window"
 msgstr ""
 
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:188
+#, fuzzy
+msgid "Device Settings Page"
+msgstr "Nastavenie zariadenia"
+
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:192
+#, fuzzy
+msgid "Messaging Window"
+msgstr "Písanie správ"
+
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:196
+msgid "GNOME Nautilus Extension"
+msgstr ""
+
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:200
+msgid "Device Control Window"
+msgstr ""
+
+#: data/ui/command-row.ui:21 data/ui/command-row.ui:23
 #: data/ui/preferences-command-editor.ui:14
 msgid "Edit Command"
 msgstr "Upraviť príkaz"
 
-#: data/ui/preferences-command-editor.ui:28
-msgid "Save"
-msgstr "Uložiť"
+#: data/ui/command-row.ui:33 data/ui/command-row.ui:35
+#, fuzzy
+msgid "Delete Command"
+msgstr "Upraviť príkaz"
 
-#: data/ui/preferences-command-editor.ui:61
-msgid "Name"
-msgstr "Názov"
+#: data/ui/connect-dialog.ui:14
+msgid "Connect to…"
+msgstr "Pripojiť k…"
 
-#: data/ui/preferences-command-editor.ui:99
-msgid "Command Line"
-msgstr "Príkazový riadok"
+#: data/ui/connect-dialog.ui:54
+msgid "IP Address"
+msgstr "IP adresa"
 
-#: data/ui/preferences-command-editor.ui:121
-#: data/ui/preferences-command-editor.ui:150
-msgid "Choose an executable"
-msgstr "Zvolí spustiteľný súbor"
+#: data/ui/connect-dialog.ui:60
+msgid "Port"
+msgstr ""
 
-#: data/ui/preferences-command-editor.ui:164
-msgid "Open"
-msgstr "Otvoriť"
+#: data/ui/connect-dialog.ui:84
+msgid "Connect"
+msgstr "Pripojiť"
 
-#: data/ui/preferences-device-panel.ui:53 src/preferences/service.js:482
-msgid "Desktop"
-msgstr "Stolný počítač"
-
-#: data/ui/preferences-device-panel.ui:102
-msgid "Clipboard Sync"
-msgstr "Synchronizácia schránky"
-
-#: data/ui/preferences-device-panel.ui:168
-msgid "Media Players"
-msgstr "Multimediálne prehrávače"
-
-#: data/ui/preferences-device-panel.ui:225
-msgid "Mouse & Keyboard"
-msgstr "Myš a klávesnica"
-
-#: data/ui/preferences-device-panel.ui:282
-msgid "Volume Control"
-msgstr "Ovládanie hlasitosti"
-
-#: data/ui/preferences-device-panel.ui:336 src/service/plugins/sftp.js:331
-msgid "Files"
-msgstr "Súbory"
-
-#: data/ui/preferences-device-panel.ui:388
-msgid "Receive Files"
-msgstr "Prijímať súbory"
-
-#: data/ui/preferences-device-panel.ui:447
-msgid "Save files to"
-msgstr "Ukladať súbory do"
-
-#: data/ui/preferences-device-panel.ui:508
-#: data/ui/preferences-device-panel.ui:2170
-msgid "Sharing"
-msgstr "Zdieľanie"
-
-#: data/ui/preferences-device-panel.ui:539
-msgid "Device Battery"
-msgstr "Stav batérie"
-
-#: data/ui/preferences-device-panel.ui:590
-msgid "Low Battery Notification"
-msgstr "Upozornenie na slabú batériu"
-
-#: data/ui/preferences-device-panel.ui:649
-msgid "Charged Up to Custom Level Notification"
-msgstr "Oznámenie o nabití na nastavenú úroveň"
-
-#: data/ui/preferences-device-panel.ui:729
-msgid "Fully Charged Notification"
-msgstr "Oznámenie o plnom nabití"
-
-#: data/ui/preferences-device-panel.ui:783
-msgid "System Battery"
-msgstr "Systémová batéria"
-
-#: data/ui/preferences-device-panel.ui:832
-msgid "Share Statistics"
-msgstr "Zdieľať štatistiky"
-
-#: data/ui/preferences-device-panel.ui:886
-#: data/ui/preferences-device-panel.ui:2216 src/service/plugins/battery.js:14
-msgid "Battery"
-msgstr "Batéria"
-
-#: data/ui/preferences-device-panel.ui:916
-#: data/ui/preferences-device-panel.ui:1001
-#: data/ui/preferences-device-panel.ui:2262
-#: src/service/plugins/runcommand.js:26 src/service/plugins/runcommand.js:34
-#: src/service/plugins/runcommand.js:194
-msgid "Commands"
-msgstr "Príkazy"
-
-#: data/ui/preferences-device-panel.ui:975
-msgid "Add Command"
-msgstr "Pridať príkaz"
-
-#. TRANSLATORS: 'Share' is a verb here; this refers to the action of sharing
-#: data/ui/preferences-device-panel.ui:1063
-msgid "Share Notifications"
-msgstr "Zdieľať oznámenia"
-
-#: data/ui/preferences-device-panel.ui:1123
-msgid "Share When Active"
-msgstr "Zdieľať, keď je aktívny"
-
-#: data/ui/preferences-device-panel.ui:1174
-msgid "Applications"
-msgstr "Aplikácie"
-
-#: data/ui/preferences-device-panel.ui:1220
-#: data/ui/preferences-device-panel.ui:2308
-#: src/service/plugins/notification.js:17
-msgid "Notifications"
-msgstr "Oznámenia"
-
-#: data/ui/preferences-device-panel.ui:1278 src/service/plugins/contacts.js:27
+#: data/ui/contact-chooser.ui:14 src/service/plugins/contacts.js:29
 msgid "Contacts"
 msgstr "Kontakty"
 
-#: data/ui/preferences-device-panel.ui:1331
-msgid "Incoming Calls"
-msgstr "Prichádzajúce hovory"
+#: data/ui/contact-chooser.ui:31 data/ui/contact-chooser.ui:33
+#: data/ui/messaging-window.ui:49 data/ui/messaging-window.ui:51
+#, fuzzy
+msgid "Search contact"
+msgstr "Synchronizovať kontakty"
 
-#: data/ui/preferences-device-panel.ui:1380
-#: data/ui/preferences-device-panel.ui:1547
-msgid "Volume"
-msgstr "Hlasitosť"
+#: data/ui/contact-chooser.ui:49
+msgid "Search for names or phone numbers"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1446
-#: data/ui/preferences-device-panel.ui:1613
-msgid "Pause Media"
-msgstr "Pozastaviť multimédiá"
+#: data/ui/contact-chooser.ui:52 data/ui/contact-chooser.ui:54
+#, fuzzy
+msgid "Search contacts from names or phone numbers"
+msgstr "Vyberte kontakt alebo číslo"
 
-#: data/ui/preferences-device-panel.ui:1499
-msgid "Ongoing Calls"
-msgstr "Odchádzajúce hovory"
+#: data/ui/find-my-phone.ui:28 src/service/plugins/findmyphone.js:208
+msgid "You found me!"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1669
-msgid "Mute Microphone"
-msgstr "Stíšiť mikrofón"
+#: data/ui/legacy-messaging-dialog.ui:13
+#, fuzzy
+msgid "Send SMS…"
+msgstr "Odoslať SMS"
 
-#: data/ui/preferences-device-panel.ui:1723
-#: data/ui/preferences-device-panel.ui:2354 src/service/plugins/telephony.js:15
-msgid "Telephony"
-msgstr "Telefonovanie"
+#: data/ui/legacy-messaging-dialog.ui:20
+#, fuzzy
+msgid "Message"
+msgstr "Písanie správ"
 
-#: data/ui/preferences-device-panel.ui:1758
-msgid "Action Shortcuts"
-msgstr "Skratky akcií"
+#: data/ui/legacy-messaging-dialog.ui:21
+#, fuzzy
+msgid "message"
+msgstr "Zadajte správu"
 
-#: data/ui/preferences-device-panel.ui:1774
-msgid "Reset All…"
-msgstr "Obnoviť všetko…"
+#: data/ui/legacy-messaging-dialog.ui:48
+#: data/ui/notification-reply-dialog.ui:31
+#, fuzzy
+msgid "Device Disconnected"
+msgstr "Zariadenie je odpojené"
 
-#: data/ui/preferences-device-panel.ui:1826
-msgid "Shortcuts"
-msgstr "Skratky"
+#: data/ui/messaging-conversation-participants.ui:14
+msgid "Participants"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1857
-msgid "Plugins"
-msgstr "Zásuvné moduly"
+#: data/ui/messaging-conversation-sharesms.ui:24
+#: data/ui/messaging-conversation-sharesms.ui:26 data/ui/messaging-window.ui:60
+#: data/ui/messaging-window.ui:62
+msgid "New Conversation"
+msgstr "Nová konverzácia"
 
-#: data/ui/preferences-device-panel.ui:1904
-msgid "Experimental"
-msgstr "Experimentálne"
+#: data/ui/messaging-conversation.ui:24 data/ui/messaging-conversation.ui:26
+msgid "Show participants"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1951
-msgid "Device Cache"
-msgstr "Vyrovnávacia pamäť zariadenia"
+#: data/ui/messaging-window.ui:70 src/service/plugins/sms.js:31
+msgid "Messaging"
+msgstr "Písanie správ"
 
-#: data/ui/preferences-device-panel.ui:1969
-msgid "Clear Cache…"
-msgstr "Vyčistiť vyrovnávaciu pamäť…"
+#: data/ui/messaging-window.ui:85
+#, fuzzy
+msgid "Search for names, phone numbers or message"
+msgstr "Zadajte telefónne číslo alebo meno"
 
-#: data/ui/preferences-device-panel.ui:2008
-msgid "Legacy SMS Support"
-msgstr "Podpora SMS (zastarané)"
+#: data/ui/messaging-window.ui:88 data/ui/messaging-window.ui:90
+msgid "Search contacts from names, phone numbers or message"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:2065
-msgid "SFTP Automount"
-msgstr "Automatické pripojenie SFTP"
+#: data/ui/messaging-window.ui:114
+msgid "No Conversations"
+msgstr "Žiadna konverzácia"
 
-#: data/ui/preferences-device-panel.ui:2120
-#: data/ui/preferences-device-panel.ui:2446
-msgid "Advanced"
-msgstr "Pokročilé"
+#: data/ui/messaging-window.ui:121 data/ui/mousepad-input-dialog.ui:42
+#: data/ui/preferences-window.ui:290
+msgid "Help"
+msgstr "Pomocník"
 
-#: data/ui/preferences-device-panel.ui:2400
-msgid "Keyboard Shortcuts"
-msgstr "Klávesové skratky"
+#: data/ui/messaging-window.ui:168
+msgid "No conversation selected"
+msgstr "Nie je vybraná konverzácia"
 
-#: data/ui/preferences-device-panel.ui:2464
+#: data/ui/messaging-window.ui:169
+msgid "Select or start a conversation"
+msgstr "Vyberte alebo začnite novú konverzáciu"
+
+#: data/ui/mousepad-input-dialog.ui:28 src/service/plugins/mousepad.js:29
+msgid "Remote Input"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:81 data/ui/mousepad-input-dialog.ui:83
+msgid "Mouse left button"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:95 data/ui/mousepad-input-dialog.ui:97
+msgid "Mouse middle button"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:108 data/ui/mousepad-input-dialog.ui:110
+msgid "Mouse right button"
+msgstr ""
+
+#: data/ui/notification-reply-dialog.ui:14
+#: data/ui/preferences-device-page.ui:106
+#: data/ui/preferences-device-page.ui:497
+#: data/ui/preferences-device-page.ui:515
+#: src/service/plugins/notification.js:19
+msgid "Notifications"
+msgstr "Oznámenia"
+
+#: data/ui/preferences-command-editor.ui:54
+msgid "Name"
+msgstr "Názov"
+
+#: data/ui/preferences-command-editor.ui:61
+#, fuzzy
+msgid "Command"
+msgstr "Príkazy"
+
+#: data/ui/preferences-command-editor.ui:77 src/preferences/device.js:679
+#: src/preferences/device.js:688 src/preferences/device.js:690
+msgid "Add Command"
+msgstr "Pridať príkaz"
+
+#: data/ui/preferences-device-page.ui:13
+#, fuzzy
+msgid "Device Page"
+msgstr "Meno zariadenia"
+
+#: data/ui/preferences-device-page.ui:20
 msgid "Device Settings"
 msgstr "Nastavenie zariadenia"
 
-#. TRANSLATORS: Send a pair request to the device
-#: data/ui/preferences-device-panel.ui:2508
-#: data/ui/preferences-device-panel.ui:2600 src/service/daemon.js:367
-msgid "Pair"
-msgstr "Spárovať"
+#: data/ui/preferences-device-page.ui:61 data/ui/preferences-device-page.ui:224
+#: data/ui/preferences-device-page.ui:242
+msgid "Sharing"
+msgstr "Zdieľanie"
 
-#: data/ui/preferences-device-panel.ui:2540
-msgid "Device is unpaired"
-msgstr "Spárovanie so zariadením bolo zrušené"
+#: data/ui/preferences-device-page.ui:76 data/ui/preferences-device-page.ui:345
+#: data/ui/preferences-device-page.ui:363 src/service/plugins/battery.js:15
+msgid "Battery"
+msgstr "Batéria"
 
-#: data/ui/preferences-device-panel.ui:2555
-msgid "You may configure this device before pairing"
-msgstr "Pred spárovaním môžete toto zariadenie nastaviť"
+#: data/ui/preferences-device-page.ui:91 data/ui/preferences-device-page.ui:443
+#: data/ui/preferences-device-page.ui:461 src/service/plugins/runcommand.js:26
+#: src/service/plugins/runcommand.js:34 src/service/plugins/runcommand.js:194
+msgid "Commands"
+msgstr "Príkazy"
 
-#. TRANSLATORS: View the TLS Certificate fingerprint
-#: data/ui/preferences-device-panel.ui:2595 src/preferences/device.js:390
-msgid "Encryption Info"
-msgstr "Informácie o šifrovaní"
+#: data/ui/preferences-device-page.ui:121
+#: data/ui/preferences-device-page.ui:565
+#: data/ui/preferences-device-page.ui:583 data/ui/preferences-settings.ui:82
+#: data/ui/preferences-settings.ui:86 src/service/plugins/telephony.js:16
+msgid "Telephony"
+msgstr "Telefonovanie"
 
-#. TRANSLATORS: Unpair the device and notify it
-#: data/ui/preferences-device-panel.ui:2606 src/service/daemon.js:376
-msgid "Unpair"
-msgstr "Zrušiť párovanie"
+#: data/ui/preferences-device-page.ui:152
+#: data/ui/preferences-device-page.ui:714
+#: data/ui/preferences-device-page.ui:732
+msgid "Keyboard Shortcuts"
+msgstr "Klávesové skratky"
 
-#. TRANSLATORS: Send clipboard content to device
-#: data/ui/preferences-device-panel.ui:2618
+#: data/ui/preferences-device-page.ui:167
+#: data/ui/preferences-device-page.ui:777
+#: data/ui/preferences-device-page.ui:795
+msgid "Advanced"
+msgstr "Pokročilé"
+
+#: data/ui/preferences-device-page.ui:198
+#, fuzzy
+msgid "Unpair Device"
+msgstr "Cieľové zariadenie"
+
+#: data/ui/preferences-device-page.ui:255 src/preferences/device.js:418
+msgid "Desktop"
+msgstr "Stolný počítač"
+
+#: data/ui/preferences-device-page.ui:259
+msgid "Clipboard Sync"
+msgstr "Synchronizácia schránky"
+
+#: data/ui/preferences-device-page.ui:264
 msgid "To Device"
 msgstr "Do zariadenia"
 
-#. TRANSLATORS: Receive clipboard content from the device
-#: data/ui/preferences-device-panel.ui:2624
+#: data/ui/preferences-device-page.ui:272
 msgid "From Device"
 msgstr "Zo zariadenia"
 
-#. TRANSLATORS: Don't change the system volume
-#: data/ui/preferences-device-panel.ui:2636
-#: data/ui/preferences-device-panel.ui:2669
+#: data/ui/preferences-device-page.ui:282
+msgid "Media Players"
+msgstr "Multimediálne prehrávače"
+
+#: data/ui/preferences-device-page.ui:289
+msgid "Mouse & Keyboard"
+msgstr "Myš a klávesnica"
+
+#: data/ui/preferences-device-page.ui:296
+msgid "Volume Control"
+msgstr "Ovládanie hlasitosti"
+
+#: data/ui/preferences-device-page.ui:305 src/service/plugins/sftp.js:332
+msgid "Files"
+msgstr "Súbory"
+
+#: data/ui/preferences-device-page.ui:309
+msgid "Receive Files"
+msgstr "Prijímať súbory"
+
+#: data/ui/preferences-device-page.ui:316
+msgid "Save files to"
+msgstr "Ukladať súbory do"
+
+#: data/ui/preferences-device-page.ui:326 src/preferences/device.js:603
+#, fuzzy
+msgid "Select Folder"
+msgstr "Vybrať"
+
+#: data/ui/preferences-device-page.ui:376
+msgid "Device Battery"
+msgstr "Stav batérie"
+
+#: data/ui/preferences-device-page.ui:380
+msgid "Low Battery Notification"
+msgstr "Upozornenie na slabú batériu"
+
+#: data/ui/preferences-device-page.ui:387
+msgid "Charged Up to Custom Level Notification"
+msgstr "Oznámenie o nabití na nastavenú úroveň"
+
+#: data/ui/preferences-device-page.ui:416
+msgid "Fully Charged Notification"
+msgstr "Oznámenie o plnom nabití"
+
+#: data/ui/preferences-device-page.ui:425
+msgid "System Battery"
+msgstr "Systémová batéria"
+
+#: data/ui/preferences-device-page.ui:429
+msgid "Share Statistics"
+msgstr "Zdieľať štatistiky"
+
+#: data/ui/preferences-device-page.ui:531
+msgid "Share Notifications"
+msgstr "Zdieľať oznámenia"
+
+#: data/ui/preferences-device-page.ui:538
+msgid "Share When Active"
+msgstr "Zdieľať, keď je aktívny"
+
+#: data/ui/preferences-device-page.ui:547
+msgid "Applications"
+msgstr "Aplikácie"
+
+#: data/ui/preferences-device-page.ui:596
+msgid "Incoming Calls"
+msgstr "Prichádzajúce hovory"
+
+#: data/ui/preferences-device-page.ui:600
+#: data/ui/preferences-device-page.ui:653
+msgid "Volume"
+msgstr "Hlasitosť"
+
+#: data/ui/preferences-device-page.ui:607
+#: data/ui/preferences-device-page.ui:608
+#: data/ui/preferences-device-page.ui:660
+#: data/ui/preferences-device-page.ui:661
 msgid "Nothing"
 msgstr "Bez zmeny"
 
-#. TRANSLATORS: Restore the system volume
-#: data/ui/preferences-device-panel.ui:2643
-#: data/ui/preferences-device-panel.ui:2676
+#: data/ui/preferences-device-page.ui:614
+#: data/ui/preferences-device-page.ui:615
+#: data/ui/preferences-device-page.ui:667
+#: data/ui/preferences-device-page.ui:668
 msgid "Restore"
 msgstr "Obnoviť"
 
-#. TRANSLATORS: Lower the system volume
-#: data/ui/preferences-device-panel.ui:2650
-#: data/ui/preferences-device-panel.ui:2683
+#: data/ui/preferences-device-page.ui:621
+#: data/ui/preferences-device-page.ui:622
+#: data/ui/preferences-device-page.ui:674
+#: data/ui/preferences-device-page.ui:675
 msgid "Lower"
 msgstr "Znížiť"
 
-#. TRANSLATORS: Mute the system volume
 #. TRANSLATORS: Silence the actively ringing call
-#: data/ui/preferences-device-panel.ui:2657
-#: data/ui/preferences-device-panel.ui:2690
-#: src/service/plugins/telephony.js:197
+#: data/ui/preferences-device-page.ui:628
+#: data/ui/preferences-device-page.ui:629
+#: data/ui/preferences-device-page.ui:681
+#: data/ui/preferences-device-page.ui:682 src/service/plugins/telephony.js:198
 msgid "Mute"
 msgstr "Stíšiť"
 
+#: data/ui/preferences-device-page.ui:640
+#: data/ui/preferences-device-page.ui:693
+msgid "Pause Media"
+msgstr "Pozastaviť multimédiá"
+
+#: data/ui/preferences-device-page.ui:649
+#, fuzzy
+msgid "Outgoing Calls"
+msgstr "Odchádzajúce hovory"
+
+#: data/ui/preferences-device-page.ui:700
+msgid "Mute Microphone"
+msgstr "Stíšiť mikrofón"
+
+#: data/ui/preferences-device-page.ui:745
+msgid "Action Shortcuts"
+msgstr "Skratky akcií"
+
+#: data/ui/preferences-device-page.ui:753
+msgid "Reset All…"
+msgstr "Obnoviť všetko…"
+
+#: data/ui/preferences-device-page.ui:808
+msgid "Plugins"
+msgstr "Zásuvné moduly"
+
+#: data/ui/preferences-device-page.ui:820
+msgid "Experimental"
+msgstr "Experimentálne"
+
+#: data/ui/preferences-device-page.ui:838
+msgid "Clear Cache…"
+msgstr "Vyčistiť vyrovnávaciu pamäť…"
+
+#. Translators: This text appears just after the name of a device to connect
+#: data/ui/preferences-device-pair.ui:69
+#, fuzzy
+msgid "is not paired"
+msgstr "Spárovanie zrušené"
+
+#: data/ui/preferences-device-pair.ui:97
+#, fuzzy
+msgid "Pair Device"
+msgstr "Cieľové zariadenie"
+
+#: data/ui/preferences-settings.ui:14 data/ui/preferences-window.ui:286
+msgid "Settings"
+msgstr "Nastavenia"
+
+#: data/ui/preferences-settings.ui:17
+msgid "General"
+msgstr "Všeobecné"
+
+#: data/ui/preferences-settings.ui:21
+#, fuzzy
+msgid "This device"
+msgstr "Do zariadenia"
+
+#: data/ui/preferences-settings.ui:24
+msgid "Hostname"
+msgstr ""
+
+#: data/ui/preferences-settings.ui:31
+#, fuzzy
+msgid "GSConnect remains active when GNOME Shell is locked"
+msgstr "GSConnect v GNOME Shelli"
+
+#: data/ui/preferences-settings.ui:40
+msgid "Apparence"
+msgstr ""
+
+#: data/ui/preferences-settings.ui:43
+msgid "Display Mode"
+msgstr "Režim zobrazenia"
+
+#: data/ui/preferences-settings.ui:49
+msgid "Panel"
+msgstr "Panel"
+
+#: data/ui/preferences-settings.ui:56
+msgid "User Menu"
+msgstr "Užívateľská ponuka"
+
+#: data/ui/preferences-settings.ui:69
+#, fuzzy
+msgid "Support"
+msgstr "Ohlásiť"
+
+#: data/ui/preferences-settings.ui:72 src/preferences/service.js:635
+msgid "Generate Support Log"
+msgstr "Vytvoriť záznam pre technickú podporu"
+
+#: data/ui/preferences-settings.ui:87
+msgid "Phone number parsing and dialing preferences"
+msgstr "Predvoľby pre analýzu a vytáčanie telefónnych čísel"
+
+#: data/ui/preferences-settings.ui:90
+msgid "Phone Country Code"
+msgstr "Kód krajiny telefónu"
+
+#: data/ui/preferences-settings.ui:91
+msgid "Default fallback region for ambiguous numbers"
+msgstr "Predvolený záložný región pre nejednoznačné čísla"
+
+#: data/ui/preferences-shortcut-editor.ui:13
+msgid "Set Shortcut"
+msgstr "Nastavenie skratky"
+
+#: data/ui/preferences-shortcut-editor.ui:22
 #: data/ui/preferences-shortcut-editor.ui:25
+#: data/ui/preferences-shortcut-editor.ui:27
+#: data/ui/service-device-chooser.ui:31 data/ui/service-device-chooser.ui:34
+#: data/ui/service-device-chooser.ui:36 data/ui/service-error-dialog.ui:30
+#: data/ui/service-error-dialog.ui:33 data/ui/service-error-dialog.ui:35
+#: src/preferences/service.js:640 src/service/plugins/share.js:179
+#: src/service/plugins/share.js:330
+msgid "Cancel"
+msgstr "Zrušiť"
+
+#: data/ui/preferences-shortcut-editor.ui:36
+#: data/ui/preferences-shortcut-editor.ui:39
+#: data/ui/preferences-shortcut-editor.ui:41
 msgid "Set"
 msgstr "Nastaviť"
 
 #. Keys for cancelling (␛) or resetting (␈) a shortcut
-#: data/ui/preferences-shortcut-editor.ui:80
+#: data/ui/preferences-shortcut-editor.ui:74
 msgid "Press Esc to cancel or Backspace to reset the keyboard shortcut."
 msgstr ""
 "Stlačte klávesu Esc na zrušenie alebo klávesu Backspace na obnovenie "
 "klávesovej skratky."
 
-#: data/ui/preferences-window.ui:24
-msgid "Device Name"
-msgstr "Meno zariadenia"
-
-#: data/ui/preferences-window.ui:61
-msgid "_Rename"
-msgstr "_Premenovať"
-
-#: data/ui/preferences-window.ui:98 data/ui/preferences-window.ui:112
+#: data/ui/preferences-window.ui:49 data/ui/preferences-window.ui:51
 msgid "Refresh"
 msgstr "Obnoviť"
 
-#: data/ui/preferences-window.ui:139 src/extension.js:114
-msgid "Mobile Settings"
-msgstr "Mobilné nastavenia"
-
-#: data/ui/preferences-window.ui:166
-msgid "Service Menu"
-msgstr "Ponuka služieb"
-
-#: data/ui/preferences-window.ui:189
-msgid "Device Menu"
+#: data/ui/preferences-window.ui:70 data/ui/preferences-window.ui:72
+#, fuzzy
+msgid "Main Menu"
 msgstr "Ponuka zariadenia"
 
-#: data/ui/preferences-window.ui:203 data/ui/preferences-window.ui:218
-msgid "Edit Device Name"
-msgstr "Upraviť meno zariadenia"
-
-#: data/ui/preferences-window.ui:278
-msgid "Devices"
-msgstr "Zariadenia"
-
-#: data/ui/preferences-window.ui:328 src/preferences/service.js:644
-msgid "Searching for devices…"
-msgstr "Hľadajú sa zariadenia…"
-
-#: data/ui/preferences-window.ui:353
+#: data/ui/preferences-window.ui:118
 #, fuzzy
-msgid "Extension Settings"
-msgstr "Nastavenie zariadenia"
+msgid "Welcome to GSConnect"
+msgstr "O programe GSConnect"
 
-#: data/ui/preferences-window.ui:390
-#, fuzzy
-msgid "GSConnect remains active when GNOME Shell is locked"
-msgstr "GSConnect v GNOME Shelli"
-
-#: data/ui/preferences-window.ui:410
-msgid "Browser Add-Ons"
-msgstr "Doplnky prehliadačov"
-
-#: data/ui/preferences-window.ui:728
-msgid "Enable"
-msgstr "Povoliť"
-
-#: data/ui/preferences-window.ui:760
-msgid "This device is invisible to unpaired devices"
-msgstr "Toto zariadenie nie je viditeľné pre nespárované zariadenia"
-
-#: data/ui/preferences-window.ui:772 src/service/manager.js:144
-msgid "Discovery Disabled"
-msgstr "Objavenie zakázané"
-
-#. TRANSLATORS: Open a dialog to connect to an IP or Bluez device
-#: data/ui/preferences-window.ui:821
+#: data/ui/preferences-window.ui:280
 msgid "Add device by IP…"
 msgstr ""
 
-#: data/ui/preferences-window.ui:826
-msgid "Display Mode"
-msgstr "Režim zobrazenia"
-
-#. TRANSLATORS: Show device indicators in the top bar
-#: data/ui/preferences-window.ui:829
-msgid "Panel"
-msgstr "Panel"
-
-#. TRANSLATORS: Show devices in the user menu like Bluetooth
-#: data/ui/preferences-window.ui:835
-msgid "User Menu"
-msgstr "Užívateľská ponuka"
-
-#. TRANSLATORS: Generate a support log
-#: data/ui/preferences-window.ui:843 src/preferences/service.js:402
-msgid "Generate Support Log"
-msgstr "Vytvoriť záznam pre technickú podporu"
-
-#: data/ui/preferences-window.ui:851
+#: data/ui/preferences-window.ui:294
 msgid "About GSConnect"
 msgstr "O programe GSConnect"
 
-#: data/ui/service-device-chooser.ui:15
-msgid "Select a Device"
+#: data/ui/service-device-chooser.ui:14
+#, fuzzy
+msgid "Select Device"
 msgstr "Výber zariadenia"
 
-#: data/ui/service-device-chooser.ui:33 data/ui/service-device-chooser.ui:38
+#: data/ui/service-device-chooser.ui:46 data/ui/service-device-chooser.ui:49
+#: data/ui/service-device-chooser.ui:51
 msgid "Select"
 msgstr "Vybrať"
 
 #. TRANSLATORS: No devices are known or available
-#: data/ui/service-device-chooser.ui:101 webextension/gettext.js:38
+#: data/ui/service-device-chooser.ui:86 webextension/gettext.js:37
 msgid "No Device Found"
 msgstr "Nenašlo sa žiadne zariadenie"
 
-#: data/ui/service-device-chooser.ui:118
-msgid "Device List"
-msgstr "Zoznam zariadení"
+#: data/ui/service-error-dialog.ui:14
+msgid "An Error Occured…"
+msgstr ""
 
-#: data/ui/service-error-dialog.ui:39 data/ui/service-error-dialog.ui:47
+#: data/ui/service-error-dialog.ui:45 data/ui/service-error-dialog.ui:48
+#: data/ui/service-error-dialog.ui:50
 msgid "Report"
 msgstr "Ohlásiť"
 
-#: data/ui/service-error-dialog.ui:79
-msgid "Something’s gone wrong"
-msgstr "Niečo sa pokazilo"
+#: data/ui/service-error-dialog.ui:62
+msgid "Oops!"
+msgstr ""
 
-#: data/ui/service-error-dialog.ui:91
+#: data/ui/service-error-dialog.ui:63
 msgid ""
 "GSConnect encountered an unexpected error. Please report the problem and "
 "include any information that may help."
@@ -596,30 +623,35 @@ msgstr ""
 "GSConnect narazil na neočakávanú chybu. Prosím, nahláste tento problém a "
 "priložte všetky informácie, ktoré môžu byť užitočné."
 
-#: data/ui/service-error-dialog.ui:125
-msgid "Technical Details"
+#: data/ui/service-error-dialog.ui:74
+#, fuzzy
+msgid "View Technical Details"
 msgstr "Technické podrobnosti"
 
 #. TRANSLATORS: Send to <device_name>, for file manager
 #. context menu
 #. TRANSLATORS: A phone number (eg. "Send to 555-5555")
 #. Update UI
-#: nautilus-extension/nautilus-gsconnect.py:187 src/service/ui/contacts.js:509
-#: src/service/ui/contacts.js:524
+#: nautilus-extension/nautilus-gsconnect.py:187 src/service/ui/contacts.js:296
+#: src/service/ui/contacts.js:313
 #, python-format, javascript-format
 msgid "Send to %s"
 msgstr "Odoslať na číslo %s"
 
 #. TRANSLATORS: Top-level context menu item for GSConnect
-#: nautilus-extension/nautilus-gsconnect.py:195 webextension/gettext.js:34
+#: nautilus-extension/nautilus-gsconnect.py:195 webextension/gettext.js:33
 msgid "Send To Mobile Device"
 msgstr "Odoslať do mobilného zariadenia"
 
-#: src/extension.js:50
+#: src/extension.js:49
 msgid "Sync between your devices"
 msgstr ""
 
-#: src/extension.js:159
+#: src/extension.js:113
+msgid "Mobile Settings"
+msgstr "Mobilné nastavenia"
+
+#: src/extension.js:158
 #, fuzzy, javascript-format
 msgid "%d Connected"
 msgid_plural "%d Connected"
@@ -627,42 +659,90 @@ msgstr[0] "Pripojené"
 msgstr[1] "Pripojené"
 msgstr[2] "Pripojené"
 
-#: src/preferences/device.js:669 src/preferences/device.js:675
-msgid "Edit"
-msgstr "Upraviť"
+#: src/preferences/device.js:218 src/preferences/device.js:440
+msgid "Encryption Info"
+msgstr "Informácie o šifrovaní"
 
-#: src/preferences/device.js:684 src/preferences/device.js:690
-msgid "Remove"
-msgstr "Odstrániť"
+#: src/preferences/device.js:421
+msgid "Laptop"
+msgstr "Notebook"
 
-#: src/preferences/device.js:944 src/preferences/device.js:972
+#: src/preferences/device.js:424
+msgid "Smartphone"
+msgstr "Smartphone"
+
+#: src/preferences/device.js:427
+msgid "Tablet"
+msgstr "Tablet"
+
+#: src/preferences/device.js:430
+msgid "Television"
+msgstr "Televízia"
+
+#: src/preferences/device.js:444
+msgid "Ok"
+msgstr ""
+
+#: src/preferences/device.js:899 src/preferences/device.js:918
 msgid "Disabled"
 msgstr "Zakázané"
 
 #. TRANSLATORS: Summary of a keyboard shortcut function
 #. Example: Enter a new shortcut to change Messaging
-#: src/preferences/keybindings.js:66
+#: src/preferences/keybindings.js:56
 #, javascript-format
 msgid "Enter a new shortcut to change <b>%s</b>"
 msgstr "Zadajte novú skratku pre zmenu akcie <b>%s</b>"
 
-#. TRANSLATORS: When a keyboard shortcut is unavailable
-#. Example: [Ctrl]+[S] is already being used
-#: src/preferences/keybindings.js:132
+#: src/preferences/keybindings.js:140
 #, javascript-format
-msgid "%s is already being used"
-msgstr "Klávesová skratka %s sa už používa"
+msgid "%s è già in uso"
+msgstr ""
 
-#: src/preferences/service.js:361
+#: src/preferences/service.js:235 src/preferences/service.js:665
+#, fuzzy
+msgid "Invalid Device Name"
+msgstr "Upraviť meno zariadenia"
+
+#. TRANSLATOR: %s is a list of forbidden characters
+#: src/preferences/service.js:237 src/preferences/service.js:667
+#, javascript-format
+msgid ""
+"Device name must not contain any of %s and have a length of 1-32 characters"
+msgstr ""
+
+#. Add a close button to dismiss the dialog
+#: src/preferences/service.js:242 src/preferences/service.js:357
+#: src/preferences/service.js:672 src/service/plugins/share.js:263
+msgid "Close"
+msgstr ""
+
+#: src/preferences/service.js:268
+#, fuzzy
+msgid "Connect to..."
+msgstr "Pripojiť k…"
+
+#: src/preferences/service.js:301
+msgid "Invalid host or port."
+msgstr ""
+
+#: src/preferences/service.js:309
+msgid "An unexpected error occurred."
+msgstr ""
+
+#: src/preferences/service.js:352
+msgid "Oops! An error occurred…"
+msgstr ""
+
+#: src/preferences/service.js:587
 msgid "A complete KDE Connect implementation for GNOME"
 msgstr "Kompletná implementácia aplikácie KDE Connect pre prostredie GNOME"
 
-#. TRANSLATORS: eg. 'Translator Name <your.email@domain.com>'
-#: src/preferences/service.js:370
+#: src/preferences/service.js:591
 msgid "translator-credits"
 msgstr "Dušan Kazik <prescott66@gmail.com>, Jose Riha <jose1711@gmail.com>"
 
-#: src/preferences/service.js:403
+#: src/preferences/service.js:636
 msgid ""
 "Debug messages are being logged. Take any steps necessary to reproduce a "
 "problem then review the log."
@@ -670,121 +750,139 @@ msgstr ""
 "Správy ladenia sú zaznamenávané. Pokúste sa opätovne vyvolať problém a "
 "pozrite sa na súbor so záznamom."
 
-#: src/preferences/service.js:406
+#: src/preferences/service.js:641
 msgid "Review Log"
 msgstr "Prezrieť súbor so záznamom"
 
-#: src/preferences/service.js:474
-msgid "Laptop"
-msgstr "Notebook"
-
-#: src/preferences/service.js:476
-msgid "Smartphone"
-msgstr "Smartphone"
-
-#: src/preferences/service.js:478
-msgid "Tablet"
-msgstr "Tablet"
-
-#: src/preferences/service.js:480
-msgid "Television"
-msgstr "Televízia"
-
-#: src/preferences/service.js:502
+#: src/preferences/service.js:703
 msgid "Unpaired"
 msgstr "Spárovanie zrušené"
 
-#: src/preferences/service.js:506
+#: src/preferences/service.js:706
 msgid "Disconnected"
 msgstr "Odpojené"
 
-#: src/preferences/service.js:510
+#: src/preferences/service.js:709
 msgid "Connected"
 msgstr "Pripojené"
 
-#: src/preferences/service.js:646
+#: src/preferences/service.js:798
+msgid "Searching for devices…"
+msgstr "Hľadajú sa zariadenia…"
+
+#: src/preferences/service.js:801
 msgid "Waiting for service…"
 msgstr "Čaká sa na službu…"
 
-#: src/service/daemon.js:175
+#. Notify the user
+#: src/service/daemon.js:103
+#, fuzzy
+msgid "Settings Migrated"
+msgstr "Nastavenia"
+
+#: src/service/daemon.js:104
+msgid ""
+"GSConnect has updated to support changes to the KDE Connect protocol. Some "
+"devices may need to be re-paired."
+msgstr ""
+
+#: src/service/daemon.js:248
 msgid "Click for help troubleshooting"
 msgstr "Kliknutím získate pomoc pri riešení problému"
 
-#: src/service/daemon.js:186
+#: src/service/daemon.js:258
 msgid "Click for more information"
 msgstr "Kliknutím získate viac informácií"
 
-#: src/service/daemon.js:280
+#. TRANSLATORS: Share URL by SMS
+#: src/service/daemon.js:354 src/service/daemon.js:477
+#: src/service/plugins/sms.js:63 webextension/gettext.js:41
+msgid "Send SMS"
+msgstr "Odoslať SMS"
+
+#: src/service/daemon.js:360
 msgid "Dial Number"
 msgstr "Vytočiť číslo"
 
-#: src/service/daemon.js:286 src/service/daemon.js:475
+#: src/service/daemon.js:366 src/service/daemon.js:564
 #: src/service/plugins/share.js:31
 msgid "Share File"
 msgstr "Zdieľať súbor"
 
-#: src/service/daemon.js:337
+#: src/service/daemon.js:417
 msgid "List available devices"
 msgstr "Zobraziť dostupné zariadenia"
 
-#: src/service/daemon.js:346
+#: src/service/daemon.js:426
 msgid "List all devices"
 msgstr "Zobraziť všetky zariadenia"
 
-#: src/service/daemon.js:355
+#: src/service/daemon.js:435
 msgid "Target Device"
 msgstr "Cieľové zariadenie"
 
-#: src/service/daemon.js:397
+#: src/service/daemon.js:444
+#, fuzzy
+msgid "Target Device Name"
+msgstr "Cieľové zariadenie"
+
+#: src/service/daemon.js:456
+msgid "Pair"
+msgstr "Spárovať"
+
+#: src/service/daemon.js:465
+msgid "Unpair"
+msgstr "Zrušiť párovanie"
+
+#: src/service/daemon.js:486
 msgid "Message Body"
 msgstr "Telo správy"
 
-#: src/service/daemon.js:409 src/service/plugins/notification.js:56
+#: src/service/daemon.js:498 src/service/plugins/notification.js:58
 msgid "Send Notification"
 msgstr "Odoslať oznámenie"
 
-#: src/service/daemon.js:418
+#: src/service/daemon.js:507
 msgid "Notification App Name"
 msgstr "Meno aplikácie v oznámení"
 
-#: src/service/daemon.js:427
+#: src/service/daemon.js:516
 msgid "Notification Body"
 msgstr "Telo oznámenia"
 
-#: src/service/daemon.js:436
+#: src/service/daemon.js:525
 msgid "Notification Icon"
 msgstr "Ikona oznámenia"
 
-#: src/service/daemon.js:445
+#: src/service/daemon.js:534
 msgid "Notification ID"
 msgstr "ID oznámenia"
 
-#: src/service/daemon.js:454 src/service/plugins/ping.js:13
+#: src/service/daemon.js:543 src/service/plugins/ping.js:13
 #: src/service/plugins/ping.js:20 src/service/plugins/ping.js:47
 msgid "Ping"
 msgstr "Ping"
 
-#: src/service/daemon.js:463 src/service/plugins/battery.js:246
-#: src/service/plugins/battery.js:275 src/service/plugins/battery.js:304
-#: src/service/plugins/findmyphone.js:22
+#: src/service/daemon.js:552 src/service/plugins/battery.js:247
+#: src/service/plugins/battery.js:276 src/service/plugins/battery.js:305
+#: src/service/plugins/findmyphone.js:23
 msgid "Ring"
 msgstr "Prezvoniť"
 
-#: src/service/daemon.js:484 src/service/plugins/share.js:47
-#: src/service/ui/messaging.js:1251 src/service/ui/messaging.js:1259
+#: src/service/daemon.js:573 src/service/plugins/share.js:47
 msgid "Share Link"
 msgstr "Zdieľať odkaz"
 
-#: src/service/daemon.js:493 src/service/plugins/share.js:39
+#: src/service/daemon.js:582 src/service/plugins/share.js:39
 msgid "Share Text"
 msgstr "Zdieľať text"
 
-#: src/service/daemon.js:505
+#: src/service/daemon.js:594
 msgid "Show release version"
 msgstr "Zobraziť verziu vydania"
 
 #. TRANSLATORS: Bluetooth address for remote device
-#: src/service/device.js:171
+#: src/service/device.js:195
 #, javascript-format
 msgid "Bluetooth device at %s"
 msgstr "Zariadenie Bluetooth na adrese %s"
@@ -794,74 +892,88 @@ msgstr "Zariadenie Bluetooth na adrese %s"
 #. Example:
 #.
 #. Verification key: 0123456789abcdef000000000000000000000000
-#: src/service/device.js:212
+#: src/service/device.js:223
 #, fuzzy, javascript-format
 msgid "Verification key: %s"
 msgstr "Oznámenia"
 
 #. TRANSLATORS: eg. Pair Request from Google Pixel
-#: src/service/device.js:846
+#: src/service/device.js:862
 #, javascript-format
 msgid "Pair Request from %s"
 msgstr "Požiadavka na spárovanie od zariadenia %s"
 
-#: src/service/device.js:853
+#: src/service/device.js:869
 msgid "Reject"
 msgstr "Odmietnuť"
 
-#: src/service/device.js:858
+#: src/service/device.js:874
 msgid "Accept"
 msgstr "Prijať"
 
-#: src/service/manager.js:145
+#. TRANSLATORS: eg. Failed to pair with Google Pixel
+#: src/service/device.js:960
+#, javascript-format
+msgid "Failed to pair with %s"
+msgstr ""
+
+#: src/service/device.js:961
+msgid "Device clocks are out of sync"
+msgstr ""
+
+#: src/service/init.js:331
+msgid "OpenSSL not found"
+msgstr "OpenSSL nebolo nájdené"
+
+#: src/service/manager.js:177
+msgid "Discovery Disabled"
+msgstr "Objavenie zakázané"
+
+#: src/service/manager.js:178
 msgid ""
 "Discovery has been disabled due to the number of devices on this network."
 msgstr "Objavenie bolo zakázané kvôli počtu zariadení na tejto sieti."
 
-#: src/service/backends/lan.js:177
-msgid "OpenSSL not found"
-msgstr "OpenSSL nebolo nájdené"
-
-#: src/service/backends/lan.js:470
+#: src/service/backends/lan.js:477
 msgid "Port already in use"
 msgstr "Port už sa používa"
 
-#: src/service/plugins/battery.js:15
+#: src/service/plugins/battery.js:16
 msgid "Exchange battery information"
 msgstr "Vymieňať informácie o batérii"
 
 #. TRANSLATORS: eg. Google Pixel: Battery is full
-#: src/service/plugins/battery.js:255
+#: src/service/plugins/battery.js:256
 #, javascript-format
 msgid "%s: Battery is full"
 msgstr "%s: Batéria je plne nabitá"
 
 #. TRANSLATORS: when the battery is fully charged
 #. TRANSLATORS: When the battery level is 100%
-#: src/service/plugins/battery.js:257 src/shell/device.js:119
+#: src/service/plugins/battery.js:258 src/shell/device.js:119
 msgid "Fully Charged"
 msgstr "Plne nabitá"
 
 #. TRANSLATORS: eg. Google Pixel: Battery has reached custom charge level
-#: src/service/plugins/battery.js:284
+#: src/service/plugins/battery.js:285
 #, javascript-format
 msgid "%s: Battery has reached custom charge level"
 msgstr "%s: Batéria dosiahla nastavenú úroveň nabitia"
 
 #. TRANSLATORS: when the battery has reached custom charge level
-#: src/service/plugins/battery.js:286
+#: src/service/plugins/battery.js:287
 #, javascript-format
 msgid "%d%% Charged"
 msgstr "%d%% nabité"
 
 #. TRANSLATORS: eg. Google Pixel: Battery is low
-#: src/service/plugins/battery.js:313
+#: src/service/plugins/battery.js:314
 #, javascript-format
 msgid "%s: Battery is low"
 msgstr "%s: Batéria je takmer vybitá"
 
 #. TRANSLATORS: eg. 15% remaining
-#: src/service/plugins/battery.js:315
+#: src/service/plugins/battery.js:316
 #, javascript-format
 msgid "%d%% remaining"
 msgstr "Zostáva %d%%"
@@ -882,17 +994,31 @@ msgstr "Odoslať obsah schránky"
 msgid "Clipboard Pull"
 msgstr "Prijať obsah schránky"
 
-#: src/service/plugins/contacts.js:28
+#: src/service/plugins/contacts.js:30
 msgid "Access contacts of the paired device"
 msgstr "Pristupovať ku kontaktom na spárovanom zariadení"
 
-#: src/service/plugins/findmyphone.js:15
+#. Ensure we have a sender
+#. TRANSLATORS: No name or phone number
+#. Contact Name
+#: src/service/plugins/contacts.js:243 src/service/plugins/contacts.js:363
+#: src/service/plugins/telephony.js:156 src/service/plugins/telephony.js:175
+#: src/service/ui/contacts.js:388 src/service/ui/messaging.js:885
+msgid "Unknown Contact"
+msgstr "Neznámy kontakt"
+
+#: src/service/plugins/findmyphone.js:16 src/service/plugins/findmyphone.js:207
 msgid "Find My Phone"
 msgstr "Nájdi môj telefón"
 
-#: src/service/plugins/findmyphone.js:16
+#: src/service/plugins/findmyphone.js:17
 msgid "Ring your paired device"
 msgstr "Prezvoní vaše spárované zariadenie"
+
+#. Add action to cancel request when notification is clicked
+#: src/service/plugins/findmyphone.js:212
+msgid "Stop Ringing"
+msgstr ""
 
 #: src/service/plugins/mousepad.js:14
 msgid "Mousepad"
@@ -902,39 +1028,35 @@ msgstr "Ovládanie myši"
 msgid "Enables the paired device to act as a remote mouse and keyboard"
 msgstr "Umožní použiť spárované zariadenie ako vzdialenú myš a klávesnicu"
 
-#: src/service/plugins/mousepad.js:29 src/service/ui/mousepad.js:107
-msgid "Remote Input"
-msgstr ""
-
-#: src/service/plugins/mpris.js:17
+#: src/service/plugins/mpris.js:18
 msgid "MPRIS"
 msgstr "MPRIS"
 
-#: src/service/plugins/mpris.js:18
+#: src/service/plugins/mpris.js:19
 msgid "Bidirectional remote media playback control"
 msgstr "Obojsmerné diaľkové ovládanie prehrávania multimédií"
 
-#: src/service/plugins/mpris.js:329
+#: src/service/plugins/mpris.js:330
 msgid "Unknown"
 msgstr "Neznáme"
 
-#: src/service/plugins/notification.js:18
+#: src/service/plugins/notification.js:20
 msgid "Share notifications with the paired device"
 msgstr "Zdieľať oznámenia so spárovaným zariadením"
 
-#: src/service/plugins/notification.js:32
+#: src/service/plugins/notification.js:34
 msgid "Cancel Notification"
 msgstr "Zrušiť oznámenie"
 
-#: src/service/plugins/notification.js:40
+#: src/service/plugins/notification.js:42
 msgid "Close Notification"
 msgstr "Zavrieť oznámenie"
 
-#: src/service/plugins/notification.js:48
+#: src/service/plugins/notification.js:50
 msgid "Reply Notification"
 msgstr "Odpovedať na oznámenie"
 
-#: src/service/plugins/notification.js:64
+#: src/service/plugins/notification.js:66
 msgid "Activate Notification"
 msgstr "Aktivovať oznámenia"
 
@@ -969,23 +1091,23 @@ msgstr ""
 "Spustiť príkazy na vašom spárovanom zariadení alebo umožniť zariadeniu "
 "spúšťať predpripravené príkazy na tomto počítači"
 
-#: src/service/plugins/sftp.js:14
+#: src/service/plugins/sftp.js:15
 msgid "SFTP"
 msgstr "SFTP"
 
-#: src/service/plugins/sftp.js:16
+#: src/service/plugins/sftp.js:17
 msgid "Browse the paired device filesystem"
 msgstr "Prehliadať súborový systém spárovaného zariadenia"
 
-#: src/service/plugins/sftp.js:21
+#: src/service/plugins/sftp.js:22
 msgid "Mount"
 msgstr "Pripojiť"
 
-#: src/service/plugins/sftp.js:29
+#: src/service/plugins/sftp.js:30
 msgid "Unmount"
 msgstr "Odpojiť"
 
-#: src/service/plugins/sftp.js:190
+#: src/service/plugins/sftp.js:191
 #, javascript-format
 msgid "%s reported an error"
 msgstr "%s nahlásilo chybu"
@@ -998,126 +1120,119 @@ msgstr "Zdieľať"
 msgid "Share files and URLs between devices"
 msgstr "Zdieľať súbory a URL adresy medzi zariadeniami"
 
-#: src/service/plugins/share.js:130 src/service/plugins/share.js:209
-#: src/service/plugins/share.js:320
+#: src/service/plugins/share.js:148 src/service/plugins/share.js:227
+#: src/service/plugins/share.js:353
 msgid "Transfer Failed"
 msgstr "Prenos zlyhal"
 
 #. TRANSLATORS: eg. Google Pixel is not allowed to upload files
-#: src/service/plugins/share.js:132
+#: src/service/plugins/share.js:150
 #, javascript-format
 msgid "%s is not allowed to upload files"
 msgstr "%s nemá povolené nahrávanie súborov"
 
-#: src/service/plugins/share.js:154 src/service/plugins/share.js:290
+#: src/service/plugins/share.js:172 src/service/plugins/share.js:323
 msgid "Transferring File"
 msgstr "Prebieha prenos súboru"
 
 #. TRANSLATORS: eg. Receiving 'book.pdf' from Google Pixel
-#: src/service/plugins/share.js:156
+#: src/service/plugins/share.js:174
 #, javascript-format
 msgid "Receiving “%s” from %s"
 msgstr "Prijíma sa „%s“ zo zariadenia %s"
 
-#: src/service/plugins/share.js:175 src/service/plugins/share.js:310
+#: src/service/plugins/share.js:193 src/service/plugins/share.js:343
 msgid "Transfer Successful"
 msgstr "Prenos úspešný"
 
 #. TRANSLATORS: eg. Received 'book.pdf' from Google Pixel
-#: src/service/plugins/share.js:177
+#: src/service/plugins/share.js:195
 #, javascript-format
 msgid "Received “%s” from %s"
 msgstr "Prijatý súbor „%s“ zo zariadenia %s"
 
-#: src/service/plugins/share.js:187
+#: src/service/plugins/share.js:205
 msgid "Show File Location"
 msgstr ""
 
-#: src/service/plugins/share.js:192
+#: src/service/plugins/share.js:210
 msgid "Open File"
 msgstr "Otvoriť súbor"
 
 #. TRANSLATORS: eg. Failed to receive 'book.pdf' from Google Pixel
-#: src/service/plugins/share.js:211
+#: src/service/plugins/share.js:229
 #, javascript-format
 msgid "Failed to receive “%s” from %s"
 msgstr "Zlyhalo prijatie súboru „%s“ zo zariadenia %s"
 
-#: src/service/plugins/share.js:242
+#: src/service/plugins/share.js:259
 #, javascript-format
 msgid "Text Shared By %s"
 msgstr "Text zdieľaný zariadením %s"
 
+#. TRANSLATORS: eg. Send files to Google Pixel
+#: src/service/plugins/share.js:280
+#, javascript-format
+msgid "Send files to %s"
+msgstr "Odoslanie súborov do zariadenia %s"
+
 #. TRANSLATORS: eg. Sending 'book.pdf' to Google Pixel
-#: src/service/plugins/share.js:292
+#: src/service/plugins/share.js:325
 #, javascript-format
 msgid "Sending “%s” to %s"
 msgstr "Odosiela sa súbor „%s“ do zariadenia %s"
 
 #. TRANSLATORS: eg. Sent "book.pdf" to Google Pixel
-#: src/service/plugins/share.js:312
+#: src/service/plugins/share.js:345
 #, javascript-format
 msgid "Sent “%s” to %s"
 msgstr "Odoslaný súbor „%s“ do zariadenia %s"
 
 #. TRANSLATORS: eg. Failed to send "book.pdf" to Google Pixel
-#: src/service/plugins/share.js:322
+#: src/service/plugins/share.js:355
 #, javascript-format
 msgid "Failed to send “%s” to %s"
 msgstr "Zlyhalo odoslanie súboru „%s“ do zariadenia %s"
 
-#. TRANSLATORS: eg. Send files to Google Pixel
-#: src/service/plugins/share.js:380
-#, javascript-format
-msgid "Send files to %s"
-msgstr "Odoslanie súborov do zariadenia %s"
-
-#. TRANSLATORS: Mark the file to be opened once completed
-#: src/service/plugins/share.js:384
-msgid "Open when done"
-msgstr "Otvoriť po dokončení"
-
-#. TRANSLATORS: eg. Send a link to Google Pixel
-#: src/service/plugins/share.js:423
-#, javascript-format
-msgid "Send a link to %s"
-msgstr "Odošle odkaz do zariadenia %s"
-
-#: src/service/plugins/sms.js:16
+#: src/service/plugins/sms.js:17
 msgid "SMS"
 msgstr "SMS"
 
-#: src/service/plugins/sms.js:17
+#: src/service/plugins/sms.js:18
 msgid "Send and read SMS of the paired device and be notified of new SMS"
 msgstr ""
 "Odoslať a čítať SMS správy zo spárovaného zariadenia a dostávať upozornenia "
 "na nové správy"
 
-#: src/service/plugins/sms.js:38
+#: src/service/plugins/sms.js:39
 msgid "New SMS (URI)"
 msgstr "Nová SMS (URI)"
 
-#: src/service/plugins/sms.js:46
+#: src/service/plugins/sms.js:47
 msgid "Reply SMS"
 msgstr "Odpovedať na SMS"
 
-#: src/service/plugins/sms.js:70
+#: src/service/plugins/sms.js:55
+msgid "Send Message"
+msgstr "Odoslať správu"
+
+#: src/service/plugins/sms.js:71
 msgid "Share SMS"
 msgstr "Zdieľať SMS"
 
-#: src/service/plugins/systemvolume.js:13
+#: src/service/plugins/systemvolume.js:14
 msgid "System Volume"
 msgstr "Systémová hlasitosť"
 
-#: src/service/plugins/systemvolume.js:14
+#: src/service/plugins/systemvolume.js:15
 msgid "Enable the paired device to control the system volume"
 msgstr "Povoliť spárovanému zariadeniu ovládať systémovú hlasitosť"
 
-#: src/service/plugins/systemvolume.js:58
+#: src/service/plugins/systemvolume.js:59
 msgid "PulseAudio not found"
 msgstr "PulseAudio nebolo nájdené"
 
-#: src/service/plugins/telephony.js:16
+#: src/service/plugins/telephony.js:17
 msgid ""
 "Be notified about calls and adjust system volume during ringing/ongoing calls"
 msgstr ""
@@ -1125,47 +1240,44 @@ msgstr ""
 "prebiehajúceho hovoru"
 
 #. TRANSLATORS: Silence the actively ringing call
-#: src/service/plugins/telephony.js:28
+#: src/service/plugins/telephony.js:29
 msgid "Mute Call"
 msgstr "Stíšiť hovor"
 
-#. Ensure we have a sender
-#. TRANSLATORS: No name or phone number
-#. Contact Name
-#: src/service/plugins/telephony.js:155 src/service/plugins/telephony.js:174
-#: src/service/ui/contacts.js:611 src/service/ui/messaging.js:750
-msgid "Unknown Contact"
-msgstr "Neznámy kontakt"
-
 #. TRANSLATORS: The phone is ringing
-#: src/service/plugins/telephony.js:193
+#: src/service/plugins/telephony.js:194
 msgid "Incoming call"
 msgstr "Prichádzajúci hovor"
 
 #. TRANSLATORS: A phone call is active
-#: src/service/plugins/telephony.js:208
+#: src/service/plugins/telephony.js:209
 msgid "Ongoing call"
 msgstr "Odchádzajúci hovor"
 
 #. TRANSLATORS: A fax number
-#: src/service/ui/contacts.js:134
+#: src/service/ui/contacts.js:21
 msgid "Fax"
 msgstr "Fax"
 
 #. TRANSLATORS: A work or office phone number
-#: src/service/ui/contacts.js:138
+#: src/service/ui/contacts.js:25
 msgid "Work"
 msgstr "Práca"
 
 #. TRANSLATORS: A mobile or cellular phone number
-#: src/service/ui/contacts.js:142
+#: src/service/ui/contacts.js:29
 msgid "Mobile"
 msgstr "Mobil"
 
 #. TRANSLATORS: A home phone number
-#: src/service/ui/contacts.js:146
+#: src/service/ui/contacts.js:33
 msgid "Home"
 msgstr "Domov"
+
+#. TRANSLATORS: All other phone number types
+#: src/service/ui/contacts.js:36
+msgid "Other"
+msgstr "Iné"
 
 #. TRANSLATORS: Less than a minute ago
 #: src/service/ui/messaging.js:105 src/service/ui/messaging.js:146
@@ -1186,21 +1298,11 @@ msgstr[0] "%d minúta"
 msgstr[1] "%d minúty"
 msgstr[2] "%d minút"
 
-#: src/service/ui/messaging.js:401
-msgid "Not available"
-msgstr "Nedostupný"
+#: src/service/ui/messaging.js:235
+msgid "<i>(Empty or unsupported)</i>"
+msgstr ""
 
-#: src/service/ui/messaging.js:758
-msgid "Group Message"
-msgstr "Skupinová správa"
-
-#. TRANSLATORS: An outgoing message body in a conversation summary
-#: src/service/ui/messaging.js:773
-#, javascript-format
-msgid "You: %s"
-msgstr "Vy: %s"
-
-#: src/service/ui/messaging.js:959
+#: src/service/ui/messaging.js:393
 #, javascript-format
 msgid "And %d other contact"
 msgid_plural "And %d others"
@@ -1208,11 +1310,46 @@ msgstr[0] "A jeden ďalší kontakt"
 msgstr[1] "A %d ďalšie kontakty"
 msgstr[2] "A %d ďalších kontaktov"
 
+#. TRANSLATORS: Shown as the summary when a text message contains
+#. only image content (no text body)
+#: src/service/ui/messaging.js:882
+msgid "<i>image</i>"
+msgstr ""
+
+#: src/service/ui/messaging.js:903
+msgid "Group Message"
+msgstr "Skupinová správa"
+
+#: src/service/ui/messaging.js:918
+#, fuzzy
+msgid "New conversation"
+msgstr "Nová konverzácia"
+
+#. TRANSLATORS: An outgoing message body in a conversation summary
+#: src/service/ui/messaging.js:926
+#, javascript-format
+msgid "You: %s"
+msgstr "Vy: %s"
+
+#: src/service/ui/messaging.js:1004
+msgid "Device is disconnected"
+msgstr "Zariadenie je odpojené"
+
 #. TRANSLATORS: Displayed when the remote keyboard is not ready to accept input
-#: src/service/ui/mousepad.js:115
+#: src/service/ui/mousepad.js:123
 #, javascript-format
 msgid "Remote keyboard on %s is not active"
 msgstr "Vzdialená klávesnica na %s nie je aktívna"
+
+#: src/service/ui/mousepad.js:130
+msgid ""
+"Touchpad.\n"
+"Drag on this area to move mouse cursor.\n"
+"Press long to drag to drag mouse cursor.\n"
+"\n"
+"Simple click will be sent to paired device.\n"
+"Left, middle, right button, and wheel scrolls."
+msgstr ""
 
 #. TRANSLATORS: When no time estimate for the battery is available
 #. EXAMPLE: 42% (Estimating…)
@@ -1235,26 +1372,123 @@ msgstr "%d%% (%d∶%02d do plného nabitia)"
 msgid "%d%% (%d∶%02d Remaining)"
 msgstr "%d%% (Zostáva %d∶%02d)"
 
-#: src/shell/notification.js:69
+#: src/shell/notification.js:73
 msgid "Reply"
 msgstr "Odpovedať"
 
+#: src/shell/notification.js:88
+msgid "Type a message"
+msgstr "Zadajte správu"
+
 #. TRANSLATORS: Chrome/Firefox WebExtension description
-#: webextension/gettext.js:32
+#: webextension/gettext.js:31
 msgid "Share links with GSConnect, direct to the browser or by SMS."
 msgstr ""
 "Zdieľanie odkazov s aplikáciou GSConnect, priamo cez prehliadač alebo formou "
 "SMS."
 
 #. TRANSLATORS: WebExtension can't connect to GSConnect
-#: webextension/gettext.js:36
+#: webextension/gettext.js:35
 msgid "Service Unavailable"
 msgstr "Služba nedostupná"
 
 #. TRANSLATORS: Open URL with the device's browser
-#: webextension/gettext.js:40
+#: webextension/gettext.js:39
 msgid "Open in Browser"
 msgstr "Otvoriť v prehliadači"
+
+#~ msgid "GSConnect in GNOME Shell"
+#~ msgstr "GSConnect v GNOME Shelli"
+
+#~ msgid "No contacts"
+#~ msgstr "Žiadne kontakty"
+
+#~ msgid "Send"
+#~ msgstr "Odoslať"
+
+#~ msgid "Message Entry"
+#~ msgstr "Zadanie správy"
+
+#~ msgid "Type a message and press Enter to send"
+#~ msgstr "Zadajte správu a stlačením klávesu Enter ju odošlite"
+
+#~ msgid "Save"
+#~ msgstr "Uložiť"
+
+#~ msgid "Command Line"
+#~ msgstr "Príkazový riadok"
+
+#~ msgid "Choose an executable"
+#~ msgstr "Zvolí spustiteľný súbor"
+
+#~ msgid "Open"
+#~ msgstr "Otvoriť"
+
+#~ msgid "Shortcuts"
+#~ msgstr "Skratky"
+
+#~ msgid "Device Cache"
+#~ msgstr "Vyrovnávacia pamäť zariadenia"
+
+#~ msgid "Legacy SMS Support"
+#~ msgstr "Podpora SMS (zastarané)"
+
+#~ msgid "SFTP Automount"
+#~ msgstr "Automatické pripojenie SFTP"
+
+#~ msgid "Device is unpaired"
+#~ msgstr "Spárovanie so zariadením bolo zrušené"
+
+#~ msgid "You may configure this device before pairing"
+#~ msgstr "Pred spárovaním môžete toto zariadenie nastaviť"
+
+#~ msgid "_Rename"
+#~ msgstr "_Premenovať"
+
+#~ msgid "Service Menu"
+#~ msgstr "Ponuka služieb"
+
+#~ msgid "Devices"
+#~ msgstr "Zariadenia"
+
+#, fuzzy
+#~ msgid "Extension Settings"
+#~ msgstr "Nastavenie zariadenia"
+
+#~ msgid "Browser Add-Ons"
+#~ msgstr "Doplnky prehliadačov"
+
+#~ msgid "Enable"
+#~ msgstr "Povoliť"
+
+#~ msgid "This device is invisible to unpaired devices"
+#~ msgstr "Toto zariadenie nie je viditeľné pre nespárované zariadenia"
+
+#~ msgid "Device List"
+#~ msgstr "Zoznam zariadení"
+
+#~ msgid "Something’s gone wrong"
+#~ msgstr "Niečo sa pokazilo"
+
+#~ msgid "Edit"
+#~ msgstr "Upraviť"
+
+#~ msgid "Remove"
+#~ msgstr "Odstrániť"
+
+#, javascript-format
+#~ msgid "%s is already being used"
+#~ msgstr "Klávesová skratka %s sa už používa"
+
+#~ msgid "Open when done"
+#~ msgstr "Otvoriť po dokončení"
+
+#, javascript-format
+#~ msgid "Send a link to %s"
+#~ msgstr "Odošle odkaz do zariadenia %s"
+
+#~ msgid "Not available"
+#~ msgstr "Nedostupný"
 
 #~ msgid "Camera"
 #~ msgstr "Fotoaparát"
@@ -1275,9 +1509,6 @@ msgstr "Otvoriť v prehliadači"
 
 #~ msgid "Off"
 #~ msgstr "Vypnuté"
-
-#~ msgid "Set Shortcut"
-#~ msgstr "Nastavenie skratky"
 
 #~ msgid "Authentication Failure"
 #~ msgstr "Zlyhalo overenie totožnosti"
@@ -1347,9 +1578,6 @@ msgstr "Otvoriť v prehliadači"
 #~ msgid "Restart Service"
 #~ msgstr "Reštartovať službu"
 
-#~ msgid "Settings"
-#~ msgstr "Nastavenia"
-
 #~ msgid "Remote Filesystems"
 #~ msgstr "Vzdialené súborové systémy"
 
@@ -1379,6 +1607,3 @@ msgstr "Otvoriť v prehliadači"
 
 #~ msgid "Starting Transfer"
 #~ msgstr "Spúšťa sa prenos"
-
-#~ msgid "Select a contact or number"
-#~ msgstr "Vyberte kontakt alebo číslo"

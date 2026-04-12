@@ -9,12 +9,13 @@ import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw';
 import Pango from 'gi://Pango';
 import Gio from 'gi://Gio';
-import {MessagingInputText} from './components.js';
+import { MessagingInputText } from './components.js';
 
 import * as Contacts from './contacts.js';
 import * as Sms from '../plugins/sms.js';
 import * as URI from '../utils/uri.js';
 import '../utils/ui.js';
+import { parsePhoneNumber } from '../utils/phone.js';
 
 /*
  * Useful time constants
@@ -23,7 +24,7 @@ const TIME_SPAN_MINUTE = 60000;
 const TIME_SPAN_HOUR = 3600000;
 const TIME_SPAN_DAY = 86400000;
 const TIME_SPAN_WEEK = 604800000;
-const LOADING_TIMEOUT_SECS = 1;
+const LOADING_TIMEOUT_SECS = 15;
 
 
 // Less than an hour (eg. 42 minutes ago)
@@ -285,10 +286,10 @@ const ConversationParticipants = GObject.registerClass({
 }, class MessagingConversationParticipants extends Adw.Dialog {
 
     _init(params) {
-        super._init({device: params.device});
+        super._init({ device: params.device });
         Object.assign(this, params);
         this.addresses.forEach(item => {
-            const contact = this.device.contacts.query({number: item.address});
+            const contact = this.device.contacts.query({ number: item.address });
             const row = new Adw.ActionRow({
                 title: contact.name,
                 subtitle: Contacts.getDisplayNumber(contact, item.address),
@@ -367,8 +368,8 @@ const MessagingConversation = GObject.registerClass({
 
         this.inbox_counter = 0;
 
-        const address = this.addresses[0].address;
-        const contact = this.device.contacts.query({number: address});
+        const address = parsePhoneNumber(this.addresses[0].address);
+        const contact = this.device.contacts.query({ number: address });
 
         this._participantsId = this.participants_button.connect('clicked', () => {
             if (this._participants_dialog === undefined) {
@@ -382,7 +383,7 @@ const MessagingConversation = GObject.registerClass({
 
         if (this.addresses.length === 1) {
             this.content_title.set_title(contact.name);
-            this.content_title.set_subtitle(Contacts.getDisplayNumber(contact, address));
+            this.content_title.set_subtitle(Contacts.getDisplayNumber(contact, address.number));
             this.avatar.set_text(contact.name);
         } else {
             const otherLength = this.addresses.length - 1;
@@ -393,8 +394,6 @@ const MessagingConversation = GObject.registerClass({
                 otherLength
             ).format(otherLength));
         }
-
-        // this.addMessage(this.message);
 
         // If we're disconnected pending messages might not succeed, but we'll
         // leave them until reconnect when we'll ask for an update
@@ -459,16 +458,16 @@ const MessagingConversation = GObject.registerClass({
         for (let i = 0, len = this.addresses.length; i < len; i++) {
             // Lookup the contact
             const address = this.addresses[i].address;
-            const contact = this.device.contacts.query({number: address});
+            const contact = this.device.contacts.query({ number: address });
 
             // Get corrected address
-            let number = address.toPhoneNumber();
+            let number = address.number;
 
             if (!number)
                 continue;
 
             for (const contactNumber of contact.numbers) {
-                const cnumber = contactNumber.value.toPhoneNumber();
+                const cnumber = contactNumber.value.number;
 
                 if (cnumber && (number.endsWith(cnumber) || cnumber.endsWith(number))) {
                     number = contactNumber.value;
@@ -542,7 +541,7 @@ const MessagingConversation = GObject.registerClass({
         const pageSize = this._vadj.get_page_size();
 
         // Has the scrolled window been filled yet?
-        return !(upper <= pageSize);
+        return upper > pageSize;
     }
 
     get plugin() {
@@ -574,7 +573,7 @@ const MessagingConversation = GObject.registerClass({
 
     _onConnected(device) {
         if (device.connected) {
-            this.pending_messages.forEach(row =>  {
+            this.pending_messages.forEach(row => {
                 this.pending_box.remove(row);
             });
         }
@@ -636,7 +635,7 @@ const MessagingConversation = GObject.registerClass({
     }
 
     _createScrollbarAnim(direction) {
-        const adjustment = this.scrolled.get_vadjustment(); ;
+        const adjustment = this.scrolled.get_vadjustment();;
         const target = Adw.PropertyAnimationTarget.new(adjustment, 'value');
         const animation = new Adw.TimedAnimation({
             widget: this.scrolled,
@@ -666,7 +665,7 @@ const MessagingConversation = GObject.registerClass({
             });
         }
 
-        return new ConversationMessage({contact: this.contacts[sender], message: message});
+        return new ConversationMessage({ contact: this.contacts[sender], message: message });
     }
 
     _populateMessages() {
@@ -739,7 +738,7 @@ const MessagingConversation = GObject.registerClass({
 
         if (before !== null && before.message !== undefined && (row.message.date - before.message.date) > TIME_SPAN_HOUR) {
             if (!header) {
-                header = new Gtk.Label({visible: true, selectable: true});
+                header = new Gtk.Label({ visible: true, selectable: true });
                 header.get_style_context().add_class('dim-label');
                 row.set_header(header);
             }
@@ -808,7 +807,7 @@ const MessagingConversation = GObject.registerClass({
                 this.earliest = message.date;
 
 
-            if (message.date < this.earliest_requested && this._loading)
+            if ((this.windowFilled || message.date < this.earliest_requested) && this._loading)
                 this._stop_loading_spinner();
 
 
@@ -1149,6 +1148,7 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _onNewConversation() {
+        this._cleanupDraftConversation();
         this._sync();
         this.search_entry.set_key_capture_widget(null);
         this.button_search.active = false;
@@ -1167,7 +1167,7 @@ export const MessagingWindow = GObject.registerClass({
         } else {
             const message = {
                 addresses: [
-                    {address: number},
+                    { address: parsePhoneNumber(number).number },
                 ],
                 type: Sms.MessageBox.SENT,
                 read: Sms.MessageStatus.READ,
@@ -1179,6 +1179,7 @@ export const MessagingWindow = GObject.registerClass({
                 contacts: contacts,
                 message: message,
             });
+            row._isDraft = true;
             this.internal_thread_list.push(row);
             this.thread_list.prepend(row);
             this.setContacts(contacts);
@@ -1202,6 +1203,7 @@ export const MessagingWindow = GObject.registerClass({
 
     // GtkListBox::row-activated
     _onThreadSelected(box, row) {
+        this._cleanupDraftConversation();
         this.search_entry.set_key_capture_widget(null);
         this.button_search.active = false;
         // Show the conversation for this number (if applicable)
@@ -1242,7 +1244,7 @@ export const MessagingWindow = GObject.registerClass({
      */
     _getRowForContacts(contacts) {
         const addresses = Object.keys(contacts).map(address => {
-            return {address: address};
+            return { address: address };
         });
 
         // Try to find a thread_id
@@ -1265,7 +1267,7 @@ export const MessagingWindow = GObject.registerClass({
         const addresses = [];
 
         for (const address of Object.keys(contacts))
-            addresses.push({address: address});
+            addresses.push({ address: address });
 
         // Try to find a thread ID for this address group
         let thread_id = this.plugin.getThreadIdForAddresses(addresses);
@@ -1283,7 +1285,12 @@ export const MessagingWindow = GObject.registerClass({
             return;
         }
 
-        // We're creating a nloew conversation
+        // Assign thread_id to the draft row so cleanup can find it
+        const draftRow = this.internal_thread_list.find(r => r._isDraft);
+        if (draftRow && draftRow._message)
+            draftRow._message.thread_id = thread_id;
+
+        // We're creating a new conversation
         const conversation = new MessagingConversation({
             device: this.device,
             plugin: this.plugin,
@@ -1296,6 +1303,9 @@ export const MessagingWindow = GObject.registerClass({
         this.split_view.set_content(conversation);
         this.split_view.set_show_content(true);
 
+        // Track this as a draft conversation
+        this._draftThreadId = thread_id;
+
         // There was a pending message waiting for a conversation to be chosen
         if (this._pendingShare) {
             conversation.setMessage(this._pendingShare);
@@ -1306,11 +1316,40 @@ export const MessagingWindow = GObject.registerClass({
         this.notify('thread-id');
     }
 
+    /**
+     * Remove a draft conversation that was never used (no messages sent).
+     */
+    _cleanupDraftConversation() {
+        if (!this._draftThreadId)
+            return;
+
+        const draftId = this._draftThreadId;
+        this._draftThreadId = null;
+
+        // Check if the conversation has any sent messages
+        const conversation = this.stack.get(draftId);
+        if (conversation && conversation.has_pending === false &&
+            conversation._ids && conversation._ids.size === 0) {
+            // Remove the conversation from the stack
+            this.stack.delete(draftId);
+            conversation.destroy();
+
+            // Remove the draft row from the thread list
+            const draftRows = this.internal_thread_list.filter(r => r._isDraft && r.thread_id === draftId);
+            draftRows.forEach(row => {
+                this.thread_list.remove(row);
+            });
+            this.internal_thread_list = this.internal_thread_list.filter(
+                r => !(r._isDraft && r.thread_id === draftId)
+            );
+        }
+    }
+
     _includesAddress(addresses, addressObj) {
-        const number = addressObj.address.toPhoneNumber();
+        const number = parsePhoneNumber(addressObj.address).number;
 
         for (const haystackObj of addresses) {
-            const tnumber = haystackObj.address.toPhoneNumber();
+            const tnumber = parsePhoneNumber(haystackObj.address).number;
 
             if (number.endsWith(tnumber) || tnumber.endsWith(number))
                 return true;

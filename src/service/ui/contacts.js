@@ -44,13 +44,13 @@ function getNumberTypeLabel(type) {
  * @returns {string} A (possibly) better display number for the address
  */
 export function getDisplayNumber(contact, address) {
-    const number = address.toPhoneNumber();
+    const number = address.number || address;
 
     for (const contactNumber of contact.numbers) {
-        const cnumber = contactNumber.value.toPhoneNumber();
+        const cnumber = contactNumber.value.number;
 
         if (number.endsWith(cnumber) || cnumber.endsWith(number))
-            return GLib.markup_escape_text(contactNumber.value, -1);
+            return GLib.markup_escape_text(contactNumber.value.number, -1);
     }
 
     return GLib.markup_escape_text(address, -1);
@@ -99,7 +99,7 @@ const AddressRow = GObject.registerClass({
             this.title = GLib.markup_escape_text(contact.name, -1);
         }
 
-        this.subtitle = GLib.markup_escape_text(this.number.value, -1);
+        this.subtitle = GLib.markup_escape_text(this.number.value.number, -1);
 
         if (this.number.type !== undefined)
             this.type_label.label = getNumberTypeLabel(this.number.type);
@@ -107,7 +107,7 @@ const AddressRow = GObject.registerClass({
 
     get number() {
         if (this._number === undefined)
-            return {value: 'unknown', type: 'unknown'};
+            return { value: 'unknown', type: 'unknown' };
 
         return this._number;
     }
@@ -261,16 +261,16 @@ export const ContactChooser = GObject.registerClass({
     }
 
     _onContactRemoved(store, id) {
-        let removed_row = null;
+        const removed_rows = [];
         const new_row_list = [];
         this.row_list.forEach(row => {
             if (row.contact.id === id)
-                removed_row = row;
+                removed_rows.push(row);
             else
                 new_row_list.push(row);
-
         });
-        this.list.remove(removed_row);
+
+        removed_rows.forEach(row => this.list.remove(row));
         this.row_list = new_row_list;
     }
 
@@ -294,14 +294,14 @@ export const ContactChooser = GObject.registerClass({
                 dynamic = new AddressRow({
                     // TRANSLATORS: A phone number (eg. "Send to 555-5555")
                     name: _('Send to %s').format(entry.text),
-                    numbers: [{type: 'unknown', value: entry.text}],
+                    numbers: [{ type: 'unknown', value: entry.text }],
                 });
                 dynamic.connect('activated', this._onNumberSelected.bind(this));
                 dynamic.__tmp = true;
                 this.list.append(dynamic);
                 this.row_list.push(dynamic);
 
-            // ...or if we already do, then update it
+                // ...or if we already do, then update it
             } else {
                 const address = entry.text;
 
@@ -314,7 +314,7 @@ export const ContactChooser = GObject.registerClass({
                 dynamic.subtitle = address;
             }
 
-        // ...otherwise remove any dynamic contact that's been created
+            // ...otherwise remove any dynamic contact that's been created
         } else if (dynamic && dynamic.__tmp) {
             this.list.remove(dynamic);
         }
@@ -332,7 +332,7 @@ export const ContactChooser = GObject.registerClass({
         const address = row.number.value;
         this.selected_rows = {};
         this.selected_rows[row.number.value] = address;
-        this.emit('number-selected', address);
+        this.emit('number-selected', address.number);
 
         // Reset the contact list
         this.search_entry.text = '';
@@ -359,8 +359,9 @@ export const ContactChooser = GObject.registerClass({
     }
 
     _populate() {
-        // Add each contact
+        // Add each contact, deduplicating by phone number
         const contacts = this.store.contacts;
+        this._seenNumbers = new Map();
 
         for (let i = 0, len = contacts.length; i < len; i++)
             this._addContact(contacts[i]);
@@ -375,7 +376,8 @@ export const ContactChooser = GObject.registerClass({
     }
 
     /**
-     * Adds a new contact to the address book.
+     * Adds a new contact to the address book, skipping duplicate phone numbers.
+     * When a duplicate is found, the contact with a real name is preferred.
      *
      * @param {object} contact The contact object to add.
      *
@@ -387,11 +389,40 @@ export const ContactChooser = GObject.registerClass({
             if (contact.name === undefined)
                 contact.name = _('Unknown Contact');
 
-            if (contact.numbers.length === 1)
-                return this._addContactNumber(contact, 0);
+            if (this._seenNumbers === undefined)
+                this._seenNumbers = new Map();
 
-            for (let i = 0, len = contact.numbers.length; i < len; i++)
-                this._addContactNumber(contact, i);
+            for (let i = 0, len = contact.numbers.length; i < len; i++) {
+                const number = contact.numbers[i].value?.number;
+                if (!number)
+                    continue;
+
+                if (this._seenNumbers.has(number)) {
+                    const existing = this._seenNumbers.get(number);
+
+                    // If existing has a real name, skip this duplicate
+                    if (existing.contact.name !== existing.number &&
+                        existing.contact.name !== _('Unknown Contact'))
+                        continue;
+
+                    // This contact has a better name — replace the old row
+                    if (contact.name !== number &&
+                        contact.name !== _('Unknown Contact')) {
+                        this.list.remove(existing.row);
+                        this.row_list = this.row_list.filter(r => r !== existing.row);
+                    } else {
+                        // Both are unnamed — skip duplicate
+                        continue;
+                    }
+                }
+
+                const row = this._addContactNumber(contact, i);
+                this._seenNumbers.set(number, {
+                    contact: contact,
+                    number: number,
+                    row: row,
+                });
+            }
         } catch (e) {
             logError(e);
         }

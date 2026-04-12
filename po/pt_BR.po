@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gsconnect\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 14:44-0400\n"
+"POT-Creation-Date: 2026-03-15 17:02+0100\n"
 "PO-Revision-Date: 2025-09-13 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese, Brazilian\n"
@@ -14,12 +14,13 @@ msgstr ""
 "X-Crowdin-Project: gsconnect\n"
 "X-Crowdin-Project-ID: 327933\n"
 "X-Crowdin-Language: pt-BR\n"
-"X-Crowdin-File: /[GSConnect.gnome-shell-extension-gsconnect] main/po/org.gnome.Shell.Extensions.GSConnect.pot\n"
+"X-Crowdin-File: /[GSConnect.gnome-shell-extension-gsconnect] main/po/"
+"org.gnome.Shell.Extensions.GSConnect.pot\n"
 "X-Crowdin-File-ID: 18\n"
 
 #. TRANSLATORS: Extension name
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:12
-#: webextension/gettext.js:29
+#: src/preferences/service.js:585 webextension/gettext.js:29
 msgid "GSConnect"
 msgstr "GSConnect"
 
@@ -32,12 +33,23 @@ msgid "GSConnect Team"
 msgstr "Equipe GSConnect"
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:41
-msgid "GSConnect is a complete implementation of KDE Connect especially for GNOME Shell with Nautilus, Chrome and Firefox integration. The KDE Connect team has applications for Linux, BSD, Android, Sailfish, iOS, macOS and Windows."
-msgstr "GSConnect é uma implementação completa do KDE Connect especialmente para GNOME Shell com integração com o Nautilus, o Chrome e o Firefox. O time do KDE Connect possui aplicativos para Linux, BSD, Android, Sailfish, iOS, macOS e Windows."
+msgid ""
+"GSConnect is a complete implementation of KDE Connect especially for GNOME "
+"Shell with Nautilus, Chrome and Firefox integration. The KDE Connect team "
+"has applications for Linux, BSD, Android, Sailfish, iOS, macOS and Windows."
+msgstr ""
+"GSConnect é uma implementação completa do KDE Connect especialmente para "
+"GNOME Shell com integração com o Nautilus, o Chrome e o Firefox. O time do "
+"KDE Connect possui aplicativos para Linux, BSD, Android, Sailfish, iOS, "
+"macOS e Windows."
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:44
-msgid "With GSConnect you can securely connect to mobile devices and other desktops to:"
-msgstr "Com o GSConnect, você pode se conectar de forma segura a dispositivos móveis e outros desktops para:"
+msgid ""
+"With GSConnect you can securely connect to mobile devices and other desktops "
+"to:"
+msgstr ""
+"Com o GSConnect, você pode se conectar de forma segura a dispositivos móveis "
+"e outros desktops para:"
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:48
 msgid "Share files, links and text"
@@ -75,542 +87,553 @@ msgstr "Executar comandos predefinidos"
 msgid "And more…"
 msgstr "E mais…"
 
-#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:165
-msgid "GSConnect in GNOME Shell"
-msgstr "GSConnect no GNOME Shell"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:180
+#, fuzzy
+msgid "GSConnect Overview"
+msgstr "Equipe GSConnect"
 
-#: data/ui/connect-dialog.ui:20
-msgid "Connect to…"
-msgstr "Conectar a…"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:184
+msgid "Preferences Window"
+msgstr ""
 
-#: data/ui/connect-dialog.ui:26 data/ui/legacy-messaging-dialog.ui:20
-#: data/ui/legacy-messaging-dialog.ui:24
-#: data/ui/notification-reply-dialog.ui:19
-#: data/ui/notification-reply-dialog.ui:23
-#: data/ui/preferences-command-editor.ui:21
-#: data/ui/preferences-command-editor.ui:157
-#: data/ui/preferences-shortcut-editor.ui:19
-#: data/ui/service-device-chooser.ui:21 data/ui/service-device-chooser.ui:25
-#: data/ui/service-error-dialog.ui:20 data/ui/service-error-dialog.ui:28
-#: src/preferences/service.js:417 src/service/plugins/share.js:179
-#: src/service/plugins/share.js:314 src/service/plugins/share.js:445
-msgid "Cancel"
-msgstr "Cancelar"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:188
+#, fuzzy
+msgid "Device Settings Page"
+msgstr "Configurações do dispositivo"
 
-#: data/ui/connect-dialog.ui:33
-msgid "Connect"
-msgstr "Conectar"
-
-#: data/ui/connect-dialog.ui:80
-msgid "IP Address"
-msgstr "Endereço IP"
-
-#: data/ui/contact-chooser.ui:56
-msgid "No contacts"
-msgstr "Nenhum contato"
-
-#: data/ui/contact-chooser.ui:68 data/ui/messaging-window.ui:103
-#: data/ui/mousepad-input-dialog.ui:56 data/ui/preferences-window.ui:949
-msgid "Help"
-msgstr "Ajuda"
-
-#: data/ui/contact-chooser.ui:109
-msgid "Type a phone number or name"
-msgstr "Digite um número de telefone ou nome"
-
-#. TRANSLATORS: All other phone number types
-#: data/ui/contacts-address-row.ui:71 src/service/ui/contacts.js:158
-msgid "Other"
-msgstr "Outros"
-
-#. TRANSLATORS: Share URL by SMS
-#: data/ui/legacy-messaging-dialog.ui:15 src/service/daemon.js:353
-#: src/service/daemon.js:467 src/service/plugins/sms.js:62
-#: webextension/gettext.js:41
-msgid "Send SMS"
-msgstr "Enviar SMS"
-
-#: data/ui/legacy-messaging-dialog.ui:32 data/ui/legacy-messaging-dialog.ui:36
-#: data/ui/notification-reply-dialog.ui:31
-#: data/ui/notification-reply-dialog.ui:35 src/service/plugins/share.js:446
-msgid "Send"
-msgstr "Enviar"
-
-#: data/ui/legacy-messaging-dialog.ui:69 data/ui/messaging-window.ui:263
-#: data/ui/notification-reply-dialog.ui:68
-msgid "Device is disconnected"
-msgstr "Dispositivo está desconectado"
-
-#: data/ui/messaging-conversation.ui:91 src/service/plugins/sms.js:54
-msgid "Send Message"
-msgstr "Enviar mensagem"
-
-#: data/ui/messaging-conversation.ui:92 src/shell/notification.js:88
-msgid "Type a message"
-msgstr "Escrever uma mensagem"
-
-#: data/ui/messaging-conversation.ui:99
-msgid "Message Entry"
-msgstr "Entrada de mensagem"
-
-#: data/ui/messaging-conversation.ui:100
-msgid "Type a message and press Enter to send"
-msgstr "Digite uma mensagem e pressione Enter para enviar"
-
-#: data/ui/messaging-window.ui:21 src/service/plugins/sms.js:30
-#: src/service/ui/messaging.js:1063
-msgid "Messaging"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:192
+#, fuzzy
+msgid "Messaging Window"
 msgstr "Mensagens"
 
-#: data/ui/messaging-window.ui:30 data/ui/messaging-window.ui:43
-#: src/service/ui/messaging.js:1274
-msgid "New Conversation"
-msgstr "Nova conversa"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:196
+msgid "GNOME Nautilus Extension"
+msgstr ""
 
-#: data/ui/messaging-window.ui:120
-msgid "No Conversations"
-msgstr "Nenhuma conversa"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:200
+msgid "Device Control Window"
+msgstr ""
 
-#: data/ui/messaging-window.ui:180
-msgid "No conversation selected"
-msgstr "Nenhuma conversa selecionada"
-
-#: data/ui/messaging-window.ui:196
-msgid "Select or start a conversation"
-msgstr "Selecionar ou iniciar uma conversa"
-
-#: data/ui/mousepad-input-dialog.ui:97
-msgid "Touchpad.\n"
-"Drag on this area to move mouse cursor.\n"
-"Press long to drag to drag mouse cursor.\n\n"
-"Simple click will be sent to paired device.\n"
-"Left, middle, right button, and wheel scrolls."
-msgstr "Touchpad.\n"
-"Arraste o dedo nesta área para mover o ponteiro do mouse.\n"
-"Aperte e arraste para mover o ponteiro do mouse.\n\n"
-"Um clique simples será enviado ao aparelho pareado. \n"
-"Botão da esquerda, meio e direita, e scroll do mouse."
-
+#: data/ui/command-row.ui:21 data/ui/command-row.ui:23
 #: data/ui/preferences-command-editor.ui:14
 msgid "Edit Command"
 msgstr "Editar comando"
 
-#: data/ui/preferences-command-editor.ui:28
-msgid "Save"
-msgstr "Salvar"
+#: data/ui/command-row.ui:33 data/ui/command-row.ui:35
+#, fuzzy
+msgid "Delete Command"
+msgstr "Editar comando"
 
-#: data/ui/preferences-command-editor.ui:61
-msgid "Name"
-msgstr "Nome"
+#: data/ui/connect-dialog.ui:14
+msgid "Connect to…"
+msgstr "Conectar a…"
 
-#: data/ui/preferences-command-editor.ui:99
-msgid "Command Line"
-msgstr "Linha de comando"
+#: data/ui/connect-dialog.ui:54
+msgid "IP Address"
+msgstr "Endereço IP"
 
-#: data/ui/preferences-command-editor.ui:121
-#: data/ui/preferences-command-editor.ui:150
-msgid "Choose an executable"
-msgstr "Escolher um executável"
-
-#: data/ui/preferences-command-editor.ui:164
-msgid "Open"
-msgstr "Abrir"
-
-#: data/ui/preferences-device-panel.ui:53 src/preferences/service.js:524
-msgid "Desktop"
-msgstr "Computador"
-
-#: data/ui/preferences-device-panel.ui:102
-msgid "Clipboard Sync"
-msgstr "Sincronização da área de transferência"
-
-#: data/ui/preferences-device-panel.ui:168
-msgid "Media Players"
-msgstr "Reprodutores de mídia"
-
-#: data/ui/preferences-device-panel.ui:225
-msgid "Mouse & Keyboard"
-msgstr "Mouse & teclado"
-
-#: data/ui/preferences-device-panel.ui:282
-msgid "Volume Control"
-msgstr "Controle de volume"
-
-#: data/ui/preferences-device-panel.ui:337 src/service/plugins/sftp.js:332
-msgid "Files"
-msgstr "Arquivos"
-
-#: data/ui/preferences-device-panel.ui:390
-msgid "Receive Files"
-msgstr "Receber arquivos"
-
-#: data/ui/preferences-device-panel.ui:449
-msgid "Save files to"
-msgstr "Salvar arquivos em"
-
-#: data/ui/preferences-device-panel.ui:510
-msgid "Links"
+#: data/ui/connect-dialog.ui:60
+msgid "Port"
 msgstr ""
 
-#: data/ui/preferences-device-panel.ui:562
-msgid "Automatically open received URLs"
-msgstr ""
+#: data/ui/connect-dialog.ui:84
+msgid "Connect"
+msgstr "Conectar"
 
-#: data/ui/preferences-device-panel.ui:623
-#: data/ui/preferences-device-panel.ui:2286
-msgid "Sharing"
-msgstr "Compartilhamento"
-
-#: data/ui/preferences-device-panel.ui:655
-msgid "Device Battery"
-msgstr "Bateria do dispositivo"
-
-#: data/ui/preferences-device-panel.ui:706
-msgid "Low Battery Notification"
-msgstr "Notificação de bateria fraca"
-
-#: data/ui/preferences-device-panel.ui:765
-msgid "Charged Up to Custom Level Notification"
-msgstr "Notificação de nível de carga personalizado"
-
-#: data/ui/preferences-device-panel.ui:845
-msgid "Fully Charged Notification"
-msgstr "Notificação de bateria carregada"
-
-#: data/ui/preferences-device-panel.ui:899
-msgid "System Battery"
-msgstr "Bateria do sistema"
-
-#: data/ui/preferences-device-panel.ui:948
-msgid "Share Statistics"
-msgstr "Compartilhar estatísticas"
-
-#: data/ui/preferences-device-panel.ui:1002
-#: data/ui/preferences-device-panel.ui:2332 src/service/plugins/battery.js:15
-msgid "Battery"
-msgstr "Bateria"
-
-#: data/ui/preferences-device-panel.ui:1032
-#: data/ui/preferences-device-panel.ui:1117
-#: data/ui/preferences-device-panel.ui:2378
-#: src/service/plugins/runcommand.js:26 src/service/plugins/runcommand.js:34
-#: src/service/plugins/runcommand.js:194
-msgid "Commands"
-msgstr "Comandos"
-
-#: data/ui/preferences-device-panel.ui:1091
-msgid "Add Command"
-msgstr "Adicionar comando"
-
-#. TRANSLATORS: 'Share' is a verb here; this refers to the action of sharing
-#: data/ui/preferences-device-panel.ui:1179
-msgid "Share Notifications"
-msgstr "Compartilhar notificações"
-
-#: data/ui/preferences-device-panel.ui:1239
-msgid "Share When Active"
-msgstr "Compartilhar quanto ativo"
-
-#: data/ui/preferences-device-panel.ui:1290
-msgid "Applications"
-msgstr "Aplicativos"
-
-#: data/ui/preferences-device-panel.ui:1336
-#: data/ui/preferences-device-panel.ui:2424
-#: src/service/plugins/notification.js:18
-msgid "Notifications"
-msgstr "Notificações"
-
-#: data/ui/preferences-device-panel.ui:1394 src/service/plugins/contacts.js:28
+#: data/ui/contact-chooser.ui:14 src/service/plugins/contacts.js:29
 msgid "Contacts"
 msgstr "Contatos"
 
-#: data/ui/preferences-device-panel.ui:1447
-msgid "Incoming Calls"
-msgstr "Chamadas recebidas"
+#: data/ui/contact-chooser.ui:31 data/ui/contact-chooser.ui:33
+#: data/ui/messaging-window.ui:49 data/ui/messaging-window.ui:51
+#, fuzzy
+msgid "Search contact"
+msgstr "Sincronizar contatos"
 
-#: data/ui/preferences-device-panel.ui:1496
-#: data/ui/preferences-device-panel.ui:1663
-msgid "Volume"
-msgstr "Volume"
+#: data/ui/contact-chooser.ui:49
+msgid "Search for names or phone numbers"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1562
-#: data/ui/preferences-device-panel.ui:1729
-msgid "Pause Media"
-msgstr "Pausar mídia"
+#: data/ui/contact-chooser.ui:52 data/ui/contact-chooser.ui:54
+msgid "Search contacts from names or phone numbers"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1615
-msgid "Ongoing Calls"
-msgstr "Chamadas em andamento"
+#: data/ui/find-my-phone.ui:28 src/service/plugins/findmyphone.js:208
+msgid "You found me!"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1785
-msgid "Mute Microphone"
-msgstr "Silenciar microfone"
+#: data/ui/legacy-messaging-dialog.ui:13
+#, fuzzy
+msgid "Send SMS…"
+msgstr "Enviar SMS"
 
-#: data/ui/preferences-device-panel.ui:1839
-#: data/ui/preferences-device-panel.ui:2470 src/service/plugins/telephony.js:16
-msgid "Telephony"
-msgstr "Telefonia"
+#: data/ui/legacy-messaging-dialog.ui:20
+#, fuzzy
+msgid "Message"
+msgstr "Mensagens"
 
-#: data/ui/preferences-device-panel.ui:1874
-msgid "Action Shortcuts"
-msgstr "Atalhos de ações"
+#: data/ui/legacy-messaging-dialog.ui:21
+#, fuzzy
+msgid "message"
+msgstr "Escrever uma mensagem"
 
-#: data/ui/preferences-device-panel.ui:1890
-msgid "Reset All…"
-msgstr "Redefinir tudo…"
+#: data/ui/legacy-messaging-dialog.ui:48
+#: data/ui/notification-reply-dialog.ui:31
+#, fuzzy
+msgid "Device Disconnected"
+msgstr "Dispositivo está desconectado"
 
-#: data/ui/preferences-device-panel.ui:1942
-msgid "Shortcuts"
-msgstr "Atalhos"
+#: data/ui/messaging-conversation-participants.ui:14
+msgid "Participants"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1973
-msgid "Plugins"
-msgstr "Plugins"
+#: data/ui/messaging-conversation-sharesms.ui:24
+#: data/ui/messaging-conversation-sharesms.ui:26 data/ui/messaging-window.ui:60
+#: data/ui/messaging-window.ui:62
+msgid "New Conversation"
+msgstr "Nova conversa"
 
-#: data/ui/preferences-device-panel.ui:2020
-msgid "Experimental"
-msgstr "Experimental"
+#: data/ui/messaging-conversation.ui:24 data/ui/messaging-conversation.ui:26
+msgid "Show participants"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:2067
-msgid "Device Cache"
-msgstr "Cache do dispositivo"
+#: data/ui/messaging-window.ui:70 src/service/plugins/sms.js:31
+msgid "Messaging"
+msgstr "Mensagens"
 
-#: data/ui/preferences-device-panel.ui:2085
-msgid "Clear Cache…"
-msgstr "Limpar cache…"
+#: data/ui/messaging-window.ui:85
+#, fuzzy
+msgid "Search for names, phone numbers or message"
+msgstr "Digite um número de telefone ou nome"
 
-#: data/ui/preferences-device-panel.ui:2124
-msgid "Legacy SMS Support"
-msgstr "Suporte a SMS legado"
+#: data/ui/messaging-window.ui:88 data/ui/messaging-window.ui:90
+msgid "Search contacts from names, phone numbers or message"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:2181
-msgid "SFTP Automount"
-msgstr "Automontagem SFTP"
+#: data/ui/messaging-window.ui:114
+msgid "No Conversations"
+msgstr "Nenhuma conversa"
 
-#: data/ui/preferences-device-panel.ui:2236
-#: data/ui/preferences-device-panel.ui:2562
-msgid "Advanced"
-msgstr "Avançado"
+#: data/ui/messaging-window.ui:121 data/ui/mousepad-input-dialog.ui:42
+#: data/ui/preferences-window.ui:290
+msgid "Help"
+msgstr "Ajuda"
 
-#: data/ui/preferences-device-panel.ui:2516
-msgid "Keyboard Shortcuts"
-msgstr "Atalhos de teclado"
+#: data/ui/messaging-window.ui:168
+msgid "No conversation selected"
+msgstr "Nenhuma conversa selecionada"
 
-#: data/ui/preferences-device-panel.ui:2580
+#: data/ui/messaging-window.ui:169
+msgid "Select or start a conversation"
+msgstr "Selecionar ou iniciar uma conversa"
+
+#: data/ui/mousepad-input-dialog.ui:28 src/service/plugins/mousepad.js:29
+msgid "Remote Input"
+msgstr "Entrada remota"
+
+#: data/ui/mousepad-input-dialog.ui:81 data/ui/mousepad-input-dialog.ui:83
+msgid "Mouse left button"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:95 data/ui/mousepad-input-dialog.ui:97
+msgid "Mouse middle button"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:108 data/ui/mousepad-input-dialog.ui:110
+msgid "Mouse right button"
+msgstr ""
+
+#: data/ui/notification-reply-dialog.ui:14
+#: data/ui/preferences-device-page.ui:106
+#: data/ui/preferences-device-page.ui:497
+#: data/ui/preferences-device-page.ui:515
+#: src/service/plugins/notification.js:19
+msgid "Notifications"
+msgstr "Notificações"
+
+#: data/ui/preferences-command-editor.ui:54
+msgid "Name"
+msgstr "Nome"
+
+#: data/ui/preferences-command-editor.ui:61
+#, fuzzy
+msgid "Command"
+msgstr "Comandos"
+
+#: data/ui/preferences-command-editor.ui:77 src/preferences/device.js:679
+#: src/preferences/device.js:688 src/preferences/device.js:690
+msgid "Add Command"
+msgstr "Adicionar comando"
+
+#: data/ui/preferences-device-page.ui:13
+#, fuzzy
+msgid "Device Page"
+msgstr "Nome do dispositivo"
+
+#: data/ui/preferences-device-page.ui:20
 msgid "Device Settings"
 msgstr "Configurações do dispositivo"
 
-#. TRANSLATORS: Send a pair request to the device
-#: data/ui/preferences-device-panel.ui:2624
-#: data/ui/preferences-device-panel.ui:2716 src/service/daemon.js:446
-msgid "Pair"
-msgstr "Parear"
+#: data/ui/preferences-device-page.ui:61 data/ui/preferences-device-page.ui:224
+#: data/ui/preferences-device-page.ui:242
+msgid "Sharing"
+msgstr "Compartilhamento"
 
-#: data/ui/preferences-device-panel.ui:2656
-msgid "Device is unpaired"
-msgstr "O dispositivo não está pareado"
+#: data/ui/preferences-device-page.ui:76 data/ui/preferences-device-page.ui:345
+#: data/ui/preferences-device-page.ui:363 src/service/plugins/battery.js:15
+msgid "Battery"
+msgstr "Bateria"
 
-#: data/ui/preferences-device-panel.ui:2671
-msgid "You may configure this device before pairing"
-msgstr "Você pode configurar este dispositivo antes de parear"
+#: data/ui/preferences-device-page.ui:91 data/ui/preferences-device-page.ui:443
+#: data/ui/preferences-device-page.ui:461 src/service/plugins/runcommand.js:26
+#: src/service/plugins/runcommand.js:34 src/service/plugins/runcommand.js:194
+msgid "Commands"
+msgstr "Comandos"
 
-#. TRANSLATORS: View the TLS Certificate fingerprint
-#: data/ui/preferences-device-panel.ui:2711 src/preferences/device.js:391
-msgid "Encryption Info"
-msgstr "Informação de criptografia"
+#: data/ui/preferences-device-page.ui:121
+#: data/ui/preferences-device-page.ui:565
+#: data/ui/preferences-device-page.ui:583 data/ui/preferences-settings.ui:82
+#: data/ui/preferences-settings.ui:86 src/service/plugins/telephony.js:16
+msgid "Telephony"
+msgstr "Telefonia"
 
-#. TRANSLATORS: Unpair the device and notify it
-#: data/ui/preferences-device-panel.ui:2722 src/service/daemon.js:455
-msgid "Unpair"
-msgstr "Esquecer"
+#: data/ui/preferences-device-page.ui:152
+#: data/ui/preferences-device-page.ui:714
+#: data/ui/preferences-device-page.ui:732
+msgid "Keyboard Shortcuts"
+msgstr "Atalhos de teclado"
 
-#. TRANSLATORS: Send clipboard content to device
-#: data/ui/preferences-device-panel.ui:2734
+#: data/ui/preferences-device-page.ui:167
+#: data/ui/preferences-device-page.ui:777
+#: data/ui/preferences-device-page.ui:795
+msgid "Advanced"
+msgstr "Avançado"
+
+#: data/ui/preferences-device-page.ui:198
+#, fuzzy
+msgid "Unpair Device"
+msgstr "Dispositivo de destino"
+
+#: data/ui/preferences-device-page.ui:255 src/preferences/device.js:418
+msgid "Desktop"
+msgstr "Computador"
+
+#: data/ui/preferences-device-page.ui:259
+msgid "Clipboard Sync"
+msgstr "Sincronização da área de transferência"
+
+#: data/ui/preferences-device-page.ui:264
 msgid "To Device"
 msgstr "Para o dispositivo"
 
-#. TRANSLATORS: Receive clipboard content from the device
-#: data/ui/preferences-device-panel.ui:2740
+#: data/ui/preferences-device-page.ui:272
 msgid "From Device"
 msgstr "Do dispositivo"
 
-#. TRANSLATORS: Don't change the system volume
-#: data/ui/preferences-device-panel.ui:2752
-#: data/ui/preferences-device-panel.ui:2785
+#: data/ui/preferences-device-page.ui:282
+msgid "Media Players"
+msgstr "Reprodutores de mídia"
+
+#: data/ui/preferences-device-page.ui:289
+msgid "Mouse & Keyboard"
+msgstr "Mouse & teclado"
+
+#: data/ui/preferences-device-page.ui:296
+msgid "Volume Control"
+msgstr "Controle de volume"
+
+#: data/ui/preferences-device-page.ui:305 src/service/plugins/sftp.js:332
+msgid "Files"
+msgstr "Arquivos"
+
+#: data/ui/preferences-device-page.ui:309
+msgid "Receive Files"
+msgstr "Receber arquivos"
+
+#: data/ui/preferences-device-page.ui:316
+msgid "Save files to"
+msgstr "Salvar arquivos em"
+
+#: data/ui/preferences-device-page.ui:326 src/preferences/device.js:603
+#, fuzzy
+msgid "Select Folder"
+msgstr "Selecionar"
+
+#: data/ui/preferences-device-page.ui:376
+msgid "Device Battery"
+msgstr "Bateria do dispositivo"
+
+#: data/ui/preferences-device-page.ui:380
+msgid "Low Battery Notification"
+msgstr "Notificação de bateria fraca"
+
+#: data/ui/preferences-device-page.ui:387
+msgid "Charged Up to Custom Level Notification"
+msgstr "Notificação de nível de carga personalizado"
+
+#: data/ui/preferences-device-page.ui:416
+msgid "Fully Charged Notification"
+msgstr "Notificação de bateria carregada"
+
+#: data/ui/preferences-device-page.ui:425
+msgid "System Battery"
+msgstr "Bateria do sistema"
+
+#: data/ui/preferences-device-page.ui:429
+msgid "Share Statistics"
+msgstr "Compartilhar estatísticas"
+
+#: data/ui/preferences-device-page.ui:531
+msgid "Share Notifications"
+msgstr "Compartilhar notificações"
+
+#: data/ui/preferences-device-page.ui:538
+msgid "Share When Active"
+msgstr "Compartilhar quanto ativo"
+
+#: data/ui/preferences-device-page.ui:547
+msgid "Applications"
+msgstr "Aplicativos"
+
+#: data/ui/preferences-device-page.ui:596
+msgid "Incoming Calls"
+msgstr "Chamadas recebidas"
+
+#: data/ui/preferences-device-page.ui:600
+#: data/ui/preferences-device-page.ui:653
+msgid "Volume"
+msgstr "Volume"
+
+#: data/ui/preferences-device-page.ui:607
+#: data/ui/preferences-device-page.ui:608
+#: data/ui/preferences-device-page.ui:660
+#: data/ui/preferences-device-page.ui:661
 msgid "Nothing"
 msgstr "Nada"
 
-#. TRANSLATORS: Restore the system volume
-#: data/ui/preferences-device-panel.ui:2759
-#: data/ui/preferences-device-panel.ui:2792
+#: data/ui/preferences-device-page.ui:614
+#: data/ui/preferences-device-page.ui:615
+#: data/ui/preferences-device-page.ui:667
+#: data/ui/preferences-device-page.ui:668
 msgid "Restore"
 msgstr "Restaurar"
 
-#. TRANSLATORS: Lower the system volume
-#: data/ui/preferences-device-panel.ui:2766
-#: data/ui/preferences-device-panel.ui:2799
+#: data/ui/preferences-device-page.ui:621
+#: data/ui/preferences-device-page.ui:622
+#: data/ui/preferences-device-page.ui:674
+#: data/ui/preferences-device-page.ui:675
 msgid "Lower"
 msgstr "Baixo"
 
-#. TRANSLATORS: Mute the system volume
 #. TRANSLATORS: Silence the actively ringing call
-#: data/ui/preferences-device-panel.ui:2773
-#: data/ui/preferences-device-panel.ui:2806
-#: src/service/plugins/telephony.js:198
+#: data/ui/preferences-device-page.ui:628
+#: data/ui/preferences-device-page.ui:629
+#: data/ui/preferences-device-page.ui:681
+#: data/ui/preferences-device-page.ui:682 src/service/plugins/telephony.js:198
 msgid "Mute"
 msgstr "Silenciar"
 
+#: data/ui/preferences-device-page.ui:640
+#: data/ui/preferences-device-page.ui:693
+msgid "Pause Media"
+msgstr "Pausar mídia"
+
+#: data/ui/preferences-device-page.ui:649
+#, fuzzy
+msgid "Outgoing Calls"
+msgstr "Chamadas em andamento"
+
+#: data/ui/preferences-device-page.ui:700
+msgid "Mute Microphone"
+msgstr "Silenciar microfone"
+
+#: data/ui/preferences-device-page.ui:745
+msgid "Action Shortcuts"
+msgstr "Atalhos de ações"
+
+#: data/ui/preferences-device-page.ui:753
+msgid "Reset All…"
+msgstr "Redefinir tudo…"
+
+#: data/ui/preferences-device-page.ui:808
+msgid "Plugins"
+msgstr "Plugins"
+
+#: data/ui/preferences-device-page.ui:820
+msgid "Experimental"
+msgstr "Experimental"
+
+#: data/ui/preferences-device-page.ui:838
+msgid "Clear Cache…"
+msgstr "Limpar cache…"
+
+#. Translators: This text appears just after the name of a device to connect
+#: data/ui/preferences-device-pair.ui:69
+#, fuzzy
+msgid "is not paired"
+msgstr "Não pareado"
+
+#: data/ui/preferences-device-pair.ui:97
+#, fuzzy
+msgid "Pair Device"
+msgstr "Dispositivo de destino"
+
+#: data/ui/preferences-settings.ui:14 data/ui/preferences-window.ui:286
+#, fuzzy
+msgid "Settings"
+msgstr "Configurações do dispositivo"
+
+#: data/ui/preferences-settings.ui:17
+msgid "General"
+msgstr "Geral"
+
+#: data/ui/preferences-settings.ui:21
+#, fuzzy
+msgid "This device"
+msgstr "Para o dispositivo"
+
+#: data/ui/preferences-settings.ui:24
+msgid "Hostname"
+msgstr ""
+
+#: data/ui/preferences-settings.ui:31
+msgid "GSConnect remains active when GNOME Shell is locked"
+msgstr "O GSConnect continua ativo enquanto o GNOME Shell estiver bloqueado"
+
+#: data/ui/preferences-settings.ui:40
+msgid "Apparence"
+msgstr ""
+
+#: data/ui/preferences-settings.ui:43
+msgid "Display Mode"
+msgstr "Modo de exibição"
+
+#: data/ui/preferences-settings.ui:49
+msgid "Panel"
+msgstr "Painel"
+
+#: data/ui/preferences-settings.ui:56
+msgid "User Menu"
+msgstr "Menu do usuário"
+
+#: data/ui/preferences-settings.ui:69
+#, fuzzy
+msgid "Support"
+msgstr "Reportar"
+
+#: data/ui/preferences-settings.ui:72 src/preferences/service.js:635
+msgid "Generate Support Log"
+msgstr "Gerar log de suporte"
+
+#: data/ui/preferences-settings.ui:87
+msgid "Phone number parsing and dialing preferences"
+msgstr "Preferências de análise e discagem de números de telefone"
+
+#: data/ui/preferences-settings.ui:90
+msgid "Phone Country Code"
+msgstr "Código de País do Telefone"
+
+#: data/ui/preferences-settings.ui:91
+msgid "Default fallback region for ambiguous numbers"
+msgstr "Região de fallback padrão para números ambíguos"
+
+#: data/ui/preferences-shortcut-editor.ui:13
+#, fuzzy
+msgid "Set Shortcut"
+msgstr "Atalhos"
+
+#: data/ui/preferences-shortcut-editor.ui:22
 #: data/ui/preferences-shortcut-editor.ui:25
+#: data/ui/preferences-shortcut-editor.ui:27
+#: data/ui/service-device-chooser.ui:31 data/ui/service-device-chooser.ui:34
+#: data/ui/service-device-chooser.ui:36 data/ui/service-error-dialog.ui:30
+#: data/ui/service-error-dialog.ui:33 data/ui/service-error-dialog.ui:35
+#: src/preferences/service.js:640 src/service/plugins/share.js:179
+#: src/service/plugins/share.js:330
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: data/ui/preferences-shortcut-editor.ui:36
+#: data/ui/preferences-shortcut-editor.ui:39
+#: data/ui/preferences-shortcut-editor.ui:41
 msgid "Set"
 msgstr "Definir"
 
 #. Keys for cancelling (␛) or resetting (␈) a shortcut
-#: data/ui/preferences-shortcut-editor.ui:80
+#: data/ui/preferences-shortcut-editor.ui:74
 msgid "Press Esc to cancel or Backspace to reset the keyboard shortcut."
-msgstr "Pressione Esc para cancelar ou Backspace para redefinir o atalho de teclado."
+msgstr ""
+"Pressione Esc para cancelar ou Backspace para redefinir o atalho de teclado."
 
-#: data/ui/preferences-window.ui:24
-msgid "Device Name"
-msgstr "Nome do dispositivo"
-
-#: data/ui/preferences-window.ui:61
-msgid "_Rename"
-msgstr "_Renomear"
-
-#: data/ui/preferences-window.ui:98 data/ui/preferences-window.ui:112
+#: data/ui/preferences-window.ui:49 data/ui/preferences-window.ui:51
 msgid "Refresh"
 msgstr "Recarregar"
 
-#: data/ui/preferences-window.ui:139 src/extension.js:113
-msgid "Mobile Settings"
-msgstr "Configurações de dispositivos"
-
-#: data/ui/preferences-window.ui:166
-msgid "Service Menu"
-msgstr "Menu do serviço"
-
-#: data/ui/preferences-window.ui:189
-msgid "Device Menu"
+#: data/ui/preferences-window.ui:70 data/ui/preferences-window.ui:72
+#, fuzzy
+msgid "Main Menu"
 msgstr "Menu do dispositivo"
 
-#: data/ui/preferences-window.ui:203 data/ui/preferences-window.ui:218
-msgid "Edit Device Name"
-msgstr "Edita o nome do dispositivo"
+#: data/ui/preferences-window.ui:118
+#, fuzzy
+msgid "Welcome to GSConnect"
+msgstr "Sobre o GSConnect"
 
-#: data/ui/preferences-window.ui:278
-msgid "Devices"
-msgstr "Dispositivos"
-
-#: data/ui/preferences-window.ui:328 src/preferences/service.js:686
-msgid "Searching for devices…"
-msgstr "Procurando dispositivos…"
-
-#: data/ui/preferences-window.ui:353
-msgid "Extension Settings"
-msgstr "Configurações de Extensão"
-
-#: data/ui/preferences-window.ui:390
-msgid "GSConnect remains active when GNOME Shell is locked"
-msgstr "O GSConnect continua ativo enquanto o GNOME Shell estiver bloqueado"
-
-#: data/ui/preferences-window.ui:410
-msgid "Browser Add-Ons"
-msgstr "Complementos para navegadores"
-
-#: data/ui/preferences-window.ui:728
-msgid "Enable"
-msgstr "Habilitar"
-
-#: data/ui/preferences-window.ui:760
-msgid "This device is invisible to unpaired devices"
-msgstr "Este dispositivo está invisível para dispositivos não pareados"
-
-#: data/ui/preferences-window.ui:772 src/service/manager.js:177
-msgid "Discovery Disabled"
-msgstr "Descoberta desativada"
-
-#: data/ui/preferences-window.ui:826
-msgid "Retry"
-msgstr ""
-
-#: data/ui/preferences-window.ui:858
-msgid "The <tt>openssl</tt> command-line tool does not appear to be installed.\n"
-"Use your distro's package manager to install it.\n"
-"For more information, visit <a href=\"https://github.com/gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-found\">the GSConnect wiki</a>."
-msgstr ""
-
-#: data/ui/preferences-window.ui:874 src/service/init.js:361
-msgid "OpenSSL not found"
-msgstr "OpenSSL não encontrado"
-
-#. TRANSLATORS: Open a dialog to connect to an IP or Bluez device
-#: data/ui/preferences-window.ui:923
+#: data/ui/preferences-window.ui:280
 msgid "Add device by IP…"
 msgstr ""
 
-#: data/ui/preferences-window.ui:928
-msgid "Display Mode"
-msgstr "Modo de exibição"
-
-#. TRANSLATORS: Show device indicators in the top bar
-#: data/ui/preferences-window.ui:931
-msgid "Panel"
-msgstr "Painel"
-
-#. TRANSLATORS: Show devices in the user menu like Bluetooth
-#: data/ui/preferences-window.ui:937
-msgid "User Menu"
-msgstr "Menu do usuário"
-
-#. TRANSLATORS: Generate a support log
-#: data/ui/preferences-window.ui:945 src/preferences/service.js:414
-msgid "Generate Support Log"
-msgstr "Gerar log de suporte"
-
-#: data/ui/preferences-window.ui:953
+#: data/ui/preferences-window.ui:294
 msgid "About GSConnect"
 msgstr "Sobre o GSConnect"
 
-#: data/ui/service-device-chooser.ui:15
-msgid "Select a Device"
+#: data/ui/service-device-chooser.ui:14
+#, fuzzy
+msgid "Select Device"
 msgstr "Selecione um dispositivo"
 
-#: data/ui/service-device-chooser.ui:33 data/ui/service-device-chooser.ui:38
+#: data/ui/service-device-chooser.ui:46 data/ui/service-device-chooser.ui:49
+#: data/ui/service-device-chooser.ui:51
 msgid "Select"
 msgstr "Selecionar"
 
 #. TRANSLATORS: No devices are known or available
-#: data/ui/service-device-chooser.ui:101 webextension/gettext.js:37
+#: data/ui/service-device-chooser.ui:86 webextension/gettext.js:37
 msgid "No Device Found"
 msgstr "Nenhum dispositivo encontrado"
 
-#: data/ui/service-device-chooser.ui:118
-msgid "Device List"
-msgstr "Lista de dispositivos"
+#: data/ui/service-error-dialog.ui:14
+msgid "An Error Occured…"
+msgstr ""
 
-#: data/ui/service-error-dialog.ui:39 data/ui/service-error-dialog.ui:47
+#: data/ui/service-error-dialog.ui:45 data/ui/service-error-dialog.ui:48
+#: data/ui/service-error-dialog.ui:50
 msgid "Report"
 msgstr "Reportar"
 
-#: data/ui/service-error-dialog.ui:79
-msgid "Something’s gone wrong"
-msgstr "Algo está errado"
+#: data/ui/service-error-dialog.ui:62
+msgid "Oops!"
+msgstr ""
 
-#: data/ui/service-error-dialog.ui:91
-msgid "GSConnect encountered an unexpected error. Please report the problem and include any information that may help."
-msgstr "GSConnect encontrou um erro inesperado. Por favor, relate o problema e inclua todas as informações que possam ajudar."
+#: data/ui/service-error-dialog.ui:63
+msgid ""
+"GSConnect encountered an unexpected error. Please report the problem and "
+"include any information that may help."
+msgstr ""
+"GSConnect encontrou um erro inesperado. Por favor, relate o problema e "
+"inclua todas as informações que possam ajudar."
 
-#: data/ui/service-error-dialog.ui:125
-msgid "Technical Details"
+#: data/ui/service-error-dialog.ui:74
+#, fuzzy
+msgid "View Technical Details"
 msgstr "Detalhes técnicos"
 
 #. TRANSLATORS: Send to <device_name>, for file manager
 #. context menu
 #. TRANSLATORS: A phone number (eg. "Send to 555-5555")
 #. Update UI
-#: nautilus-extension/nautilus-gsconnect.py:187 src/service/ui/contacts.js:518
-#: src/service/ui/contacts.js:533
+#: nautilus-extension/nautilus-gsconnect.py:187 src/service/ui/contacts.js:296
+#: src/service/ui/contacts.js:313
 #, python-format, javascript-format
 msgid "Send to %s"
 msgstr "Enviar para %s"
@@ -624,6 +647,10 @@ msgstr "Enviar para dispositivo móvel"
 msgid "Sync between your devices"
 msgstr "Sincronização entre os seus aparelhos"
 
+#: src/extension.js:113
+msgid "Mobile Settings"
+msgstr "Configurações de dispositivos"
+
 #: src/extension.js:158
 #, javascript-format
 msgid "%d Connected"
@@ -631,175 +658,225 @@ msgid_plural "%d Connected"
 msgstr[0] "%d conectado"
 msgstr[1] "%d conectados"
 
-#: src/preferences/device.js:671 src/preferences/device.js:677
-msgid "Edit"
-msgstr "Editar"
+#: src/preferences/device.js:218 src/preferences/device.js:440
+msgid "Encryption Info"
+msgstr "Informação de criptografia"
 
-#: src/preferences/device.js:686 src/preferences/device.js:692
-msgid "Remove"
-msgstr "Remover"
+#: src/preferences/device.js:421
+msgid "Laptop"
+msgstr "Notebook"
 
-#: src/preferences/device.js:946 src/preferences/device.js:974
+#: src/preferences/device.js:424
+msgid "Smartphone"
+msgstr "Smartphone"
+
+#: src/preferences/device.js:427
+msgid "Tablet"
+msgstr "Tablet"
+
+#: src/preferences/device.js:430
+msgid "Television"
+msgstr "Televisão"
+
+#: src/preferences/device.js:444
+msgid "Ok"
+msgstr ""
+
+#: src/preferences/device.js:899 src/preferences/device.js:918
 msgid "Disabled"
 msgstr "Desativado"
 
 #. TRANSLATORS: Summary of a keyboard shortcut function
 #. Example: Enter a new shortcut to change Messaging
-#: src/preferences/keybindings.js:66
+#: src/preferences/keybindings.js:56
 #, javascript-format
 msgid "Enter a new shortcut to change <b>%s</b>"
 msgstr "Digite um novo atalho para mudar <b>%s</b>"
 
-#. TRANSLATORS: When a keyboard shortcut is unavailable
-#. Example: [Ctrl]+[S] is already being used
-#: src/preferences/keybindings.js:132
+#: src/preferences/keybindings.js:140
 #, javascript-format
-msgid "%s is already being used"
-msgstr "%s já está em uso"
+msgid "%s è già in uso"
+msgstr ""
 
-#: src/preferences/service.js:373
-msgid "A complete KDE Connect implementation for GNOME"
-msgstr "Uma implementação completa do KDE Connect para o GNOME"
-
-#. TRANSLATORS: eg. 'Translator Name <your.email@domain.com>'
-#: src/preferences/service.js:382
-msgid "translator-credits"
-msgstr "Ricardo Silva Veloso <ricvelozo@gmail.com>\n"
-"Rafael Fontenelle <rafaelff@gnome.org>"
-
-#: src/preferences/service.js:415
-msgid "Debug messages are being logged. Take any steps necessary to reproduce a problem then review the log."
-msgstr "Mensagens de depuração estão sendo registradas. Utilize quaisquer etapas necessárias para reproduzir um problema e consulte o log."
-
-#: src/preferences/service.js:418
-msgid "Review Log"
-msgstr "Consultar log"
-
-#: src/preferences/service.js:443
+#: src/preferences/service.js:235 src/preferences/service.js:665
 msgid "Invalid Device Name"
 msgstr ""
 
 #. TRANSLATOR: %s is a list of forbidden characters
-#: src/preferences/service.js:445
+#: src/preferences/service.js:237 src/preferences/service.js:667
 #, javascript-format
-msgid "Device name must not contain any of %s and have a length of 1-32 characters"
+msgid ""
+"Device name must not contain any of %s and have a length of 1-32 characters"
 msgstr ""
 
-#: src/preferences/service.js:516
-msgid "Laptop"
-msgstr "Notebook"
+#. Add a close button to dismiss the dialog
+#: src/preferences/service.js:242 src/preferences/service.js:357
+#: src/preferences/service.js:672 src/service/plugins/share.js:263
+msgid "Close"
+msgstr ""
 
-#: src/preferences/service.js:518
-msgid "Smartphone"
-msgstr "Smartphone"
+#: src/preferences/service.js:268
+#, fuzzy
+msgid "Connect to..."
+msgstr "Conectar a…"
 
-#: src/preferences/service.js:520
-msgid "Tablet"
-msgstr "Tablet"
+#: src/preferences/service.js:301
+msgid "Invalid host or port."
+msgstr ""
 
-#: src/preferences/service.js:522
-msgid "Television"
-msgstr "Televisão"
+#: src/preferences/service.js:309
+msgid "An unexpected error occurred."
+msgstr ""
 
-#: src/preferences/service.js:544
+#: src/preferences/service.js:352
+msgid "Oops! An error occurred…"
+msgstr ""
+
+#: src/preferences/service.js:587
+msgid "A complete KDE Connect implementation for GNOME"
+msgstr "Uma implementação completa do KDE Connect para o GNOME"
+
+#: src/preferences/service.js:591
+msgid "translator-credits"
+msgstr ""
+"Ricardo Silva Veloso <ricvelozo@gmail.com>\n"
+"Rafael Fontenelle <rafaelff@gnome.org>"
+
+#: src/preferences/service.js:636
+msgid ""
+"Debug messages are being logged. Take any steps necessary to reproduce a "
+"problem then review the log."
+msgstr ""
+"Mensagens de depuração estão sendo registradas. Utilize quaisquer etapas "
+"necessárias para reproduzir um problema e consulte o log."
+
+#: src/preferences/service.js:641
+msgid "Review Log"
+msgstr "Consultar log"
+
+#: src/preferences/service.js:703
 msgid "Unpaired"
 msgstr "Não pareado"
 
-#: src/preferences/service.js:548
+#: src/preferences/service.js:706
 msgid "Disconnected"
 msgstr "Desconectado"
 
-#: src/preferences/service.js:552
+#: src/preferences/service.js:709
 msgid "Connected"
 msgstr "Conectado"
 
-#: src/preferences/service.js:688
+#: src/preferences/service.js:798
+msgid "Searching for devices…"
+msgstr "Procurando dispositivos…"
+
+#: src/preferences/service.js:801
 msgid "Waiting for service…"
 msgstr "Aguardando serviço…"
 
 #. Notify the user
-#: src/service/daemon.js:99
+#: src/service/daemon.js:103
 msgid "Settings Migrated"
 msgstr ""
 
-#: src/service/daemon.js:100
-msgid "GSConnect has updated to support changes to the KDE Connect protocol. Some devices may need to be re-paired."
+#: src/service/daemon.js:104
+msgid ""
+"GSConnect has updated to support changes to the KDE Connect protocol. Some "
+"devices may need to be re-paired."
 msgstr ""
 
-#: src/service/daemon.js:241
+#: src/service/daemon.js:248
 msgid "Click for help troubleshooting"
 msgstr "Clique para ajuda na solução de problemas"
 
-#: src/service/daemon.js:251
+#: src/service/daemon.js:258
 msgid "Click for more information"
 msgstr "Clique para mais informação"
 
-#: src/service/daemon.js:359
+#. TRANSLATORS: Share URL by SMS
+#: src/service/daemon.js:354 src/service/daemon.js:477
+#: src/service/plugins/sms.js:63 webextension/gettext.js:41
+msgid "Send SMS"
+msgstr "Enviar SMS"
+
+#: src/service/daemon.js:360
 msgid "Dial Number"
 msgstr "Ligar para número"
 
-#: src/service/daemon.js:365 src/service/daemon.js:554
+#: src/service/daemon.js:366 src/service/daemon.js:564
 #: src/service/plugins/share.js:31
 msgid "Share File"
 msgstr "Compartilhar arquivo"
 
-#: src/service/daemon.js:416
+#: src/service/daemon.js:417
 msgid "List available devices"
 msgstr "Listar dispositivos disponíveis"
 
-#: src/service/daemon.js:425
+#: src/service/daemon.js:426
 msgid "List all devices"
 msgstr "Listar todos dispositivos"
 
-#: src/service/daemon.js:434
+#: src/service/daemon.js:435
 msgid "Target Device"
 msgstr "Dispositivo de destino"
 
-#: src/service/daemon.js:476
+#: src/service/daemon.js:444
+#, fuzzy
+msgid "Target Device Name"
+msgstr "Dispositivo de destino"
+
+#: src/service/daemon.js:456
+msgid "Pair"
+msgstr "Parear"
+
+#: src/service/daemon.js:465
+msgid "Unpair"
+msgstr "Esquecer"
+
+#: src/service/daemon.js:486
 msgid "Message Body"
 msgstr "Corpo da mensagem"
 
-#: src/service/daemon.js:488 src/service/plugins/notification.js:57
+#: src/service/daemon.js:498 src/service/plugins/notification.js:58
 msgid "Send Notification"
 msgstr "Enviar notificação"
 
-#: src/service/daemon.js:497
+#: src/service/daemon.js:507
 msgid "Notification App Name"
 msgstr "Nome do aplicativo de notificação"
 
-#: src/service/daemon.js:506
+#: src/service/daemon.js:516
 msgid "Notification Body"
 msgstr "Corpo da notificação"
 
-#: src/service/daemon.js:515
+#: src/service/daemon.js:525
 msgid "Notification Icon"
 msgstr "Ícone da notificação"
 
-#: src/service/daemon.js:524
+#: src/service/daemon.js:534
 msgid "Notification ID"
 msgstr "ID da notificação"
 
-#: src/service/daemon.js:533 src/service/plugins/ping.js:13
+#: src/service/daemon.js:543 src/service/plugins/ping.js:13
 #: src/service/plugins/ping.js:20 src/service/plugins/ping.js:47
 msgid "Ping"
 msgstr "Ping"
 
-#: src/service/daemon.js:542 src/service/plugins/battery.js:247
+#: src/service/daemon.js:552 src/service/plugins/battery.js:247
 #: src/service/plugins/battery.js:276 src/service/plugins/battery.js:305
-#: src/service/plugins/findmyphone.js:22
+#: src/service/plugins/findmyphone.js:23
 msgid "Ring"
 msgstr "Tocar"
 
-#: src/service/daemon.js:563 src/service/plugins/share.js:47
-#: src/service/ui/messaging.js:1257 src/service/ui/messaging.js:1265
+#: src/service/daemon.js:573 src/service/plugins/share.js:47
 msgid "Share Link"
 msgstr "Compartilhar link"
 
-#: src/service/daemon.js:572 src/service/plugins/share.js:39
+#: src/service/daemon.js:582 src/service/plugins/share.js:39
 msgid "Share Text"
 msgstr "Compartilhar texto"
 
-#: src/service/daemon.js:584
+#: src/service/daemon.js:594
 msgid "Show release version"
 msgstr "Mostrar versão de lançamento"
 
@@ -843,9 +920,19 @@ msgstr ""
 msgid "Device clocks are out of sync"
 msgstr ""
 
+#: src/service/init.js:331
+msgid "OpenSSL not found"
+msgstr "OpenSSL não encontrado"
+
+#: src/service/manager.js:177
+msgid "Discovery Disabled"
+msgstr "Descoberta desativada"
+
 #: src/service/manager.js:178
-msgid "Discovery has been disabled due to the number of devices on this network."
-msgstr "A descoberta foi desativada devido ao número de dispositivos nesta rede."
+msgid ""
+"Discovery has been disabled due to the number of devices on this network."
+msgstr ""
+"A descoberta foi desativada devido ao número de dispositivos nesta rede."
 
 #: src/service/backends/lan.js:477
 msgid "Port already in use"
@@ -907,26 +994,31 @@ msgstr "Enviar para área de transferência"
 msgid "Clipboard Pull"
 msgstr "Pegar da área de transferência"
 
-#: src/service/plugins/contacts.js:29
+#: src/service/plugins/contacts.js:30
 msgid "Access contacts of the paired device"
 msgstr "Acessar contatos do aparelho pareado"
 
 #. Ensure we have a sender
 #. TRANSLATORS: No name or phone number
 #. Contact Name
-#: src/service/plugins/contacts.js:242 src/service/plugins/contacts.js:362
+#: src/service/plugins/contacts.js:243 src/service/plugins/contacts.js:363
 #: src/service/plugins/telephony.js:156 src/service/plugins/telephony.js:175
-#: src/service/ui/contacts.js:620 src/service/ui/messaging.js:756
+#: src/service/ui/contacts.js:388 src/service/ui/messaging.js:885
 msgid "Unknown Contact"
 msgstr "Contato desconhecido"
 
-#: src/service/plugins/findmyphone.js:15
+#: src/service/plugins/findmyphone.js:16 src/service/plugins/findmyphone.js:207
 msgid "Find My Phone"
 msgstr "Encontrar meu smartphone"
 
-#: src/service/plugins/findmyphone.js:16
+#: src/service/plugins/findmyphone.js:17
 msgid "Ring your paired device"
 msgstr "Tocar no seu dispositivo pareado"
+
+#. Add action to cancel request when notification is clicked
+#: src/service/plugins/findmyphone.js:212
+msgid "Stop Ringing"
+msgstr ""
 
 #: src/service/plugins/mousepad.js:14
 msgid "Mousepad"
@@ -934,11 +1026,8 @@ msgstr "Mousepad"
 
 #: src/service/plugins/mousepad.js:15
 msgid "Enables the paired device to act as a remote mouse and keyboard"
-msgstr "Permite que o dispositivo pareado funcione como mouse e teclado remotos"
-
-#: src/service/plugins/mousepad.js:29 src/service/ui/mousepad.js:107
-msgid "Remote Input"
-msgstr "Entrada remota"
+msgstr ""
+"Permite que o dispositivo pareado funcione como mouse e teclado remotos"
 
 #: src/service/plugins/mpris.js:18
 msgid "MPRIS"
@@ -948,27 +1037,27 @@ msgstr "MPRIS"
 msgid "Bidirectional remote media playback control"
 msgstr "Controle remoto de reprodução multimídia bidirecional"
 
-#: src/service/plugins/mpris.js:357
+#: src/service/plugins/mpris.js:330
 msgid "Unknown"
 msgstr "Desconhecido"
 
-#: src/service/plugins/notification.js:19
+#: src/service/plugins/notification.js:20
 msgid "Share notifications with the paired device"
 msgstr "Compartilhar notificações com o dispositivo pareado"
 
-#: src/service/plugins/notification.js:33
+#: src/service/plugins/notification.js:34
 msgid "Cancel Notification"
 msgstr "Cancelar notificação"
 
-#: src/service/plugins/notification.js:41
+#: src/service/plugins/notification.js:42
 msgid "Close Notification"
 msgstr "Fechar notificação"
 
-#: src/service/plugins/notification.js:49
+#: src/service/plugins/notification.js:50
 msgid "Reply Notification"
 msgstr "Responder notificação"
 
-#: src/service/plugins/notification.js:65
+#: src/service/plugins/notification.js:66
 msgid "Activate Notification"
 msgstr "Ativar notificação"
 
@@ -996,8 +1085,12 @@ msgid "Run Commands"
 msgstr "Executar comandos"
 
 #: src/service/plugins/runcommand.js:15
-msgid "Run commands on your paired device or let the device run predefined commands on this PC"
-msgstr "Executar comandos em seu dispositivo conectado ou permitir que o dispositivo execute comandos predefinidos neste PC"
+msgid ""
+"Run commands on your paired device or let the device run predefined commands "
+"on this PC"
+msgstr ""
+"Executar comandos em seu dispositivo conectado ou permitir que o dispositivo "
+"execute comandos predefinidos neste PC"
 
 #: src/service/plugins/sftp.js:15
 msgid "SFTP"
@@ -1029,7 +1122,7 @@ msgid "Share files and URLs between devices"
 msgstr "Compartilhar arquivos e URLs entre dispositivos"
 
 #: src/service/plugins/share.js:148 src/service/plugins/share.js:227
-#: src/service/plugins/share.js:337
+#: src/service/plugins/share.js:353
 msgid "Transfer Failed"
 msgstr "Transferência falhou"
 
@@ -1039,7 +1132,7 @@ msgstr "Transferência falhou"
 msgid "%s is not allowed to upload files"
 msgstr "%s não tem permissão para enviar arquivos"
 
-#: src/service/plugins/share.js:172 src/service/plugins/share.js:307
+#: src/service/plugins/share.js:172 src/service/plugins/share.js:323
 msgid "Transferring File"
 msgstr "Transferindo arquivo"
 
@@ -1049,7 +1142,7 @@ msgstr "Transferindo arquivo"
 msgid "Receiving “%s” from %s"
 msgstr "Recebendo “%s” de %s"
 
-#: src/service/plugins/share.js:193 src/service/plugins/share.js:327
+#: src/service/plugins/share.js:193 src/service/plugins/share.js:343
 msgid "Transfer Successful"
 msgstr "Transferência completa"
 
@@ -1078,76 +1171,72 @@ msgstr "Falha ao receber “%s” de %s"
 msgid "Text Shared By %s"
 msgstr "Texto compartilhado por %s"
 
+#. TRANSLATORS: eg. Send files to Google Pixel
+#: src/service/plugins/share.js:280
+#, javascript-format
+msgid "Send files to %s"
+msgstr "Enviar arquivos para %s"
+
 #. TRANSLATORS: eg. Sending 'book.pdf' to Google Pixel
-#: src/service/plugins/share.js:309
+#: src/service/plugins/share.js:325
 #, javascript-format
 msgid "Sending “%s” to %s"
 msgstr "Enviando “%s” para %s"
 
 #. TRANSLATORS: eg. Sent "book.pdf" to Google Pixel
-#: src/service/plugins/share.js:329
+#: src/service/plugins/share.js:345
 #, javascript-format
 msgid "Sent “%s” to %s"
 msgstr "Enviado “%s” para %s"
 
 #. TRANSLATORS: eg. Failed to send "book.pdf" to Google Pixel
-#: src/service/plugins/share.js:339
+#: src/service/plugins/share.js:355
 #, javascript-format
 msgid "Failed to send “%s” to %s"
 msgstr "Falha ao enviar “%s” para %s"
 
-#. TRANSLATORS: eg. Send files to Google Pixel
-#: src/service/plugins/share.js:397
-#, javascript-format
-msgid "Send files to %s"
-msgstr "Enviar arquivos para %s"
-
-#. TRANSLATORS: Mark the file to be opened once completed
-#: src/service/plugins/share.js:401
-msgid "Open when done"
-msgstr "Abrir quando terminar"
-
-#. TRANSLATORS: eg. Send a link to Google Pixel
-#: src/service/plugins/share.js:440
-#, javascript-format
-msgid "Send a link to %s"
-msgstr "Enviar um link para %s"
-
-#: src/service/plugins/sms.js:16
+#: src/service/plugins/sms.js:17
 msgid "SMS"
 msgstr "SMS"
 
-#: src/service/plugins/sms.js:17
+#: src/service/plugins/sms.js:18
 msgid "Send and read SMS of the paired device and be notified of new SMS"
-msgstr "Enviar e ler SMS do dispositivo conectado e ser notificado sobre o novo SMS"
+msgstr ""
+"Enviar e ler SMS do dispositivo conectado e ser notificado sobre o novo SMS"
 
-#: src/service/plugins/sms.js:38
+#: src/service/plugins/sms.js:39
 msgid "New SMS (URI)"
 msgstr "Novo SMS (URI)"
 
-#: src/service/plugins/sms.js:46
+#: src/service/plugins/sms.js:47
 msgid "Reply SMS"
 msgstr "Responder SMS"
 
-#: src/service/plugins/sms.js:70
+#: src/service/plugins/sms.js:55
+msgid "Send Message"
+msgstr "Enviar mensagem"
+
+#: src/service/plugins/sms.js:71
 msgid "Share SMS"
 msgstr "Compartilhar SMS"
 
-#: src/service/plugins/systemvolume.js:36
+#: src/service/plugins/systemvolume.js:14
 msgid "System Volume"
 msgstr "Volume do sistema"
 
-#: src/service/plugins/systemvolume.js:37
+#: src/service/plugins/systemvolume.js:15
 msgid "Enable the paired device to control the system volume"
 msgstr "Ative o dispositivo emparelhado para controlar o volume do sistema"
 
-#: src/service/plugins/systemvolume.js:81
+#: src/service/plugins/systemvolume.js:59
 msgid "PulseAudio not found"
 msgstr "PulseAudio não encontrado"
 
 #: src/service/plugins/telephony.js:17
-msgid "Be notified about calls and adjust system volume during ringing/ongoing calls"
-msgstr "Ser notificado sobre chamadas e ajustar o volume do sistema durante chamadas"
+msgid ""
+"Be notified about calls and adjust system volume during ringing/ongoing calls"
+msgstr ""
+"Ser notificado sobre chamadas e ajustar o volume do sistema durante chamadas"
 
 #. TRANSLATORS: Silence the actively ringing call
 #: src/service/plugins/telephony.js:29
@@ -1165,24 +1254,29 @@ msgid "Ongoing call"
 msgstr "Chamada em andamento"
 
 #. TRANSLATORS: A fax number
-#: src/service/ui/contacts.js:143
+#: src/service/ui/contacts.js:21
 msgid "Fax"
 msgstr "Fax"
 
 #. TRANSLATORS: A work or office phone number
-#: src/service/ui/contacts.js:147
+#: src/service/ui/contacts.js:25
 msgid "Work"
 msgstr "Trabalho"
 
 #. TRANSLATORS: A mobile or cellular phone number
-#: src/service/ui/contacts.js:151
+#: src/service/ui/contacts.js:29
 msgid "Mobile"
 msgstr "Celular"
 
 #. TRANSLATORS: A home phone number
-#: src/service/ui/contacts.js:155
+#: src/service/ui/contacts.js:33
 msgid "Home"
 msgstr "Residencial"
+
+#. TRANSLATORS: All other phone number types
+#: src/service/ui/contacts.js:36
+msgid "Other"
+msgstr "Outros"
 
 #. TRANSLATORS: Less than a minute ago
 #: src/service/ui/messaging.js:105 src/service/ui/messaging.js:146
@@ -1202,32 +1296,63 @@ msgid_plural "%d minutes"
 msgstr[0] "%d minuto"
 msgstr[1] "%d minutos"
 
-#: src/service/ui/messaging.js:407
-msgid "Not available"
-msgstr "Indisponível"
+#: src/service/ui/messaging.js:235
+msgid "<i>(Empty or unsupported)</i>"
+msgstr ""
 
-#: src/service/ui/messaging.js:764
-msgid "Group Message"
-msgstr "Mensagem de grupo"
-
-#. TRANSLATORS: An outgoing message body in a conversation summary
-#: src/service/ui/messaging.js:779
-#, javascript-format
-msgid "You: %s"
-msgstr "Você: %s"
-
-#: src/service/ui/messaging.js:965
+#: src/service/ui/messaging.js:393
 #, javascript-format
 msgid "And %d other contact"
 msgid_plural "And %d others"
 msgstr[0] "E %d outro contato"
 msgstr[1] "E %d outros"
 
+#. TRANSLATORS: Shown as the summary when a text message contains
+#. only image content (no text body)
+#: src/service/ui/messaging.js:882
+msgid "<i>image</i>"
+msgstr ""
+
+#: src/service/ui/messaging.js:903
+msgid "Group Message"
+msgstr "Mensagem de grupo"
+
+#: src/service/ui/messaging.js:918
+#, fuzzy
+msgid "New conversation"
+msgstr "Nova conversa"
+
+#. TRANSLATORS: An outgoing message body in a conversation summary
+#: src/service/ui/messaging.js:926
+#, javascript-format
+msgid "You: %s"
+msgstr "Você: %s"
+
+#: src/service/ui/messaging.js:1004
+msgid "Device is disconnected"
+msgstr "Dispositivo está desconectado"
+
 #. TRANSLATORS: Displayed when the remote keyboard is not ready to accept input
-#: src/service/ui/mousepad.js:115
+#: src/service/ui/mousepad.js:123
 #, javascript-format
 msgid "Remote keyboard on %s is not active"
 msgstr "O teclado remoto em %s não está ativo"
+
+#: src/service/ui/mousepad.js:130
+msgid ""
+"Touchpad.\n"
+"Drag on this area to move mouse cursor.\n"
+"Press long to drag to drag mouse cursor.\n"
+"\n"
+"Simple click will be sent to paired device.\n"
+"Left, middle, right button, and wheel scrolls."
+msgstr ""
+"Touchpad.\n"
+"Arraste o dedo nesta área para mover o ponteiro do mouse.\n"
+"Aperte e arraste para mover o ponteiro do mouse.\n"
+"\n"
+"Um clique simples será enviado ao aparelho pareado. \n"
+"Botão da esquerda, meio e direita, e scroll do mouse."
 
 #. TRANSLATORS: When no time estimate for the battery is available
 #. EXAMPLE: 42% (Estimating…)
@@ -1254,10 +1379,15 @@ msgstr "%d%% (%d∶%02d restante)"
 msgid "Reply"
 msgstr "Responder"
 
+#: src/shell/notification.js:88
+msgid "Type a message"
+msgstr "Escrever uma mensagem"
+
 #. TRANSLATORS: Chrome/Firefox WebExtension description
 #: webextension/gettext.js:31
 msgid "Share links with GSConnect, direct to the browser or by SMS."
-msgstr "Compartilhe links com o GSConnect, diretamente no navegador ou por SMS."
+msgstr ""
+"Compartilhe links com o GSConnect, diretamente no navegador ou por SMS."
 
 #. TRANSLATORS: WebExtension can't connect to GSConnect
 #: webextension/gettext.js:35
@@ -1269,3 +1399,94 @@ msgstr "Serviço indisponível"
 msgid "Open in Browser"
 msgstr "Abrir no navegador"
 
+#~ msgid "GSConnect in GNOME Shell"
+#~ msgstr "GSConnect no GNOME Shell"
+
+#~ msgid "No contacts"
+#~ msgstr "Nenhum contato"
+
+#~ msgid "Send"
+#~ msgstr "Enviar"
+
+#~ msgid "Message Entry"
+#~ msgstr "Entrada de mensagem"
+
+#~ msgid "Type a message and press Enter to send"
+#~ msgstr "Digite uma mensagem e pressione Enter para enviar"
+
+#~ msgid "Save"
+#~ msgstr "Salvar"
+
+#~ msgid "Command Line"
+#~ msgstr "Linha de comando"
+
+#~ msgid "Choose an executable"
+#~ msgstr "Escolher um executável"
+
+#~ msgid "Open"
+#~ msgstr "Abrir"
+
+#~ msgid "Device Cache"
+#~ msgstr "Cache do dispositivo"
+
+#~ msgid "Legacy SMS Support"
+#~ msgstr "Suporte a SMS legado"
+
+#~ msgid "SFTP Automount"
+#~ msgstr "Automontagem SFTP"
+
+#~ msgid "Device is unpaired"
+#~ msgstr "O dispositivo não está pareado"
+
+#~ msgid "You may configure this device before pairing"
+#~ msgstr "Você pode configurar este dispositivo antes de parear"
+
+#~ msgid "_Rename"
+#~ msgstr "_Renomear"
+
+#~ msgid "Service Menu"
+#~ msgstr "Menu do serviço"
+
+#~ msgid "Edit Device Name"
+#~ msgstr "Edita o nome do dispositivo"
+
+#~ msgid "Devices"
+#~ msgstr "Dispositivos"
+
+#~ msgid "Extension Settings"
+#~ msgstr "Configurações de Extensão"
+
+#~ msgid "Browser Add-Ons"
+#~ msgstr "Complementos para navegadores"
+
+#~ msgid "Enable"
+#~ msgstr "Habilitar"
+
+#~ msgid "This device is invisible to unpaired devices"
+#~ msgstr "Este dispositivo está invisível para dispositivos não pareados"
+
+#~ msgid "Device List"
+#~ msgstr "Lista de dispositivos"
+
+#~ msgid "Something’s gone wrong"
+#~ msgstr "Algo está errado"
+
+#~ msgid "Edit"
+#~ msgstr "Editar"
+
+#~ msgid "Remove"
+#~ msgstr "Remover"
+
+#, javascript-format
+#~ msgid "%s is already being used"
+#~ msgstr "%s já está em uso"
+
+#~ msgid "Open when done"
+#~ msgstr "Abrir quando terminar"
+
+#, javascript-format
+#~ msgid "Send a link to %s"
+#~ msgstr "Enviar um link para %s"
+
+#~ msgid "Not available"
+#~ msgstr "Indisponível"

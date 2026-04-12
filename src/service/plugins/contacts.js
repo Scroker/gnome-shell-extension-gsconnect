@@ -8,6 +8,7 @@ import GObject from 'gi://GObject';
 import Plugin from '../plugin.js';
 import Contacts from '../components/contacts.js';
 import * as Core from '../core.js';
+import { parsePhoneNumber } from '../utils/phone.js';
 
 /*
  * We prefer libebook's vCard parser if it's available
@@ -215,12 +216,12 @@ const ContactsPlugin = GObject.registerClass({
 
             return output.join('');
 
-        // Fallback to old unfaithful
+            // Fallback to old unfaithful
         } catch {
             try {
                 return decodeURIComponent(escape(input));
 
-            // Say "chowdah" frenchie!
+                // Say "chowdah" frenchie!
             } catch (e) {
                 debug(e, `Failed to decode UTF-8 VCard field ${input}`);
                 return input;
@@ -301,7 +302,7 @@ const ContactsPlugin = GObject.registerClass({
                 if (key === 'fn')
                     vcard[key] = value[0];
                 else
-                    vcard[key].push({meta: meta, value: value});
+                    vcard[key].push({ meta: meta, value: value });
             }
         }
 
@@ -334,7 +335,7 @@ const ContactsPlugin = GObject.registerClass({
                 if (entry.meta && entry.meta.type)
                     type = entry.meta.type;
 
-                return {type: type, value: entry.value[0]};
+                return { type: type, value: parsePhoneNumber(entry.value[0]) };
             });
 
             // Avatar
@@ -378,7 +379,7 @@ const ContactsPlugin = GObject.registerClass({
                         break;
 
                     case 'tel':
-                        number = {value: attr.get_value(), type: 'unknown'};
+                        number = { value: parsePhoneNumber(attr.get_value()), type: 'unknown' };
 
                         if (attr.has_type('CELL'))
                             number.type = 'cell';

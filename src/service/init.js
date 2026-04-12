@@ -175,36 +175,6 @@ if (!globalThis.HAVE_GNOME) {
 
 
 /**
- * A simple (for now) pre-comparison sanitizer for phone numbers
- * See: https://github.com/KDE/kdeconnect-kde/blob/master/smsapp/conversationlistmodel.cpp#L200-L210
- *
- * @returns {string} Return the string stripped of leading 0, and ' ()-+'
- */
-String.prototype.toPhoneNumber = function () {
-    const strippedNumber = this.replace(/^0*|[ ()+-]/g, '');
-
-    if (strippedNumber.length)
-        return strippedNumber;
-
-    return this;
-};
-
-
-/**
- * A simple equality check for phone numbers based on `toPhoneNumber()`
- *
- * @param {string} number - A phone number string to compare
- * @returns {boolean} If `this` and {@link number} are equivalent phone numbers
- */
-String.prototype.equalsPhoneNumber = function (number) {
-    const a = this.toPhoneNumber();
-    const b = number.toPhoneNumber();
-
-    return (a.length && b.length && (a.endsWith(b) || b.endsWith(a)));
-};
-
-
-/**
  * An implementation of `rm -rf` in Gio
  *
  * @param {Gio.File|string} file - a GFile or filepath

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gsconnect\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 14:44-0400\n"
+"POT-Creation-Date: 2026-03-15 17:02+0100\n"
 "PO-Revision-Date: 2025-09-13 18:59\n"
 "Last-Translator: \n"
 "Language-Team: Turkish\n"
@@ -14,12 +14,13 @@ msgstr ""
 "X-Crowdin-Project: gsconnect\n"
 "X-Crowdin-Project-ID: 327933\n"
 "X-Crowdin-Language: tr\n"
-"X-Crowdin-File: /[GSConnect.gnome-shell-extension-gsconnect] main/po/org.gnome.Shell.Extensions.GSConnect.pot\n"
+"X-Crowdin-File: /[GSConnect.gnome-shell-extension-gsconnect] main/po/"
+"org.gnome.Shell.Extensions.GSConnect.pot\n"
 "X-Crowdin-File-ID: 18\n"
 
 #. TRANSLATORS: Extension name
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:12
-#: webextension/gettext.js:29
+#: src/preferences/service.js:585 webextension/gettext.js:29
 msgid "GSConnect"
 msgstr "GSConnect"
 
@@ -32,12 +33,23 @@ msgid "GSConnect Team"
 msgstr "GSConnect Takımı"
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:41
-msgid "GSConnect is a complete implementation of KDE Connect especially for GNOME Shell with Nautilus, Chrome and Firefox integration. The KDE Connect team has applications for Linux, BSD, Android, Sailfish, iOS, macOS and Windows."
-msgstr "GSConnect, Nautilus, Chrome ve Firefox bütünleşmesi ile özellikle GNOME Kabuğu için eksiksiz bir KDE Connect uygulamasıdır. KDE Connect ekibinin Linux, BSD, Android, Sailfish, iOS, macOS ve Windows için uygulamaları vardır."
+msgid ""
+"GSConnect is a complete implementation of KDE Connect especially for GNOME "
+"Shell with Nautilus, Chrome and Firefox integration. The KDE Connect team "
+"has applications for Linux, BSD, Android, Sailfish, iOS, macOS and Windows."
+msgstr ""
+"GSConnect, Nautilus, Chrome ve Firefox bütünleşmesi ile özellikle GNOME "
+"Kabuğu için eksiksiz bir KDE Connect uygulamasıdır. KDE Connect ekibinin "
+"Linux, BSD, Android, Sailfish, iOS, macOS ve Windows için uygulamaları "
+"vardır."
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:44
-msgid "With GSConnect you can securely connect to mobile devices and other desktops to:"
-msgstr "GSConnect ile mobil cihazlara ve diğer masaüstlerine bağlanarak şunları yapabilirsiniz:"
+msgid ""
+"With GSConnect you can securely connect to mobile devices and other desktops "
+"to:"
+msgstr ""
+"GSConnect ile mobil cihazlara ve diğer masaüstlerine bağlanarak şunları "
+"yapabilirsiniz:"
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:48
 msgid "Share files, links and text"
@@ -75,542 +87,553 @@ msgstr "Ön tanımlı komutları yürüt"
 msgid "And more…"
 msgstr "Ve daha fazlası…"
 
-#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:165
-msgid "GSConnect in GNOME Shell"
-msgstr "GNOME Kabuğunda GSConnect"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:180
+#, fuzzy
+msgid "GSConnect Overview"
+msgstr "GSConnect Takımı"
 
-#: data/ui/connect-dialog.ui:20
-msgid "Connect to…"
-msgstr "Bağlan…"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:184
+msgid "Preferences Window"
+msgstr ""
 
-#: data/ui/connect-dialog.ui:26 data/ui/legacy-messaging-dialog.ui:20
-#: data/ui/legacy-messaging-dialog.ui:24
-#: data/ui/notification-reply-dialog.ui:19
-#: data/ui/notification-reply-dialog.ui:23
-#: data/ui/preferences-command-editor.ui:21
-#: data/ui/preferences-command-editor.ui:157
-#: data/ui/preferences-shortcut-editor.ui:19
-#: data/ui/service-device-chooser.ui:21 data/ui/service-device-chooser.ui:25
-#: data/ui/service-error-dialog.ui:20 data/ui/service-error-dialog.ui:28
-#: src/preferences/service.js:417 src/service/plugins/share.js:179
-#: src/service/plugins/share.js:314 src/service/plugins/share.js:445
-msgid "Cancel"
-msgstr "İptal"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:188
+#, fuzzy
+msgid "Device Settings Page"
+msgstr "Cihaz Ayarları"
 
-#: data/ui/connect-dialog.ui:33
-msgid "Connect"
-msgstr "Bağlan"
-
-#: data/ui/connect-dialog.ui:80
-msgid "IP Address"
-msgstr "IP Adresi"
-
-#: data/ui/contact-chooser.ui:56
-msgid "No contacts"
-msgstr "Kişi yok"
-
-#: data/ui/contact-chooser.ui:68 data/ui/messaging-window.ui:103
-#: data/ui/mousepad-input-dialog.ui:56 data/ui/preferences-window.ui:949
-msgid "Help"
-msgstr "Yardım"
-
-#: data/ui/contact-chooser.ui:109
-msgid "Type a phone number or name"
-msgstr "Telefon numarası veya isim yaz"
-
-#. TRANSLATORS: All other phone number types
-#: data/ui/contacts-address-row.ui:71 src/service/ui/contacts.js:158
-msgid "Other"
-msgstr "Diğer"
-
-#. TRANSLATORS: Share URL by SMS
-#: data/ui/legacy-messaging-dialog.ui:15 src/service/daemon.js:353
-#: src/service/daemon.js:467 src/service/plugins/sms.js:62
-#: webextension/gettext.js:41
-msgid "Send SMS"
-msgstr "SMS Gönder"
-
-#: data/ui/legacy-messaging-dialog.ui:32 data/ui/legacy-messaging-dialog.ui:36
-#: data/ui/notification-reply-dialog.ui:31
-#: data/ui/notification-reply-dialog.ui:35 src/service/plugins/share.js:446
-msgid "Send"
-msgstr "Gönder"
-
-#: data/ui/legacy-messaging-dialog.ui:69 data/ui/messaging-window.ui:263
-#: data/ui/notification-reply-dialog.ui:68
-msgid "Device is disconnected"
-msgstr "Cihaz çevrim dışı"
-
-#: data/ui/messaging-conversation.ui:91 src/service/plugins/sms.js:54
-msgid "Send Message"
-msgstr "Mesaj Gönder"
-
-#: data/ui/messaging-conversation.ui:92 src/shell/notification.js:88
-msgid "Type a message"
-msgstr "Bir Mesaj Yaz"
-
-#: data/ui/messaging-conversation.ui:99
-msgid "Message Entry"
-msgstr "Mesaj Girdisi"
-
-#: data/ui/messaging-conversation.ui:100
-msgid "Type a message and press Enter to send"
-msgstr "Bir mesaj yazın ve göndermek için Enter tuşuna basın"
-
-#: data/ui/messaging-window.ui:21 src/service/plugins/sms.js:30
-#: src/service/ui/messaging.js:1063
-msgid "Messaging"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:192
+#, fuzzy
+msgid "Messaging Window"
 msgstr "Mesajlaşma"
 
-#: data/ui/messaging-window.ui:30 data/ui/messaging-window.ui:43
-#: src/service/ui/messaging.js:1274
-msgid "New Conversation"
-msgstr "Yeni Sohbet"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:196
+msgid "GNOME Nautilus Extension"
+msgstr ""
 
-#: data/ui/messaging-window.ui:120
-msgid "No Conversations"
-msgstr "Sohbet yok"
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:200
+msgid "Device Control Window"
+msgstr ""
 
-#: data/ui/messaging-window.ui:180
-msgid "No conversation selected"
-msgstr "Hiçbir sohbet seçilmedi"
-
-#: data/ui/messaging-window.ui:196
-msgid "Select or start a conversation"
-msgstr "Sohbet seç ya da başlat"
-
-#: data/ui/mousepad-input-dialog.ui:97
-msgid "Touchpad.\n"
-"Drag on this area to move mouse cursor.\n"
-"Press long to drag to drag mouse cursor.\n\n"
-"Simple click will be sent to paired device.\n"
-"Left, middle, right button, and wheel scrolls."
-msgstr "Dokunmatik yüzey.\n"
-"Fare imlecini hareket ettirmek için bu alanda sürükleyin.\n"
-"Fare imlecini bi yerden bi yere sürüklemek için uzun basın.\n\n"
-"Eşleştirilmiş cihaza basit bir tıklama gönderilecektir.\n"
-"Sol, orta, sağ düğme ve imleç kaydırmaları."
-
+#: data/ui/command-row.ui:21 data/ui/command-row.ui:23
 #: data/ui/preferences-command-editor.ui:14
 msgid "Edit Command"
 msgstr "Komutu Düzenle"
 
-#: data/ui/preferences-command-editor.ui:28
-msgid "Save"
-msgstr "Kaydet"
+#: data/ui/command-row.ui:33 data/ui/command-row.ui:35
+#, fuzzy
+msgid "Delete Command"
+msgstr "Komutu Düzenle"
 
-#: data/ui/preferences-command-editor.ui:61
-msgid "Name"
-msgstr "İsim"
+#: data/ui/connect-dialog.ui:14
+msgid "Connect to…"
+msgstr "Bağlan…"
 
-#: data/ui/preferences-command-editor.ui:99
-msgid "Command Line"
-msgstr "Komut Satırı"
+#: data/ui/connect-dialog.ui:54
+msgid "IP Address"
+msgstr "IP Adresi"
 
-#: data/ui/preferences-command-editor.ui:121
-#: data/ui/preferences-command-editor.ui:150
-msgid "Choose an executable"
-msgstr "Yürütülebilir dosya seç"
-
-#: data/ui/preferences-command-editor.ui:164
-msgid "Open"
-msgstr "Aç"
-
-#: data/ui/preferences-device-panel.ui:53 src/preferences/service.js:524
-msgid "Desktop"
-msgstr "Masaüstü"
-
-#: data/ui/preferences-device-panel.ui:102
-msgid "Clipboard Sync"
-msgstr "Pano Eşleşmesi"
-
-#: data/ui/preferences-device-panel.ui:168
-msgid "Media Players"
-msgstr "Medya Oynatıcılar"
-
-#: data/ui/preferences-device-panel.ui:225
-msgid "Mouse & Keyboard"
-msgstr "Fare & Klavye"
-
-#: data/ui/preferences-device-panel.ui:282
-msgid "Volume Control"
-msgstr "Ses Kontrolü"
-
-#: data/ui/preferences-device-panel.ui:337 src/service/plugins/sftp.js:332
-msgid "Files"
-msgstr "Dosyalar"
-
-#: data/ui/preferences-device-panel.ui:390
-msgid "Receive Files"
-msgstr "Alınan Dosyalar"
-
-#: data/ui/preferences-device-panel.ui:449
-msgid "Save files to"
-msgstr "Dosyaları şuraya kaydet"
-
-#: data/ui/preferences-device-panel.ui:510
-msgid "Links"
-msgstr "Bağlantılar"
-
-#: data/ui/preferences-device-panel.ui:562
-msgid "Automatically open received URLs"
+#: data/ui/connect-dialog.ui:60
+msgid "Port"
 msgstr ""
 
-#: data/ui/preferences-device-panel.ui:623
-#: data/ui/preferences-device-panel.ui:2286
-msgid "Sharing"
-msgstr "Paylaşım"
+#: data/ui/connect-dialog.ui:84
+msgid "Connect"
+msgstr "Bağlan"
 
-#: data/ui/preferences-device-panel.ui:655
-msgid "Device Battery"
-msgstr "Cihaz Bataryası"
-
-#: data/ui/preferences-device-panel.ui:706
-msgid "Low Battery Notification"
-msgstr "Düşük Batarya Bildirimi"
-
-#: data/ui/preferences-device-panel.ui:765
-msgid "Charged Up to Custom Level Notification"
-msgstr ""
-
-#: data/ui/preferences-device-panel.ui:845
-msgid "Fully Charged Notification"
-msgstr "Tam Şarj Bildirimi"
-
-#: data/ui/preferences-device-panel.ui:899
-msgid "System Battery"
-msgstr "Sistem Bataryası"
-
-#: data/ui/preferences-device-panel.ui:948
-msgid "Share Statistics"
-msgstr "İstatistikleri Paylaş"
-
-#: data/ui/preferences-device-panel.ui:1002
-#: data/ui/preferences-device-panel.ui:2332 src/service/plugins/battery.js:15
-msgid "Battery"
-msgstr "Batarya"
-
-#: data/ui/preferences-device-panel.ui:1032
-#: data/ui/preferences-device-panel.ui:1117
-#: data/ui/preferences-device-panel.ui:2378
-#: src/service/plugins/runcommand.js:26 src/service/plugins/runcommand.js:34
-#: src/service/plugins/runcommand.js:194
-msgid "Commands"
-msgstr "Komutlar"
-
-#: data/ui/preferences-device-panel.ui:1091
-msgid "Add Command"
-msgstr "Komut Ekle"
-
-#. TRANSLATORS: 'Share' is a verb here; this refers to the action of sharing
-#: data/ui/preferences-device-panel.ui:1179
-msgid "Share Notifications"
-msgstr "Bildirimleri Paylaş"
-
-#: data/ui/preferences-device-panel.ui:1239
-msgid "Share When Active"
-msgstr "Aktif Olduğunda Paylaş"
-
-#: data/ui/preferences-device-panel.ui:1290
-msgid "Applications"
-msgstr "Uygulamalar"
-
-#: data/ui/preferences-device-panel.ui:1336
-#: data/ui/preferences-device-panel.ui:2424
-#: src/service/plugins/notification.js:18
-msgid "Notifications"
-msgstr "Bildirimler"
-
-#: data/ui/preferences-device-panel.ui:1394 src/service/plugins/contacts.js:28
+#: data/ui/contact-chooser.ui:14 src/service/plugins/contacts.js:29
 msgid "Contacts"
 msgstr "Kişiler"
 
-#: data/ui/preferences-device-panel.ui:1447
-msgid "Incoming Calls"
-msgstr "Gelen Çağrılar"
+#: data/ui/contact-chooser.ui:31 data/ui/contact-chooser.ui:33
+#: data/ui/messaging-window.ui:49 data/ui/messaging-window.ui:51
+#, fuzzy
+msgid "Search contact"
+msgstr "Kişileri eşitle"
 
-#: data/ui/preferences-device-panel.ui:1496
-#: data/ui/preferences-device-panel.ui:1663
-msgid "Volume"
-msgstr "Ses"
+#: data/ui/contact-chooser.ui:49
+msgid "Search for names or phone numbers"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1562
-#: data/ui/preferences-device-panel.ui:1729
-msgid "Pause Media"
-msgstr "Medyayı Duraklat"
+#: data/ui/contact-chooser.ui:52 data/ui/contact-chooser.ui:54
+msgid "Search contacts from names or phone numbers"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1615
-msgid "Ongoing Calls"
-msgstr "Devam Eden Çağrılar"
+#: data/ui/find-my-phone.ui:28 src/service/plugins/findmyphone.js:208
+msgid "You found me!"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1785
-msgid "Mute Microphone"
-msgstr "Mikrofonu Sustur"
+#: data/ui/legacy-messaging-dialog.ui:13
+#, fuzzy
+msgid "Send SMS…"
+msgstr "SMS Gönder"
 
-#: data/ui/preferences-device-panel.ui:1839
-#: data/ui/preferences-device-panel.ui:2470 src/service/plugins/telephony.js:16
-msgid "Telephony"
-msgstr "Telefon"
+#: data/ui/legacy-messaging-dialog.ui:20
+#, fuzzy
+msgid "Message"
+msgstr "Mesajlaşma"
 
-#: data/ui/preferences-device-panel.ui:1874
-msgid "Action Shortcuts"
-msgstr "Kısayol Eylemleri"
+#: data/ui/legacy-messaging-dialog.ui:21
+#, fuzzy
+msgid "message"
+msgstr "Bir Mesaj Yaz"
 
-#: data/ui/preferences-device-panel.ui:1890
-msgid "Reset All…"
-msgstr "Tümünü Sıfırla…"
+#: data/ui/legacy-messaging-dialog.ui:48
+#: data/ui/notification-reply-dialog.ui:31
+#, fuzzy
+msgid "Device Disconnected"
+msgstr "Cihaz çevrim dışı"
 
-#: data/ui/preferences-device-panel.ui:1942
-msgid "Shortcuts"
-msgstr "Kısayollar"
+#: data/ui/messaging-conversation-participants.ui:14
+msgid "Participants"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:1973
-msgid "Plugins"
-msgstr "Eklentiler"
+#: data/ui/messaging-conversation-sharesms.ui:24
+#: data/ui/messaging-conversation-sharesms.ui:26 data/ui/messaging-window.ui:60
+#: data/ui/messaging-window.ui:62
+msgid "New Conversation"
+msgstr "Yeni Sohbet"
 
-#: data/ui/preferences-device-panel.ui:2020
-msgid "Experimental"
-msgstr "Deneysel"
+#: data/ui/messaging-conversation.ui:24 data/ui/messaging-conversation.ui:26
+msgid "Show participants"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:2067
-msgid "Device Cache"
-msgstr "Cihaz Önbelleği"
+#: data/ui/messaging-window.ui:70 src/service/plugins/sms.js:31
+msgid "Messaging"
+msgstr "Mesajlaşma"
 
-#: data/ui/preferences-device-panel.ui:2085
-msgid "Clear Cache…"
-msgstr "Önbelleği Temizle…"
+#: data/ui/messaging-window.ui:85
+#, fuzzy
+msgid "Search for names, phone numbers or message"
+msgstr "Telefon numarası veya isim yaz"
 
-#: data/ui/preferences-device-panel.ui:2124
-msgid "Legacy SMS Support"
-msgstr "Eski SMS Desteği"
+#: data/ui/messaging-window.ui:88 data/ui/messaging-window.ui:90
+msgid "Search contacts from names, phone numbers or message"
+msgstr ""
 
-#: data/ui/preferences-device-panel.ui:2181
-msgid "SFTP Automount"
-msgstr "SFTP Otomatik Bağla"
+#: data/ui/messaging-window.ui:114
+msgid "No Conversations"
+msgstr "Sohbet yok"
 
-#: data/ui/preferences-device-panel.ui:2236
-#: data/ui/preferences-device-panel.ui:2562
-msgid "Advanced"
-msgstr "Gelişmiş"
+#: data/ui/messaging-window.ui:121 data/ui/mousepad-input-dialog.ui:42
+#: data/ui/preferences-window.ui:290
+msgid "Help"
+msgstr "Yardım"
 
-#: data/ui/preferences-device-panel.ui:2516
-msgid "Keyboard Shortcuts"
-msgstr "Klavye Kısayolları"
+#: data/ui/messaging-window.ui:168
+msgid "No conversation selected"
+msgstr "Hiçbir sohbet seçilmedi"
 
-#: data/ui/preferences-device-panel.ui:2580
+#: data/ui/messaging-window.ui:169
+msgid "Select or start a conversation"
+msgstr "Sohbet seç ya da başlat"
+
+#: data/ui/mousepad-input-dialog.ui:28 src/service/plugins/mousepad.js:29
+msgid "Remote Input"
+msgstr "Uzak Girdi"
+
+#: data/ui/mousepad-input-dialog.ui:81 data/ui/mousepad-input-dialog.ui:83
+msgid "Mouse left button"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:95 data/ui/mousepad-input-dialog.ui:97
+msgid "Mouse middle button"
+msgstr ""
+
+#: data/ui/mousepad-input-dialog.ui:108 data/ui/mousepad-input-dialog.ui:110
+msgid "Mouse right button"
+msgstr ""
+
+#: data/ui/notification-reply-dialog.ui:14
+#: data/ui/preferences-device-page.ui:106
+#: data/ui/preferences-device-page.ui:497
+#: data/ui/preferences-device-page.ui:515
+#: src/service/plugins/notification.js:19
+msgid "Notifications"
+msgstr "Bildirimler"
+
+#: data/ui/preferences-command-editor.ui:54
+msgid "Name"
+msgstr "İsim"
+
+#: data/ui/preferences-command-editor.ui:61
+#, fuzzy
+msgid "Command"
+msgstr "Komutlar"
+
+#: data/ui/preferences-command-editor.ui:77 src/preferences/device.js:679
+#: src/preferences/device.js:688 src/preferences/device.js:690
+msgid "Add Command"
+msgstr "Komut Ekle"
+
+#: data/ui/preferences-device-page.ui:13
+#, fuzzy
+msgid "Device Page"
+msgstr "Cihaz Adı"
+
+#: data/ui/preferences-device-page.ui:20
 msgid "Device Settings"
 msgstr "Cihaz Ayarları"
 
-#. TRANSLATORS: Send a pair request to the device
-#: data/ui/preferences-device-panel.ui:2624
-#: data/ui/preferences-device-panel.ui:2716 src/service/daemon.js:446
-msgid "Pair"
-msgstr "Eşleştir"
+#: data/ui/preferences-device-page.ui:61 data/ui/preferences-device-page.ui:224
+#: data/ui/preferences-device-page.ui:242
+msgid "Sharing"
+msgstr "Paylaşım"
 
-#: data/ui/preferences-device-panel.ui:2656
-msgid "Device is unpaired"
-msgstr "Cihaz eşleşmemiş"
+#: data/ui/preferences-device-page.ui:76 data/ui/preferences-device-page.ui:345
+#: data/ui/preferences-device-page.ui:363 src/service/plugins/battery.js:15
+msgid "Battery"
+msgstr "Batarya"
 
-#: data/ui/preferences-device-panel.ui:2671
-msgid "You may configure this device before pairing"
-msgstr "Eşleşmeden önce cihazı yapılandır"
+#: data/ui/preferences-device-page.ui:91 data/ui/preferences-device-page.ui:443
+#: data/ui/preferences-device-page.ui:461 src/service/plugins/runcommand.js:26
+#: src/service/plugins/runcommand.js:34 src/service/plugins/runcommand.js:194
+msgid "Commands"
+msgstr "Komutlar"
 
-#. TRANSLATORS: View the TLS Certificate fingerprint
-#: data/ui/preferences-device-panel.ui:2711 src/preferences/device.js:391
-msgid "Encryption Info"
-msgstr "Şifreleme Bilgisi"
+#: data/ui/preferences-device-page.ui:121
+#: data/ui/preferences-device-page.ui:565
+#: data/ui/preferences-device-page.ui:583 data/ui/preferences-settings.ui:82
+#: data/ui/preferences-settings.ui:86 src/service/plugins/telephony.js:16
+msgid "Telephony"
+msgstr "Telefon"
 
-#. TRANSLATORS: Unpair the device and notify it
-#: data/ui/preferences-device-panel.ui:2722 src/service/daemon.js:455
-msgid "Unpair"
-msgstr "Eşleştirmeyi Bitir"
+#: data/ui/preferences-device-page.ui:152
+#: data/ui/preferences-device-page.ui:714
+#: data/ui/preferences-device-page.ui:732
+msgid "Keyboard Shortcuts"
+msgstr "Klavye Kısayolları"
 
-#. TRANSLATORS: Send clipboard content to device
-#: data/ui/preferences-device-panel.ui:2734
+#: data/ui/preferences-device-page.ui:167
+#: data/ui/preferences-device-page.ui:777
+#: data/ui/preferences-device-page.ui:795
+msgid "Advanced"
+msgstr "Gelişmiş"
+
+#: data/ui/preferences-device-page.ui:198
+#, fuzzy
+msgid "Unpair Device"
+msgstr "Hedef Cihaz"
+
+#: data/ui/preferences-device-page.ui:255 src/preferences/device.js:418
+msgid "Desktop"
+msgstr "Masaüstü"
+
+#: data/ui/preferences-device-page.ui:259
+msgid "Clipboard Sync"
+msgstr "Pano Eşleşmesi"
+
+#: data/ui/preferences-device-page.ui:264
 msgid "To Device"
 msgstr "Cihaza"
 
-#. TRANSLATORS: Receive clipboard content from the device
-#: data/ui/preferences-device-panel.ui:2740
+#: data/ui/preferences-device-page.ui:272
 msgid "From Device"
 msgstr "Cihazdan"
 
-#. TRANSLATORS: Don't change the system volume
-#: data/ui/preferences-device-panel.ui:2752
-#: data/ui/preferences-device-panel.ui:2785
+#: data/ui/preferences-device-page.ui:282
+msgid "Media Players"
+msgstr "Medya Oynatıcılar"
+
+#: data/ui/preferences-device-page.ui:289
+msgid "Mouse & Keyboard"
+msgstr "Fare & Klavye"
+
+#: data/ui/preferences-device-page.ui:296
+msgid "Volume Control"
+msgstr "Ses Kontrolü"
+
+#: data/ui/preferences-device-page.ui:305 src/service/plugins/sftp.js:332
+msgid "Files"
+msgstr "Dosyalar"
+
+#: data/ui/preferences-device-page.ui:309
+msgid "Receive Files"
+msgstr "Alınan Dosyalar"
+
+#: data/ui/preferences-device-page.ui:316
+msgid "Save files to"
+msgstr "Dosyaları şuraya kaydet"
+
+#: data/ui/preferences-device-page.ui:326 src/preferences/device.js:603
+#, fuzzy
+msgid "Select Folder"
+msgstr "Seç"
+
+#: data/ui/preferences-device-page.ui:376
+msgid "Device Battery"
+msgstr "Cihaz Bataryası"
+
+#: data/ui/preferences-device-page.ui:380
+msgid "Low Battery Notification"
+msgstr "Düşük Batarya Bildirimi"
+
+#: data/ui/preferences-device-page.ui:387
+msgid "Charged Up to Custom Level Notification"
+msgstr ""
+
+#: data/ui/preferences-device-page.ui:416
+msgid "Fully Charged Notification"
+msgstr "Tam Şarj Bildirimi"
+
+#: data/ui/preferences-device-page.ui:425
+msgid "System Battery"
+msgstr "Sistem Bataryası"
+
+#: data/ui/preferences-device-page.ui:429
+msgid "Share Statistics"
+msgstr "İstatistikleri Paylaş"
+
+#: data/ui/preferences-device-page.ui:531
+msgid "Share Notifications"
+msgstr "Bildirimleri Paylaş"
+
+#: data/ui/preferences-device-page.ui:538
+msgid "Share When Active"
+msgstr "Aktif Olduğunda Paylaş"
+
+#: data/ui/preferences-device-page.ui:547
+msgid "Applications"
+msgstr "Uygulamalar"
+
+#: data/ui/preferences-device-page.ui:596
+msgid "Incoming Calls"
+msgstr "Gelen Çağrılar"
+
+#: data/ui/preferences-device-page.ui:600
+#: data/ui/preferences-device-page.ui:653
+msgid "Volume"
+msgstr "Ses"
+
+#: data/ui/preferences-device-page.ui:607
+#: data/ui/preferences-device-page.ui:608
+#: data/ui/preferences-device-page.ui:660
+#: data/ui/preferences-device-page.ui:661
 msgid "Nothing"
 msgstr "Hiç Biri"
 
-#. TRANSLATORS: Restore the system volume
-#: data/ui/preferences-device-panel.ui:2759
-#: data/ui/preferences-device-panel.ui:2792
+#: data/ui/preferences-device-page.ui:614
+#: data/ui/preferences-device-page.ui:615
+#: data/ui/preferences-device-page.ui:667
+#: data/ui/preferences-device-page.ui:668
 msgid "Restore"
 msgstr "Geri yükle"
 
-#. TRANSLATORS: Lower the system volume
-#: data/ui/preferences-device-panel.ui:2766
-#: data/ui/preferences-device-panel.ui:2799
+#: data/ui/preferences-device-page.ui:621
+#: data/ui/preferences-device-page.ui:622
+#: data/ui/preferences-device-page.ui:674
+#: data/ui/preferences-device-page.ui:675
 msgid "Lower"
 msgstr "Düşük"
 
-#. TRANSLATORS: Mute the system volume
 #. TRANSLATORS: Silence the actively ringing call
-#: data/ui/preferences-device-panel.ui:2773
-#: data/ui/preferences-device-panel.ui:2806
-#: src/service/plugins/telephony.js:198
+#: data/ui/preferences-device-page.ui:628
+#: data/ui/preferences-device-page.ui:629
+#: data/ui/preferences-device-page.ui:681
+#: data/ui/preferences-device-page.ui:682 src/service/plugins/telephony.js:198
 msgid "Mute"
 msgstr "Sessiz"
 
+#: data/ui/preferences-device-page.ui:640
+#: data/ui/preferences-device-page.ui:693
+msgid "Pause Media"
+msgstr "Medyayı Duraklat"
+
+#: data/ui/preferences-device-page.ui:649
+#, fuzzy
+msgid "Outgoing Calls"
+msgstr "Devam Eden Çağrılar"
+
+#: data/ui/preferences-device-page.ui:700
+msgid "Mute Microphone"
+msgstr "Mikrofonu Sustur"
+
+#: data/ui/preferences-device-page.ui:745
+msgid "Action Shortcuts"
+msgstr "Kısayol Eylemleri"
+
+#: data/ui/preferences-device-page.ui:753
+msgid "Reset All…"
+msgstr "Tümünü Sıfırla…"
+
+#: data/ui/preferences-device-page.ui:808
+msgid "Plugins"
+msgstr "Eklentiler"
+
+#: data/ui/preferences-device-page.ui:820
+msgid "Experimental"
+msgstr "Deneysel"
+
+#: data/ui/preferences-device-page.ui:838
+msgid "Clear Cache…"
+msgstr "Önbelleği Temizle…"
+
+#. Translators: This text appears just after the name of a device to connect
+#: data/ui/preferences-device-pair.ui:69
+#, fuzzy
+msgid "is not paired"
+msgstr "Eşleşmemiş"
+
+#: data/ui/preferences-device-pair.ui:97
+#, fuzzy
+msgid "Pair Device"
+msgstr "Hedef Cihaz"
+
+#: data/ui/preferences-settings.ui:14 data/ui/preferences-window.ui:286
+#, fuzzy
+msgid "Settings"
+msgstr "Cihaz Ayarları"
+
+#: data/ui/preferences-settings.ui:17
+msgid "General"
+msgstr "Genel"
+
+#: data/ui/preferences-settings.ui:21
+#, fuzzy
+msgid "This device"
+msgstr "Cihaza"
+
+#: data/ui/preferences-settings.ui:24
+msgid "Hostname"
+msgstr ""
+
+#: data/ui/preferences-settings.ui:31
+msgid "GSConnect remains active when GNOME Shell is locked"
+msgstr "GNOME kabuğu kilitlendiğinde GSConnect etkin kalır"
+
+#: data/ui/preferences-settings.ui:40
+msgid "Apparence"
+msgstr ""
+
+#: data/ui/preferences-settings.ui:43
+msgid "Display Mode"
+msgstr "Görünüm Kipi"
+
+#: data/ui/preferences-settings.ui:49
+msgid "Panel"
+msgstr "Sistem Paneli"
+
+#: data/ui/preferences-settings.ui:56
+msgid "User Menu"
+msgstr "Kullanıcı Menüsü"
+
+#: data/ui/preferences-settings.ui:69
+#, fuzzy
+msgid "Support"
+msgstr "Rapor"
+
+#: data/ui/preferences-settings.ui:72 src/preferences/service.js:635
+msgid "Generate Support Log"
+msgstr "Destek Günlüğü Oluştur"
+
+#: data/ui/preferences-settings.ui:87
+msgid "Phone number parsing and dialing preferences"
+msgstr "Telefon numarası ayrıştırma ve arama tercihleri"
+
+#: data/ui/preferences-settings.ui:90
+msgid "Phone Country Code"
+msgstr "Telefon Ülke Kodu"
+
+#: data/ui/preferences-settings.ui:91
+msgid "Default fallback region for ambiguous numbers"
+msgstr "Belirsiz numaralar için varsayılan geri dönüş bölgesi"
+
+#: data/ui/preferences-shortcut-editor.ui:13
+#, fuzzy
+msgid "Set Shortcut"
+msgstr "Kısayollar"
+
+#: data/ui/preferences-shortcut-editor.ui:22
 #: data/ui/preferences-shortcut-editor.ui:25
+#: data/ui/preferences-shortcut-editor.ui:27
+#: data/ui/service-device-chooser.ui:31 data/ui/service-device-chooser.ui:34
+#: data/ui/service-device-chooser.ui:36 data/ui/service-error-dialog.ui:30
+#: data/ui/service-error-dialog.ui:33 data/ui/service-error-dialog.ui:35
+#: src/preferences/service.js:640 src/service/plugins/share.js:179
+#: src/service/plugins/share.js:330
+msgid "Cancel"
+msgstr "İptal"
+
+#: data/ui/preferences-shortcut-editor.ui:36
+#: data/ui/preferences-shortcut-editor.ui:39
+#: data/ui/preferences-shortcut-editor.ui:41
 msgid "Set"
 msgstr "Ayarla"
 
 #. Keys for cancelling (␛) or resetting (␈) a shortcut
-#: data/ui/preferences-shortcut-editor.ui:80
+#: data/ui/preferences-shortcut-editor.ui:74
 msgid "Press Esc to cancel or Backspace to reset the keyboard shortcut."
-msgstr "Klavye kısayolunu sıfırlamak için iptal, geri almak için ESC tuşuna bas."
+msgstr ""
+"Klavye kısayolunu sıfırlamak için iptal, geri almak için ESC tuşuna bas."
 
-#: data/ui/preferences-window.ui:24
-msgid "Device Name"
-msgstr "Cihaz Adı"
-
-#: data/ui/preferences-window.ui:61
-msgid "_Rename"
-msgstr "_Adlandır"
-
-#: data/ui/preferences-window.ui:98 data/ui/preferences-window.ui:112
+#: data/ui/preferences-window.ui:49 data/ui/preferences-window.ui:51
 msgid "Refresh"
 msgstr "Yenile"
 
-#: data/ui/preferences-window.ui:139 src/extension.js:113
-msgid "Mobile Settings"
-msgstr "Mobil Ayarları"
-
-#: data/ui/preferences-window.ui:166
-msgid "Service Menu"
-msgstr "Servis Menüsü"
-
-#: data/ui/preferences-window.ui:189
-msgid "Device Menu"
+#: data/ui/preferences-window.ui:70 data/ui/preferences-window.ui:72
+#, fuzzy
+msgid "Main Menu"
 msgstr "Cihaz Menüsü"
 
-#: data/ui/preferences-window.ui:203 data/ui/preferences-window.ui:218
-msgid "Edit Device Name"
-msgstr "Cihaz Adını Düzenle"
+#: data/ui/preferences-window.ui:118
+#, fuzzy
+msgid "Welcome to GSConnect"
+msgstr "GSConnect Hakkında"
 
-#: data/ui/preferences-window.ui:278
-msgid "Devices"
-msgstr "Cihazlar"
-
-#: data/ui/preferences-window.ui:328 src/preferences/service.js:686
-msgid "Searching for devices…"
-msgstr "Cihazlar aranıyor…"
-
-#: data/ui/preferences-window.ui:353
-msgid "Extension Settings"
-msgstr "Eklenti Ayarları"
-
-#: data/ui/preferences-window.ui:390
-msgid "GSConnect remains active when GNOME Shell is locked"
-msgstr "GNOME kabuğu kilitlendiğinde GSConnect etkin kalır"
-
-#: data/ui/preferences-window.ui:410
-msgid "Browser Add-Ons"
-msgstr "Tarayıcı Eklentileri"
-
-#: data/ui/preferences-window.ui:728
-msgid "Enable"
-msgstr "Etkin"
-
-#: data/ui/preferences-window.ui:760
-msgid "This device is invisible to unpaired devices"
-msgstr "Bu cihaz eşleştirme yapılmayan cihazlara görünmez"
-
-#: data/ui/preferences-window.ui:772 src/service/manager.js:177
-msgid "Discovery Disabled"
-msgstr "Keşif Devre Dışı"
-
-#: data/ui/preferences-window.ui:826
-msgid "Retry"
-msgstr ""
-
-#: data/ui/preferences-window.ui:858
-msgid "The <tt>openssl</tt> command-line tool does not appear to be installed.\n"
-"Use your distro's package manager to install it.\n"
-"For more information, visit <a href=\"https://github.com/gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-found\">the GSConnect wiki</a>."
-msgstr ""
-
-#: data/ui/preferences-window.ui:874 src/service/init.js:361
-msgid "OpenSSL not found"
-msgstr "OpenSSL bulunamadı"
-
-#. TRANSLATORS: Open a dialog to connect to an IP or Bluez device
-#: data/ui/preferences-window.ui:923
+#: data/ui/preferences-window.ui:280
 msgid "Add device by IP…"
 msgstr ""
 
-#: data/ui/preferences-window.ui:928
-msgid "Display Mode"
-msgstr "Görünüm Kipi"
-
-#. TRANSLATORS: Show device indicators in the top bar
-#: data/ui/preferences-window.ui:931
-msgid "Panel"
-msgstr "Sistem Paneli"
-
-#. TRANSLATORS: Show devices in the user menu like Bluetooth
-#: data/ui/preferences-window.ui:937
-msgid "User Menu"
-msgstr "Kullanıcı Menüsü"
-
-#. TRANSLATORS: Generate a support log
-#: data/ui/preferences-window.ui:945 src/preferences/service.js:414
-msgid "Generate Support Log"
-msgstr "Destek Günlüğü Oluştur"
-
-#: data/ui/preferences-window.ui:953
+#: data/ui/preferences-window.ui:294
 msgid "About GSConnect"
 msgstr "GSConnect Hakkında"
 
-#: data/ui/service-device-chooser.ui:15
-msgid "Select a Device"
+#: data/ui/service-device-chooser.ui:14
+#, fuzzy
+msgid "Select Device"
 msgstr "Cihaz Seç"
 
-#: data/ui/service-device-chooser.ui:33 data/ui/service-device-chooser.ui:38
+#: data/ui/service-device-chooser.ui:46 data/ui/service-device-chooser.ui:49
+#: data/ui/service-device-chooser.ui:51
 msgid "Select"
 msgstr "Seç"
 
 #. TRANSLATORS: No devices are known or available
-#: data/ui/service-device-chooser.ui:101 webextension/gettext.js:37
+#: data/ui/service-device-chooser.ui:86 webextension/gettext.js:37
 msgid "No Device Found"
 msgstr "Cihaz Bulunamadı"
 
-#: data/ui/service-device-chooser.ui:118
-msgid "Device List"
-msgstr "Cihaz Listesi"
+#: data/ui/service-error-dialog.ui:14
+msgid "An Error Occured…"
+msgstr ""
 
-#: data/ui/service-error-dialog.ui:39 data/ui/service-error-dialog.ui:47
+#: data/ui/service-error-dialog.ui:45 data/ui/service-error-dialog.ui:48
+#: data/ui/service-error-dialog.ui:50
 msgid "Report"
 msgstr "Rapor"
 
-#: data/ui/service-error-dialog.ui:79
-msgid "Something’s gone wrong"
-msgstr "Bir şeyler ters gitti"
+#: data/ui/service-error-dialog.ui:62
+msgid "Oops!"
+msgstr ""
 
-#: data/ui/service-error-dialog.ui:91
-msgid "GSConnect encountered an unexpected error. Please report the problem and include any information that may help."
-msgstr "GSConnect beklenmedik bir hatayla karşılaştı. Lütfen sorunu bildirin ve yardımcı olabilecek tüm bilgileri ekleyin."
+#: data/ui/service-error-dialog.ui:63
+msgid ""
+"GSConnect encountered an unexpected error. Please report the problem and "
+"include any information that may help."
+msgstr ""
+"GSConnect beklenmedik bir hatayla karşılaştı. Lütfen sorunu bildirin ve "
+"yardımcı olabilecek tüm bilgileri ekleyin."
 
-#: data/ui/service-error-dialog.ui:125
-msgid "Technical Details"
+#: data/ui/service-error-dialog.ui:74
+#, fuzzy
+msgid "View Technical Details"
 msgstr "Teknik Ayrıntılar"
 
 #. TRANSLATORS: Send to <device_name>, for file manager
 #. context menu
 #. TRANSLATORS: A phone number (eg. "Send to 555-5555")
 #. Update UI
-#: nautilus-extension/nautilus-gsconnect.py:187 src/service/ui/contacts.js:518
-#: src/service/ui/contacts.js:533
+#: nautilus-extension/nautilus-gsconnect.py:187 src/service/ui/contacts.js:296
+#: src/service/ui/contacts.js:313
 #, python-format, javascript-format
 msgid "Send to %s"
 msgstr "Gönder %s"
@@ -624,6 +647,10 @@ msgstr "Mobil Cihaza Gönder"
 msgid "Sync between your devices"
 msgstr "Cihazlarınız arasında eşitleyin"
 
+#: src/extension.js:113
+msgid "Mobile Settings"
+msgstr "Mobil Ayarları"
+
 #: src/extension.js:158
 #, javascript-format
 msgid "%d Connected"
@@ -631,176 +658,226 @@ msgid_plural "%d Connected"
 msgstr[0] "%d Bağlı"
 msgstr[1] "%d Bağlı"
 
-#: src/preferences/device.js:671 src/preferences/device.js:677
-msgid "Edit"
-msgstr "Düzenle"
+#: src/preferences/device.js:218 src/preferences/device.js:440
+msgid "Encryption Info"
+msgstr "Şifreleme Bilgisi"
 
-#: src/preferences/device.js:686 src/preferences/device.js:692
-msgid "Remove"
-msgstr "Kaldır"
+#: src/preferences/device.js:421
+msgid "Laptop"
+msgstr "Dizüstü"
 
-#: src/preferences/device.js:946 src/preferences/device.js:974
+#: src/preferences/device.js:424
+msgid "Smartphone"
+msgstr "Telefon"
+
+#: src/preferences/device.js:427
+msgid "Tablet"
+msgstr "Tablet"
+
+#: src/preferences/device.js:430
+msgid "Television"
+msgstr "Televizyon"
+
+#: src/preferences/device.js:444
+msgid "Ok"
+msgstr ""
+
+#: src/preferences/device.js:899 src/preferences/device.js:918
 msgid "Disabled"
 msgstr "Devre dışı"
 
 #. TRANSLATORS: Summary of a keyboard shortcut function
 #. Example: Enter a new shortcut to change Messaging
-#: src/preferences/keybindings.js:66
+#: src/preferences/keybindings.js:56
 #, javascript-format
 msgid "Enter a new shortcut to change <b>%s</b>"
 msgstr "Değiştirmek için yeni bir kısayol gir <b>%s</b>"
 
-#. TRANSLATORS: When a keyboard shortcut is unavailable
-#. Example: [Ctrl]+[S] is already being used
-#: src/preferences/keybindings.js:132
+#: src/preferences/keybindings.js:140
 #, javascript-format
-msgid "%s is already being used"
-msgstr "%s zaten kullanılıyor"
+msgid "%s è già in uso"
+msgstr ""
 
-#: src/preferences/service.js:373
-msgid "A complete KDE Connect implementation for GNOME"
-msgstr "GNOME için eksiksiz bir KDE Connect uygulaması"
-
-#. TRANSLATORS: eg. 'Translator Name <your.email@domain.com>'
-#: src/preferences/service.js:382
-msgid "translator-credits"
-msgstr "Serdar Sağlam <teknomobil@yandex.com>\n"
-"Orhan Engin Okay <orhanenginokay@hotmail.com>\n"
-"A. Burak Tektaş <abtektas@gmail.com>"
-
-#: src/preferences/service.js:415
-msgid "Debug messages are being logged. Take any steps necessary to reproduce a problem then review the log."
-msgstr "Hata ayıklama mesajları kaydediliyor. Sorunu yeniden oluşturmak için gerekli adımları izleyin ve günlüğü inceleyin."
-
-#: src/preferences/service.js:418
-msgid "Review Log"
-msgstr "Günlüğü Gözden Geçir"
-
-#: src/preferences/service.js:443
+#: src/preferences/service.js:235 src/preferences/service.js:665
 msgid "Invalid Device Name"
 msgstr ""
 
 #. TRANSLATOR: %s is a list of forbidden characters
-#: src/preferences/service.js:445
+#: src/preferences/service.js:237 src/preferences/service.js:667
 #, javascript-format
-msgid "Device name must not contain any of %s and have a length of 1-32 characters"
+msgid ""
+"Device name must not contain any of %s and have a length of 1-32 characters"
 msgstr ""
 
-#: src/preferences/service.js:516
-msgid "Laptop"
-msgstr "Dizüstü"
+#. Add a close button to dismiss the dialog
+#: src/preferences/service.js:242 src/preferences/service.js:357
+#: src/preferences/service.js:672 src/service/plugins/share.js:263
+msgid "Close"
+msgstr ""
 
-#: src/preferences/service.js:518
-msgid "Smartphone"
-msgstr "Telefon"
+#: src/preferences/service.js:268
+#, fuzzy
+msgid "Connect to..."
+msgstr "Bağlan…"
 
-#: src/preferences/service.js:520
-msgid "Tablet"
-msgstr "Tablet"
+#: src/preferences/service.js:301
+msgid "Invalid host or port."
+msgstr ""
 
-#: src/preferences/service.js:522
-msgid "Television"
-msgstr "Televizyon"
+#: src/preferences/service.js:309
+msgid "An unexpected error occurred."
+msgstr ""
 
-#: src/preferences/service.js:544
+#: src/preferences/service.js:352
+msgid "Oops! An error occurred…"
+msgstr ""
+
+#: src/preferences/service.js:587
+msgid "A complete KDE Connect implementation for GNOME"
+msgstr "GNOME için eksiksiz bir KDE Connect uygulaması"
+
+#: src/preferences/service.js:591
+msgid "translator-credits"
+msgstr ""
+"Serdar Sağlam <teknomobil@yandex.com>\n"
+"Orhan Engin Okay <orhanenginokay@hotmail.com>\n"
+"A. Burak Tektaş <abtektas@gmail.com>"
+
+#: src/preferences/service.js:636
+msgid ""
+"Debug messages are being logged. Take any steps necessary to reproduce a "
+"problem then review the log."
+msgstr ""
+"Hata ayıklama mesajları kaydediliyor. Sorunu yeniden oluşturmak için gerekli "
+"adımları izleyin ve günlüğü inceleyin."
+
+#: src/preferences/service.js:641
+msgid "Review Log"
+msgstr "Günlüğü Gözden Geçir"
+
+#: src/preferences/service.js:703
 msgid "Unpaired"
 msgstr "Eşleşmemiş"
 
-#: src/preferences/service.js:548
+#: src/preferences/service.js:706
 msgid "Disconnected"
 msgstr "Bağlantı kesildi"
 
-#: src/preferences/service.js:552
+#: src/preferences/service.js:709
 msgid "Connected"
 msgstr "Bağlı"
 
-#: src/preferences/service.js:688
+#: src/preferences/service.js:798
+msgid "Searching for devices…"
+msgstr "Cihazlar aranıyor…"
+
+#: src/preferences/service.js:801
 msgid "Waiting for service…"
 msgstr "Hizmet bekleniyor…"
 
 #. Notify the user
-#: src/service/daemon.js:99
+#: src/service/daemon.js:103
 msgid "Settings Migrated"
 msgstr ""
 
-#: src/service/daemon.js:100
-msgid "GSConnect has updated to support changes to the KDE Connect protocol. Some devices may need to be re-paired."
+#: src/service/daemon.js:104
+msgid ""
+"GSConnect has updated to support changes to the KDE Connect protocol. Some "
+"devices may need to be re-paired."
 msgstr ""
 
-#: src/service/daemon.js:241
+#: src/service/daemon.js:248
 msgid "Click for help troubleshooting"
 msgstr "Sorun giderme konusunda yardım için tıkla"
 
-#: src/service/daemon.js:251
+#: src/service/daemon.js:258
 msgid "Click for more information"
 msgstr "Daha fazla bilgi için tıkla"
 
-#: src/service/daemon.js:359
+#. TRANSLATORS: Share URL by SMS
+#: src/service/daemon.js:354 src/service/daemon.js:477
+#: src/service/plugins/sms.js:63 webextension/gettext.js:41
+msgid "Send SMS"
+msgstr "SMS Gönder"
+
+#: src/service/daemon.js:360
 msgid "Dial Number"
 msgstr "Numarayı Çevir"
 
-#: src/service/daemon.js:365 src/service/daemon.js:554
+#: src/service/daemon.js:366 src/service/daemon.js:564
 #: src/service/plugins/share.js:31
 msgid "Share File"
 msgstr "Dosya Paylaşımı"
 
-#: src/service/daemon.js:416
+#: src/service/daemon.js:417
 msgid "List available devices"
 msgstr "Kullanılabilir cihazları listele"
 
-#: src/service/daemon.js:425
+#: src/service/daemon.js:426
 msgid "List all devices"
 msgstr "Tüm cihazları listele"
 
-#: src/service/daemon.js:434
+#: src/service/daemon.js:435
 msgid "Target Device"
 msgstr "Hedef Cihaz"
 
-#: src/service/daemon.js:476
+#: src/service/daemon.js:444
+#, fuzzy
+msgid "Target Device Name"
+msgstr "Hedef Cihaz"
+
+#: src/service/daemon.js:456
+msgid "Pair"
+msgstr "Eşleştir"
+
+#: src/service/daemon.js:465
+msgid "Unpair"
+msgstr "Eşleştirmeyi Bitir"
+
+#: src/service/daemon.js:486
 msgid "Message Body"
 msgstr "Mesaj Metni"
 
-#: src/service/daemon.js:488 src/service/plugins/notification.js:57
+#: src/service/daemon.js:498 src/service/plugins/notification.js:58
 msgid "Send Notification"
 msgstr "Bildirim Gönder"
 
-#: src/service/daemon.js:497
+#: src/service/daemon.js:507
 msgid "Notification App Name"
 msgstr "Bildirim Uygulama Adı"
 
-#: src/service/daemon.js:506
+#: src/service/daemon.js:516
 msgid "Notification Body"
 msgstr "Bildirim Metni"
 
-#: src/service/daemon.js:515
+#: src/service/daemon.js:525
 msgid "Notification Icon"
 msgstr "Bildirim Simgesi"
 
-#: src/service/daemon.js:524
+#: src/service/daemon.js:534
 msgid "Notification ID"
 msgstr "Bildirim Kimliği"
 
-#: src/service/daemon.js:533 src/service/plugins/ping.js:13
+#: src/service/daemon.js:543 src/service/plugins/ping.js:13
 #: src/service/plugins/ping.js:20 src/service/plugins/ping.js:47
 msgid "Ping"
 msgstr "Yokla"
 
-#: src/service/daemon.js:542 src/service/plugins/battery.js:247
+#: src/service/daemon.js:552 src/service/plugins/battery.js:247
 #: src/service/plugins/battery.js:276 src/service/plugins/battery.js:305
-#: src/service/plugins/findmyphone.js:22
+#: src/service/plugins/findmyphone.js:23
 msgid "Ring"
 msgstr "Çaldır"
 
-#: src/service/daemon.js:563 src/service/plugins/share.js:47
-#: src/service/ui/messaging.js:1257 src/service/ui/messaging.js:1265
+#: src/service/daemon.js:573 src/service/plugins/share.js:47
 msgid "Share Link"
 msgstr "Bağlantıyı Paylaş"
 
-#: src/service/daemon.js:572 src/service/plugins/share.js:39
+#: src/service/daemon.js:582 src/service/plugins/share.js:39
 msgid "Share Text"
 msgstr "Metni Paylaş"
 
-#: src/service/daemon.js:584
+#: src/service/daemon.js:594
 msgid "Show release version"
 msgstr "Sürüm versiyonunu göster"
 
@@ -844,8 +921,17 @@ msgstr ""
 msgid "Device clocks are out of sync"
 msgstr ""
 
+#: src/service/init.js:331
+msgid "OpenSSL not found"
+msgstr "OpenSSL bulunamadı"
+
+#: src/service/manager.js:177
+msgid "Discovery Disabled"
+msgstr "Keşif Devre Dışı"
+
 #: src/service/manager.js:178
-msgid "Discovery has been disabled due to the number of devices on this network."
+msgid ""
+"Discovery has been disabled due to the number of devices on this network."
 msgstr "Bu ağdaki cihazların sayısı nedeniyle keşif devre dışı bırakıldı."
 
 #: src/service/backends/lan.js:477
@@ -908,25 +994,30 @@ msgstr "Panoya Gönder"
 msgid "Clipboard Pull"
 msgstr "Panodan Al"
 
-#: src/service/plugins/contacts.js:29
+#: src/service/plugins/contacts.js:30
 msgid "Access contacts of the paired device"
 msgstr ""
 
 #. Ensure we have a sender
 #. TRANSLATORS: No name or phone number
 #. Contact Name
-#: src/service/plugins/contacts.js:242 src/service/plugins/contacts.js:362
+#: src/service/plugins/contacts.js:243 src/service/plugins/contacts.js:363
 #: src/service/plugins/telephony.js:156 src/service/plugins/telephony.js:175
-#: src/service/ui/contacts.js:620 src/service/ui/messaging.js:756
+#: src/service/ui/contacts.js:388 src/service/ui/messaging.js:885
 msgid "Unknown Contact"
 msgstr "Bilinmeyen Kişi"
 
-#: src/service/plugins/findmyphone.js:15
+#: src/service/plugins/findmyphone.js:16 src/service/plugins/findmyphone.js:207
 msgid "Find My Phone"
 msgstr "Telefonumu Bul"
 
-#: src/service/plugins/findmyphone.js:16
+#: src/service/plugins/findmyphone.js:17
 msgid "Ring your paired device"
+msgstr ""
+
+#. Add action to cancel request when notification is clicked
+#: src/service/plugins/findmyphone.js:212
+msgid "Stop Ringing"
 msgstr ""
 
 #: src/service/plugins/mousepad.js:14
@@ -937,10 +1028,6 @@ msgstr "Fare Desteği"
 msgid "Enables the paired device to act as a remote mouse and keyboard"
 msgstr ""
 
-#: src/service/plugins/mousepad.js:29 src/service/ui/mousepad.js:107
-msgid "Remote Input"
-msgstr "Uzak Girdi"
-
 #: src/service/plugins/mpris.js:18
 msgid "MPRIS"
 msgstr "MPRIS"
@@ -949,27 +1036,27 @@ msgstr "MPRIS"
 msgid "Bidirectional remote media playback control"
 msgstr ""
 
-#: src/service/plugins/mpris.js:357
+#: src/service/plugins/mpris.js:330
 msgid "Unknown"
 msgstr "Bilinmeyen"
 
-#: src/service/plugins/notification.js:19
+#: src/service/plugins/notification.js:20
 msgid "Share notifications with the paired device"
 msgstr ""
 
-#: src/service/plugins/notification.js:33
+#: src/service/plugins/notification.js:34
 msgid "Cancel Notification"
 msgstr "Bildirimi İptal Et"
 
-#: src/service/plugins/notification.js:41
+#: src/service/plugins/notification.js:42
 msgid "Close Notification"
 msgstr "Bildirimi Kapat"
 
-#: src/service/plugins/notification.js:49
+#: src/service/plugins/notification.js:50
 msgid "Reply Notification"
 msgstr "Bildirimi Yanıtla"
 
-#: src/service/plugins/notification.js:65
+#: src/service/plugins/notification.js:66
 msgid "Activate Notification"
 msgstr "Bildirimi Etkinleştir"
 
@@ -997,7 +1084,9 @@ msgid "Run Commands"
 msgstr "Komutları Çalıştır"
 
 #: src/service/plugins/runcommand.js:15
-msgid "Run commands on your paired device or let the device run predefined commands on this PC"
+msgid ""
+"Run commands on your paired device or let the device run predefined commands "
+"on this PC"
 msgstr ""
 
 #: src/service/plugins/sftp.js:15
@@ -1030,7 +1119,7 @@ msgid "Share files and URLs between devices"
 msgstr ""
 
 #: src/service/plugins/share.js:148 src/service/plugins/share.js:227
-#: src/service/plugins/share.js:337
+#: src/service/plugins/share.js:353
 msgid "Transfer Failed"
 msgstr "Aktarım Başarısız"
 
@@ -1040,7 +1129,7 @@ msgstr "Aktarım Başarısız"
 msgid "%s is not allowed to upload files"
 msgstr "%s dosya yükleme iznine sahip değil"
 
-#: src/service/plugins/share.js:172 src/service/plugins/share.js:307
+#: src/service/plugins/share.js:172 src/service/plugins/share.js:323
 msgid "Transferring File"
 msgstr "Dosya Aktarımı"
 
@@ -1050,7 +1139,7 @@ msgstr "Dosya Aktarımı"
 msgid "Receiving “%s” from %s"
 msgstr "Alınıyor “%s” kaynak %s"
 
-#: src/service/plugins/share.js:193 src/service/plugins/share.js:327
+#: src/service/plugins/share.js:193 src/service/plugins/share.js:343
 msgid "Transfer Successful"
 msgstr "Aktarım Başarılı"
 
@@ -1079,75 +1168,69 @@ msgstr "Alım başarısız “%s” kaynak %s"
 msgid "Text Shared By %s"
 msgstr "Paylaşılan Metin %s"
 
+#. TRANSLATORS: eg. Send files to Google Pixel
+#: src/service/plugins/share.js:280
+#, javascript-format
+msgid "Send files to %s"
+msgstr "Dosyaları gönder %s"
+
 #. TRANSLATORS: eg. Sending 'book.pdf' to Google Pixel
-#: src/service/plugins/share.js:309
+#: src/service/plugins/share.js:325
 #, javascript-format
 msgid "Sending “%s” to %s"
 msgstr "Gönderiliyor “%s” hedef %s"
 
 #. TRANSLATORS: eg. Sent "book.pdf" to Google Pixel
-#: src/service/plugins/share.js:329
+#: src/service/plugins/share.js:345
 #, javascript-format
 msgid "Sent “%s” to %s"
 msgstr "Gönderildi “%s” hedef %s"
 
 #. TRANSLATORS: eg. Failed to send "book.pdf" to Google Pixel
-#: src/service/plugins/share.js:339
+#: src/service/plugins/share.js:355
 #, javascript-format
 msgid "Failed to send “%s” to %s"
 msgstr "Gönderilemedi “%s” hedef %s"
 
-#. TRANSLATORS: eg. Send files to Google Pixel
-#: src/service/plugins/share.js:397
-#, javascript-format
-msgid "Send files to %s"
-msgstr "Dosyaları gönder %s"
-
-#. TRANSLATORS: Mark the file to be opened once completed
-#: src/service/plugins/share.js:401
-msgid "Open when done"
-msgstr "Tamamlandığında aç"
-
-#. TRANSLATORS: eg. Send a link to Google Pixel
-#: src/service/plugins/share.js:440
-#, javascript-format
-msgid "Send a link to %s"
-msgstr "Bağlantı gönder %s"
-
-#: src/service/plugins/sms.js:16
+#: src/service/plugins/sms.js:17
 msgid "SMS"
 msgstr "SMS"
 
-#: src/service/plugins/sms.js:17
+#: src/service/plugins/sms.js:18
 msgid "Send and read SMS of the paired device and be notified of new SMS"
 msgstr ""
 
-#: src/service/plugins/sms.js:38
+#: src/service/plugins/sms.js:39
 msgid "New SMS (URI)"
 msgstr "Yeni SMS (URI)"
 
-#: src/service/plugins/sms.js:46
+#: src/service/plugins/sms.js:47
 msgid "Reply SMS"
 msgstr "SMS Yanıtla"
 
-#: src/service/plugins/sms.js:70
+#: src/service/plugins/sms.js:55
+msgid "Send Message"
+msgstr "Mesaj Gönder"
+
+#: src/service/plugins/sms.js:71
 msgid "Share SMS"
 msgstr "SMS Paylaş"
 
-#: src/service/plugins/systemvolume.js:36
+#: src/service/plugins/systemvolume.js:14
 msgid "System Volume"
 msgstr "Sistem Sesi"
 
-#: src/service/plugins/systemvolume.js:37
+#: src/service/plugins/systemvolume.js:15
 msgid "Enable the paired device to control the system volume"
 msgstr ""
 
-#: src/service/plugins/systemvolume.js:81
+#: src/service/plugins/systemvolume.js:59
 msgid "PulseAudio not found"
 msgstr "PulseAudio bulunamadı"
 
 #: src/service/plugins/telephony.js:17
-msgid "Be notified about calls and adjust system volume during ringing/ongoing calls"
+msgid ""
+"Be notified about calls and adjust system volume during ringing/ongoing calls"
 msgstr ""
 
 #. TRANSLATORS: Silence the actively ringing call
@@ -1166,24 +1249,29 @@ msgid "Ongoing call"
 msgstr "Devam eden çağrı"
 
 #. TRANSLATORS: A fax number
-#: src/service/ui/contacts.js:143
+#: src/service/ui/contacts.js:21
 msgid "Fax"
 msgstr "Faks"
 
 #. TRANSLATORS: A work or office phone number
-#: src/service/ui/contacts.js:147
+#: src/service/ui/contacts.js:25
 msgid "Work"
 msgstr "İş"
 
 #. TRANSLATORS: A mobile or cellular phone number
-#: src/service/ui/contacts.js:151
+#: src/service/ui/contacts.js:29
 msgid "Mobile"
 msgstr "Mobil"
 
 #. TRANSLATORS: A home phone number
-#: src/service/ui/contacts.js:155
+#: src/service/ui/contacts.js:33
 msgid "Home"
 msgstr "Ev"
+
+#. TRANSLATORS: All other phone number types
+#: src/service/ui/contacts.js:36
+msgid "Other"
+msgstr "Diğer"
 
 #. TRANSLATORS: Less than a minute ago
 #: src/service/ui/messaging.js:105 src/service/ui/messaging.js:146
@@ -1203,32 +1291,63 @@ msgid_plural "%d minutes"
 msgstr[0] "%d dakika"
 msgstr[1] "%d dakika"
 
-#: src/service/ui/messaging.js:407
-msgid "Not available"
-msgstr "Müsait Değil"
+#: src/service/ui/messaging.js:235
+msgid "<i>(Empty or unsupported)</i>"
+msgstr ""
 
-#: src/service/ui/messaging.js:764
-msgid "Group Message"
-msgstr "Grup Mesajı"
-
-#. TRANSLATORS: An outgoing message body in a conversation summary
-#: src/service/ui/messaging.js:779
-#, javascript-format
-msgid "You: %s"
-msgstr "Sen: %s"
-
-#: src/service/ui/messaging.js:965
+#: src/service/ui/messaging.js:393
 #, javascript-format
 msgid "And %d other contact"
 msgid_plural "And %d others"
 msgstr[0] "Ve %d başka kişi"
 msgstr[1] "Ve %d başkaları"
 
+#. TRANSLATORS: Shown as the summary when a text message contains
+#. only image content (no text body)
+#: src/service/ui/messaging.js:882
+msgid "<i>image</i>"
+msgstr ""
+
+#: src/service/ui/messaging.js:903
+msgid "Group Message"
+msgstr "Grup Mesajı"
+
+#: src/service/ui/messaging.js:918
+#, fuzzy
+msgid "New conversation"
+msgstr "Yeni Sohbet"
+
+#. TRANSLATORS: An outgoing message body in a conversation summary
+#: src/service/ui/messaging.js:926
+#, javascript-format
+msgid "You: %s"
+msgstr "Sen: %s"
+
+#: src/service/ui/messaging.js:1004
+msgid "Device is disconnected"
+msgstr "Cihaz çevrim dışı"
+
 #. TRANSLATORS: Displayed when the remote keyboard is not ready to accept input
-#: src/service/ui/mousepad.js:115
+#: src/service/ui/mousepad.js:123
 #, javascript-format
 msgid "Remote keyboard on %s is not active"
 msgstr "%s üzerindeki uzak klavye etkin değil"
+
+#: src/service/ui/mousepad.js:130
+msgid ""
+"Touchpad.\n"
+"Drag on this area to move mouse cursor.\n"
+"Press long to drag to drag mouse cursor.\n"
+"\n"
+"Simple click will be sent to paired device.\n"
+"Left, middle, right button, and wheel scrolls."
+msgstr ""
+"Dokunmatik yüzey.\n"
+"Fare imlecini hareket ettirmek için bu alanda sürükleyin.\n"
+"Fare imlecini bi yerden bi yere sürüklemek için uzun basın.\n"
+"\n"
+"Eşleştirilmiş cihaza basit bir tıklama gönderilecektir.\n"
+"Sol, orta, sağ düğme ve imleç kaydırmaları."
 
 #. TRANSLATORS: When no time estimate for the battery is available
 #. EXAMPLE: 42% (Estimating…)
@@ -1255,6 +1374,10 @@ msgstr "%d%% (Kalan Süre %d∶%02d)"
 msgid "Reply"
 msgstr "Yanıtla"
 
+#: src/shell/notification.js:88
+msgid "Type a message"
+msgstr "Bir Mesaj Yaz"
+
 #. TRANSLATORS: Chrome/Firefox WebExtension description
 #: webextension/gettext.js:31
 msgid "Share links with GSConnect, direct to the browser or by SMS."
@@ -1270,3 +1393,97 @@ msgstr "Servis Mevcut Değil"
 msgid "Open in Browser"
 msgstr "Tarayıcıda Aç"
 
+#~ msgid "GSConnect in GNOME Shell"
+#~ msgstr "GNOME Kabuğunda GSConnect"
+
+#~ msgid "No contacts"
+#~ msgstr "Kişi yok"
+
+#~ msgid "Send"
+#~ msgstr "Gönder"
+
+#~ msgid "Message Entry"
+#~ msgstr "Mesaj Girdisi"
+
+#~ msgid "Type a message and press Enter to send"
+#~ msgstr "Bir mesaj yazın ve göndermek için Enter tuşuna basın"
+
+#~ msgid "Save"
+#~ msgstr "Kaydet"
+
+#~ msgid "Command Line"
+#~ msgstr "Komut Satırı"
+
+#~ msgid "Choose an executable"
+#~ msgstr "Yürütülebilir dosya seç"
+
+#~ msgid "Open"
+#~ msgstr "Aç"
+
+#~ msgid "Links"
+#~ msgstr "Bağlantılar"
+
+#~ msgid "Device Cache"
+#~ msgstr "Cihaz Önbelleği"
+
+#~ msgid "Legacy SMS Support"
+#~ msgstr "Eski SMS Desteği"
+
+#~ msgid "SFTP Automount"
+#~ msgstr "SFTP Otomatik Bağla"
+
+#~ msgid "Device is unpaired"
+#~ msgstr "Cihaz eşleşmemiş"
+
+#~ msgid "You may configure this device before pairing"
+#~ msgstr "Eşleşmeden önce cihazı yapılandır"
+
+#~ msgid "_Rename"
+#~ msgstr "_Adlandır"
+
+#~ msgid "Service Menu"
+#~ msgstr "Servis Menüsü"
+
+#~ msgid "Edit Device Name"
+#~ msgstr "Cihaz Adını Düzenle"
+
+#~ msgid "Devices"
+#~ msgstr "Cihazlar"
+
+#~ msgid "Extension Settings"
+#~ msgstr "Eklenti Ayarları"
+
+#~ msgid "Browser Add-Ons"
+#~ msgstr "Tarayıcı Eklentileri"
+
+#~ msgid "Enable"
+#~ msgstr "Etkin"
+
+#~ msgid "This device is invisible to unpaired devices"
+#~ msgstr "Bu cihaz eşleştirme yapılmayan cihazlara görünmez"
+
+#~ msgid "Device List"
+#~ msgstr "Cihaz Listesi"
+
+#~ msgid "Something’s gone wrong"
+#~ msgstr "Bir şeyler ters gitti"
+
+#~ msgid "Edit"
+#~ msgstr "Düzenle"
+
+#~ msgid "Remove"
+#~ msgstr "Kaldır"
+
+#, javascript-format
+#~ msgid "%s is already being used"
+#~ msgstr "%s zaten kullanılıyor"
+
+#~ msgid "Open when done"
+#~ msgstr "Tamamlandığında aç"
+
+#, javascript-format
+#~ msgid "Send a link to %s"
+#~ msgstr "Bağlantı gönder %s"
+
+#~ msgid "Not available"
+#~ msgstr "Müsait Değil"

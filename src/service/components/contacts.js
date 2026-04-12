@@ -7,6 +7,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import Config from '../../config.js';
+import { parsePhoneNumber } from '../utils/phone.js';
 
 let HAVE_EDS = true;
 let EBook = null;
@@ -86,7 +87,7 @@ const Store = GObject.registerClass({
 
             for (const attr of nums) {
                 const number = {
-                    value: attr.get_value(),
+                    value: parsePhoneNumber(attr.get_value()),
                     type: 'unknown',
                 };
 
@@ -359,53 +360,43 @@ const Store = GObject.registerClass({
      * @returns {object} A contact object
      */
     query(query) {
-        // First look for an existing contact by number
-        const contacts = this.contacts;
-        const matches = [];
-        let qnumber = null;
-        if (query.number)
-            qnumber = query.number.toPhoneNumber();
-        let qname = null;
-        if (query.name)
-            qname = query.name;
+        const qname = query.name;
+        let qnumberObj = query.number;
+        
+        if (typeof qnumberObj === 'string') {
+            qnumberObj = parsePhoneNumber(qnumberObj);
+        }
+        
+        const qnumber = qnumberObj?.number;
 
-        for (let i = 0, len = contacts.length; i < len; i++) {
-
-            const contact = contacts[i];
-            if (qname === contact.name)
-                return contact;
-
-            if (qnumber) {
-                for (const num of contact.numbers) {
-                    const cnumber = num.value.toPhoneNumber();
-
-                    if (qnumber.endsWith(cnumber) || cnumber.endsWith(qnumber)) {
-                    // If no query name or exact match, return immediately
-                        if (!qname)
-                            return contact;
-
-                        // Otherwise we might find an exact name match that shares
-                        // the number with another contact
-                        matches.push(contact);
-                    }
-                }
-            }
+        if (qname) {
+            const nameMatch = this.contacts.find(contact => contact.name === qname);
+            if (nameMatch) return nameMatch;
         }
 
-        // Return the first match (pretty much what Android does)
-        if (matches.length > 0)
-            return matches[0];
+        if (qnumber) {
+            const numberMatch = this.contacts.find(contact => 
+                contact.numbers.some(num => {
+                    const cnumber = num.value.number;
 
-        // No match; return a mock contact with a unique ID
-        let id = GLib.uuid_string_random();
+                    return (qnumber === cnumber) || 
+                        (qnumber.length >= 7 && cnumber.length >= 7 &&
+                        (qnumber.endsWith(cnumber) || 
+                            cnumber.endsWith(qnumber)));
+                })
+            );
+            if (numberMatch) return numberMatch;
+        }
 
-        while (this._cacheData.hasOwnProperty(id))
+        let id;
+        do {
             id = GLib.uuid_string_random();
+        } while (this._cacheData.hasOwnProperty(id));
 
         return {
             id: id,
-            name: query.name || query.number,
-            numbers: [{value: query.number, type: 'unknown'}],
+            name: query.name || qnumberObj.number,
+            numbers: [{ value: qnumberObj, type: 'unknown' }],
             origin: 'gsconnect',
         };
     }

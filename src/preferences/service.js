@@ -14,6 +14,7 @@ import system from 'system';
 import Config from '../config.js';
 import {DeviceNavigationPage, DevicePairPage} from './device.js';
 import {Service} from '../utils/remote.js';
+import { getCountries } from '../vendor/libphonenumber-esm.js';
 
 
 /*
@@ -115,7 +116,7 @@ const SettingsDialog = GObject.registerClass({
     GTypeName: 'GSConnectSettingsDialog',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-settings.ui',
     Children: [
-        'display-mode-toggle', 'rename-entry',
+        'display-mode-toggle', 'rename-entry', 'country-row',
     ],
 }, class SettingsDialog extends Adw.PreferencesDialog {
 
@@ -131,6 +132,63 @@ const SettingsDialog = GObject.registerClass({
             if (name)
                 this.display_mode = name;
 
+        });
+
+        this._initCountryRow();
+    }
+
+    /**
+     * Initializes the country row model and binds it to the default-country setting.
+     * Uses libphonenumber's country list aligned with system locale translations.
+     */
+    _initCountryRow() {
+        let currentCountry = this.settings.get_string('default-country');
+        if (!currentCountry) {
+            try {
+                const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+                if (locale && locale.includes('-')) {
+                    currentCountry = locale.split('-')[1].toUpperCase();
+                }
+            } catch (e) {}
+            if (!currentCountry) currentCountry = 'US';
+            this.settings.set_string('default-country', currentCountry);
+        }
+
+        const stringList = new Gtk.StringList();
+        const countriesList = getCountries();
+        let localeCode = 'en-US';
+        try {
+            localeCode = Intl.DateTimeFormat().resolvedOptions().locale;
+        } catch (e) {}
+
+        const displayNames = new Intl.DisplayNames([localeCode], { type: 'region' });
+
+        this._countryCodes = [];
+        let selectedIndex = 0;
+
+        const mappedCountries = countriesList.map(code => {
+            let name = code;
+            try {
+                name = displayNames.of(code) || code;
+            } catch (e) {}
+            return { code, name };
+        }).sort((a, b) => a.name.localeCompare(b.name));
+
+        mappedCountries.forEach((c, index) => {
+            stringList.append(`${c.name} (${c.code})`);
+            this._countryCodes.push(c.code);
+            if (c.code === currentCountry) {
+                selectedIndex = index;
+            }
+        });
+
+        this.country_row.set_model(stringList);
+        this.country_row.set_selected(selectedIndex);
+        this.country_row.connect('notify::selected', () => {
+            const code = this._countryCodes[this.country_row.selected];
+            if (code) {
+                this.settings.set_string('default-country', code);
+            }
         });
     }
 

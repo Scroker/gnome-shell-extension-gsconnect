@@ -14,6 +14,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <property name="title" translatable="yes">Settings</property>
     <child>
       <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">General</property>
+        <property name="icon-name">preferences-system-symbolic</property>
         <child>
           <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">This device</property>
@@ -30,6 +32,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <property name="action-name">win.keep-alive-when-locked</property>
               </object>
             </child>
+
           </object>
         </child>
         <child>
@@ -70,6 +73,24 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <property name="action-name">win.support-log</property>
               </object>
             </child>  
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwPreferencesPage">
+        <property name="title" translatable="yes">Telephony</property>
+        <property name="icon-name">call-start-symbolic</property>
+        <child>
+          <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Telephony</property>
+            <property name="description" translatable="yes">Phone number parsing and dialing preferences</property>
+            <child>
+              <object class="AdwComboRow" id="country-row">
+                <property name="title" translatable="yes">Phone Country Code</property>
+                <property name="subtitle" translatable="yes">Default fallback region for ambiguous numbers</property>
+              </object>
+            </child>
           </object>
         </child>
       </object>

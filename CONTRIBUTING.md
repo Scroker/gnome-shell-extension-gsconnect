@@ -90,7 +90,7 @@ service to run. The example below will build a user extension ZIP, then install
 it:
 
 ```sh
-$ meson _build
+$ meson setup _build
 $ ninja -C _build install-zip
 ```
 
@@ -98,7 +98,7 @@ Use the `make-zip` target instead to simple build a distributable ZIP, which
 will be output as `_build/gsconnect@andyholmes.github.io.zip`:
 
 ```sh
-$ meson _build
+$ meson setup _build
 $ ninja -C _build make-zip
 ```
 
@@ -123,7 +123,7 @@ The typical workflow for developing GSConnect will mainly involve working on the
 service. First build and install the extension:
 
 ```sh
-$ meson _build
+$ meson setup _build
 $ ninja -C _build install-zip
 ```
     
@@ -162,6 +162,12 @@ extension and you should watch `gnome-shell` with `journalctl` instead of GJS:
 
 ```sh
 $ journalctl -f -o cat /usr/bin/gnome-shell
+```
+## Update libphonenumber-js
+
+```sh
+$ meson setup _build
+$ ninja -C _build update-libphonenumber
 ```
 
 ## Questions
