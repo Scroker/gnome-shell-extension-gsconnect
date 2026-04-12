@@ -9,13 +9,13 @@ import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw';
 import Pango from 'gi://Pango';
 import Gio from 'gi://Gio';
-import { MessagingInputText } from './components.js';
+import {MessagingInputText} from './components.js';
 
 import * as Contacts from './contacts.js';
 import * as Sms from '../plugins/sms.js';
 import * as URI from '../utils/uri.js';
 import '../utils/ui.js';
-import { parsePhoneNumber } from '../utils/phone.js';
+import {parsePhoneNumber} from '../utils/phone.js';
 
 /*
  * Useful time constants
@@ -286,10 +286,10 @@ const ConversationParticipants = GObject.registerClass({
 }, class MessagingConversationParticipants extends Adw.Dialog {
 
     _init(params) {
-        super._init({ device: params.device });
+        super._init({device: params.device});
         Object.assign(this, params);
         this.addresses.forEach(item => {
-            const contact = this.device.contacts.query({ number: item.address });
+            const contact = this.device.contacts.query({number: item.address});
             const row = new Adw.ActionRow({
                 title: contact.name,
                 subtitle: Contacts.getDisplayNumber(contact, item.address),
@@ -369,7 +369,7 @@ const MessagingConversation = GObject.registerClass({
         this.inbox_counter = 0;
 
         const address = parsePhoneNumber(this.addresses[0].address);
-        const contact = this.device.contacts.query({ number: address });
+        const contact = this.device.contacts.query({number: address});
 
         this._participantsId = this.participants_button.connect('clicked', () => {
             if (this._participants_dialog === undefined) {
@@ -458,7 +458,7 @@ const MessagingConversation = GObject.registerClass({
         for (let i = 0, len = this.addresses.length; i < len; i++) {
             // Lookup the contact
             const address = this.addresses[i].address;
-            const contact = this.device.contacts.query({ number: address });
+            const contact = this.device.contacts.query({number: address});
 
             // Get corrected address
             let number = address.number;
@@ -635,7 +635,7 @@ const MessagingConversation = GObject.registerClass({
     }
 
     _createScrollbarAnim(direction) {
-        const adjustment = this.scrolled.get_vadjustment();;
+        const adjustment = this.scrolled.get_vadjustment(); ;
         const target = Adw.PropertyAnimationTarget.new(adjustment, 'value');
         const animation = new Adw.TimedAnimation({
             widget: this.scrolled,
@@ -665,7 +665,7 @@ const MessagingConversation = GObject.registerClass({
             });
         }
 
-        return new ConversationMessage({ contact: this.contacts[sender], message: message });
+        return new ConversationMessage({contact: this.contacts[sender], message: message});
     }
 
     _populateMessages() {
@@ -738,7 +738,7 @@ const MessagingConversation = GObject.registerClass({
 
         if (before !== null && before.message !== undefined && (row.message.date - before.message.date) > TIME_SPAN_HOUR) {
             if (!header) {
-                header = new Gtk.Label({ visible: true, selectable: true });
+                header = new Gtk.Label({visible: true, selectable: true});
                 header.get_style_context().add_class('dim-label');
                 row.set_header(header);
             }
@@ -1167,7 +1167,7 @@ export const MessagingWindow = GObject.registerClass({
         } else {
             const message = {
                 addresses: [
-                    { address: parsePhoneNumber(number).number },
+                    {address: parsePhoneNumber(number).number},
                 ],
                 type: Sms.MessageBox.SENT,
                 read: Sms.MessageStatus.READ,
@@ -1244,7 +1244,7 @@ export const MessagingWindow = GObject.registerClass({
      */
     _getRowForContacts(contacts) {
         const addresses = Object.keys(contacts).map(address => {
-            return { address: address };
+            return {address: address};
         });
 
         // Try to find a thread_id
@@ -1267,7 +1267,7 @@ export const MessagingWindow = GObject.registerClass({
         const addresses = [];
 
         for (const address of Object.keys(contacts))
-            addresses.push({ address: address });
+            addresses.push({address: address});
 
         // Try to find a thread ID for this address group
         let thread_id = this.plugin.getThreadIdForAddresses(addresses);

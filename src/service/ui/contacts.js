@@ -107,7 +107,7 @@ const AddressRow = GObject.registerClass({
 
     get number() {
         if (this._number === undefined)
-            return { value: 'unknown', type: 'unknown' };
+            return {value: 'unknown', type: 'unknown'};
 
         return this._number;
     }
@@ -294,7 +294,7 @@ export const ContactChooser = GObject.registerClass({
                 dynamic = new AddressRow({
                     // TRANSLATORS: A phone number (eg. "Send to 555-5555")
                     name: _('Send to %s').format(entry.text),
-                    numbers: [{ type: 'unknown', value: entry.text }],
+                    numbers: [{type: 'unknown', value: entry.text}],
                 });
                 dynamic.connect('activated', this._onNumberSelected.bind(this));
                 dynamic.__tmp = true;

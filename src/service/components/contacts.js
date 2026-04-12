@@ -7,7 +7,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import Config from '../../config.js';
-import { parsePhoneNumber } from '../utils/phone.js';
+import {parsePhoneNumber} from '../utils/phone.js';
 
 let HAVE_EDS = true;
 let EBook = null;
@@ -362,41 +362,43 @@ const Store = GObject.registerClass({
     query(query) {
         const qname = query.name;
         let qnumberObj = query.number;
-        
-        if (typeof qnumberObj === 'string') {
+
+        if (typeof qnumberObj === 'string')
             qnumberObj = parsePhoneNumber(qnumberObj);
-        }
-        
+
+
         const qnumber = qnumberObj?.number;
 
         if (qname) {
             const nameMatch = this.contacts.find(contact => contact.name === qname);
-            if (nameMatch) return nameMatch;
+            if (nameMatch)
+                return nameMatch;
         }
 
         if (qnumber) {
-            const numberMatch = this.contacts.find(contact => 
+            const numberMatch = this.contacts.find(contact =>
                 contact.numbers.some(num => {
                     const cnumber = num.value.number;
 
-                    return (qnumber === cnumber) || 
+                    return (qnumber === cnumber) ||
                         (qnumber.length >= 7 && cnumber.length >= 7 &&
-                        (qnumber.endsWith(cnumber) || 
+                        (qnumber.endsWith(cnumber) ||
                             cnumber.endsWith(qnumber)));
                 })
             );
-            if (numberMatch) return numberMatch;
+            if (numberMatch)
+                return numberMatch;
         }
 
         let id;
-        do {
+        do
             id = GLib.uuid_string_random();
-        } while (this._cacheData.hasOwnProperty(id));
+        while (this._cacheData.hasOwnProperty(id));
 
         return {
             id: id,
             name: query.name || qnumberObj.number,
-            numbers: [{ value: qnumberObj, type: 'unknown' }],
+            numbers: [{value: qnumberObj, type: 'unknown'}],
             origin: 'gsconnect',
         };
     }

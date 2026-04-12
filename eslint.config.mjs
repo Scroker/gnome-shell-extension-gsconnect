@@ -13,6 +13,7 @@ export default defineConfig([
     globalIgnores([
         '**/*.js',
 	'!src/**/*.js',
+    'src/vendor/libphonenumber-esm.js',
 	'!installed-tests/**/*.js',
 	'!webextension/**/*.js',
 	'webextension/js/browser-polyfill*',
