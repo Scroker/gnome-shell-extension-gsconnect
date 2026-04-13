@@ -9,6 +9,7 @@ import {MessagingInputText} from './components.js'; // this dependency is needed
 
 import * as Contacts from '../ui/contacts.js';
 import * as URI from '../utils/uri.js';
+import {parsePhoneNumber} from '../utils/phone.js';
 import '../utils/ui.js';
 
 const Dialog = GObject.registerClass({
@@ -112,14 +113,24 @@ const Dialog = GObject.registerClass({
         this.message_label.label = URI.linkify(message.body);
         this.message_avatar.visible = true;
 
-        const sender = message.title || 'unknown';
-        const contact = this.device.contacts.query({
-            name: sender,
-        });
-        if (contact)
-            this.addresses = [{address: contact.numbers[0].value}];
-        else
-            this.title_widget.title = sender;
+        if (message.addresses && message.addresses.length > 0) {
+            this.addresses = message.addresses.map(a => {
+                return { address: parsePhoneNumber(a.address).number };
+            });
+        } else {
+            const sender = message.title || 'unknown';
+            const contact = this.device.contacts.query({
+                name: sender,
+                number: sender,
+            });
+
+            if (contact && contact.name !== sender) {
+                this.addresses = [{ address: contact.numbers[0].value.number }];
+            } else {
+                this.title_widget.title = sender;
+                this.message_avatar.text = sender;
+            }
+        }
 
         this.nav_view.pop();
     }
@@ -181,7 +192,7 @@ const Dialog = GObject.registerClass({
     _onNumberSelected(chooser, number) {
         const contacts = chooser.getSelected();
         this.addresses = Object.keys(contacts).map(address => {
-            return {address: address};
+            return { address: parsePhoneNumber(address).number };
         });
         this.nav_view.pop();
     }
