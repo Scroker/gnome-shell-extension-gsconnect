@@ -115,7 +115,7 @@ const Dialog = GObject.registerClass({
 
         if (message.addresses && message.addresses.length > 0) {
             this.addresses = message.addresses.map(a => {
-                return { address: parsePhoneNumber(a.address).number };
+                return {address: parsePhoneNumber(a.address).number};
             });
         } else {
             const sender = message.title || 'unknown';
@@ -125,7 +125,7 @@ const Dialog = GObject.registerClass({
             });
 
             if (contact && contact.name !== sender) {
-                this.addresses = [{ address: contact.numbers[0].value.number }];
+                this.addresses = [{address: contact.numbers[0].value.number}];
             } else {
                 this.title_widget.title = sender;
                 this.message_avatar.text = sender;
@@ -192,7 +192,7 @@ const Dialog = GObject.registerClass({
     _onNumberSelected(chooser, number) {
         const contacts = chooser.getSelected();
         this.addresses = Object.keys(contacts).map(address => {
-            return { address: parsePhoneNumber(address).number };
+            return {address: parsePhoneNumber(address).number};
         });
         this.nav_view.pop();
     }
