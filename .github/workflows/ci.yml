@@ -7,11 +7,11 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - libphonenumber-integration
       - 'backports/gnome-*'
   pull_request:
     branches:
-      - main
+      - libphonenumber-integration
       - 'backports/gnome-*'
   workflow_dispatch:
 
