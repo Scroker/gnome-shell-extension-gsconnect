@@ -204,7 +204,8 @@ const Clipboard = GObject.registerClass({
             });
             this._applyUpdate(text);
         } catch (e) {
-            if (e instanceof Error && e.matches && e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+            if (e instanceof Error && e.matches &&
+                e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 return;
 
             if (e instanceof Error)

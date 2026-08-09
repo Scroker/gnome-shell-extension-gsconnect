@@ -151,7 +151,9 @@ export const InputDialog = GObject.registerClass({
         motionController.connect('motion', this._onTouchpadDragUpdate.bind(this));
         motionController.connect('leave', this._onTouchpadDragEnd.bind(this));
 
-        const scrollController = new Gtk.EventControllerScroll({flags: Gtk.EventControllerScrollFlags.VERTICAL});
+        const scrollController = new Gtk.EventControllerScroll({
+            flags: Gtk.EventControllerScrollFlags.VERTICAL,
+        });
         scrollController.connect('scroll', this._onScroll.bind(this));
 
         const rightClickGesture = new RightClickGesture();

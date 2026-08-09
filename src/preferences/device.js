@@ -50,15 +50,15 @@ export function titleSortFunc(row1, row2) {
 }
 
 /**
- * A GtkListBox widget that displays a list of action rows based on a menu model.
+ * A GtkListBox that displays action rows from a menu model.
  *
- * This custom widget listens for changes in the model and updates the list of rows accordingly.
- * It supports hierarchical menu structures by creating expandable rows for submenus.
- * Additionally, it adds a special row for encryption information. Each action row can be activated
- * and is linked to a corresponding action in the associated action group.
+ * This widget listens for model changes and updates the rows accordingly.
+ * It supports hierarchical menus by creating expandable submenu rows.
+ * It also adds a special row for encryption information. Each row is
+ * linked to a corresponding action in the associated action group.
  *
- * The widget handles dynamic updates when actions are added, removed, or enabled/disabled,
- * and rebuilds the list of rows in response to these changes.
+ * The widget rebuilds its rows when actions are added, removed, enabled,
+ * or disabled.
  *
  * @class ActionRowBox
  * @augments Gtk.ListBox
@@ -98,16 +98,16 @@ const ActionRowBox = GObject.registerClass({
     /**
      * Rebuilds all the rows in the list based on the model.
      *
-     * This method handles changes in the menu model, and when items are added or removed,
-     * it rebuilds the list of rows. It clears the existing rows and appends new ones based
-     * on the updated menu model. After updating the rows, it adds a specific encryption row.
+     * This method handles menu model changes by rebuilding the row list.
+     * It clears the existing rows, appends new rows from the updated model,
+     * then adds the encryption row.
      *
-     * @param {Gio.MenuModel} model - The menu model that has been changed. This model contains the updated list of menu items.
-     * @param {number} position - The position at which the change (addition or removal) occurred in the menu model.
-     * @param {number} removed - The number of items that were removed from the menu model.
-     * @param {number} added - The number of items that were added to the menu model.
+     * @param {Gio.MenuModel} model - The changed menu model
+     * @param {number} position - The changed position in the menu model
+     * @param {number} removed - The number of items removed
+     * @param {number} added - The number of items added
      *
-     * @returns {void} - This method does not return anything. It updates the UI by rebuilding the rows.
+     * @returns {void} This method does not return anything.
      */
     _onItemsChanged(model, position, removed, added) {
         // Clear the menu
@@ -126,14 +126,13 @@ const ActionRowBox = GObject.registerClass({
     /**
      * Builds an array of rows from a menu model.
      *
-     * This method processes a `Gio.MenuModel` and constructs a list of rows (either `Adw.ActionRow` or `Adw.ExpanderRow`)
-     * to be added to a UI, based on the items in the menu model. It handles submenus by creating expandable rows
-     * for hierarchical menu structures and adds appropriate action rows for each item in the model.
+     * This method processes a `Gio.MenuModel` and constructs a list of
+     * `Adw.ActionRow` or `Adw.ExpanderRow` rows. It handles submenus by
+     * creating expandable rows for hierarchical menu structures.
      *
-     * @param {Gio.MenuModel} menuModel - The menu model from which items will be extracted to create the rows.
+     * @param {Gio.MenuModel} menuModel - The menu model to extract items from
      *
-     * @returns {Array<Adw.ActionRow|Adw.ExpanderRow>} - A list of rows (`Adw.ActionRow` or `Adw.ExpanderRow`)
-     * that can be added to a UI component. These rows represent the actions or submenus in the menu model.
+     * @returns {Array<Adw.ActionRow|Adw.ExpanderRow>} The action rows
      */
     buildActionRowsFromMenuModel(menuModel) {
         const rows = [];
@@ -206,11 +205,11 @@ const ActionRowBox = GObject.registerClass({
     /**
      * Creates an encryption information row.
      *
-     * This method creates a row that contains encryption-related information. It returns
-     * an `Adw.ActionRow` containing a title and an icon that indicates encryption status.
-     * The row is activatable and connected to an action that will trigger the encryption info action when activated.
+     * This method creates an `Adw.ActionRow` with encryption information.
+     * The row has a title and an icon indicating encryption status.
+     * It is connected to the encryption info action when activated.
      *
-     * @returns {Adw.ActionRow} The encryption info row, which is an instance of `Adw.ActionRow`.
+     * @returns {Adw.ActionRow} The encryption info row
      */
     _create_encription_row() {
         const row = new Adw.ActionRow({
@@ -232,14 +231,12 @@ const ActionRowBox = GObject.registerClass({
     /**
      * Activates an action from the action group.
      *
-     * This method is called when a row in the list is activated. It uses the action group
-     * to activate the specified action by its name. If there is a target associated with
-     * the action, it is passed along during activation; otherwise, `null` is used.
+     * This method is called when a row in the list is activated.
+     * It uses the action group to activate the specified action by name.
+     * If the action has a target, it is passed along during activation.
      *
-     * @param {string} action_name - The name of the action to activate. It should match
-     *                               the name of an action in the action group.
-     * @param {object} target - The target associated with the action (can be `null`).
-     *                     This is typically the data or object the action should operate on.
+     * @param {string} action_name - The name of the action to activate
+     * @param {object} target - The target associated with the action
      *
      * @returns {void} - This method does not return anything.
      */
@@ -250,9 +247,9 @@ const ActionRowBox = GObject.registerClass({
     /**
      * Disconnects signals and destroys the widget.
      *
-     * This method cleans up resources when the widget is no longer needed. It disconnects
-     * any connected signals (like the `items-changed` signal in this case) and then calls
-     * the superclass's `destroy` method to properly dispose of the widget.
+     * This method cleans up resources when the widget is no longer needed.
+     * It disconnects signals and then calls the superclass `destroy`
+     * method to dispose of the widget.
      *
      * @returns {void} - This method does not return anything.
      */
@@ -261,11 +258,10 @@ const ActionRowBox = GObject.registerClass({
 /**
  * A dialog for editing commands in the GSConnect preferences.
  *
- * This class represents a command editor dialog that allows users to define and edit
- * custom commands. The dialog includes fields for entering the command name and command
- * line, as well as a button to browse for the command file. The dialog provides functionality
- * for selecting a command file and updating the entries accordingly. The save button is enabled
- * only when both the command name and command line are valid.
+ * This class represents a command editor dialog for defining and editing
+ * custom commands. The dialog includes fields for the command name and
+ * line, plus a button to browse for the command file. The save button is
+ * enabled only when the command name and line are valid.
  *
  * @class CommandEditor
  * @augments Adw.Dialog
@@ -326,9 +322,9 @@ const CommandEditor = GObject.registerClass({
 });
 
 /**
- * The DeviceNavigationPage manages navigation and settings for a device in the context of the GSConnect extension.
- * This class extends Adw.NavigationPage and handles device-specific configurations,
- * including sharing settings, battery, commands, and notifications.
+ * DeviceNavigationPage manages navigation and settings for a device.
+ * This class handles device-specific configuration, including sharing
+ * settings, battery, commands, and notifications.
  *
  * @class DeviceNavigationPage
  * @augments Adw.NavigationPage
@@ -408,8 +404,8 @@ export const DeviceNavigationPage = GObject.registerClass({
      * Sets the window title and subtitle based on the device type.
      *
      * This function sets the main title of the window to the device's name,
-     * and updates the subtitle based on the type of device (e.g., laptop, phone, etc.).
-     * The subtitle is translated into the current language using the _() function.
+     * and updates the subtitle based on the type of device.
+     * The subtitle is translated into the current language.
      *
      * @returns {void}
      */
@@ -701,12 +697,12 @@ export const DeviceNavigationPage = GObject.registerClass({
     /**
      * Inserts a new command row into the command list.
      *
-     * This method creates a `CommandActionRow` for the command identified by the given `uuid`. The row is
-     * populated with the command's name as the title and the command line as the subtitle. It also attaches the
-     * `edit` and `delete` button click events to their respective handler methods (`_onEditCommand` and `_onDeleteCommand`).
-     * After setting up the row, it is added to the `command_list` to be displayed in the UI.
+     * This method creates a `CommandActionRow` for the given `uuid`.
+     * The row uses the command name as its title and the command line as
+     * its subtitle. It also attaches the `edit` and `delete` button click
+     * events to their handlers, then adds the row to `command_list`.
      *
-     * @param {string} uuid - The unique identifier of the command to insert into the list.
+     * @param {string} uuid - The unique identifier of the command to insert
      */
     _insertCommand(uuid) {
         const row = new CommandActionRow({
@@ -1033,12 +1029,12 @@ export const DeviceNavigationPage = GObject.registerClass({
 });
 
 /**
- * CommandActionRow represents a row in the command list, providing a UI element for each command.
+ * CommandActionRow represents a row in the command list.
  *
- * This class extends the `Adw.ActionRow` and provides buttons for editing and deleting commands.
- * It uses a custom UI template located at 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/command-row.ui'.
- * The class is designed to manage command-related actions within a list (such as adding, editing, and deleting commands).
- * It provides methods to access the command's name and the associated edit and delete buttons.
+ * This class extends `Adw.ActionRow` and provides buttons for editing
+ * and deleting commands. It uses the `ui/command-row.ui` template.
+ * The class manages command-related actions within a list, such as
+ * adding, editing, and deleting commands.
  *
  * @class CommandActionRow
  * @augments Adw.ActionRow
@@ -1060,12 +1056,11 @@ export const CommandActionRow = GObject.registerClass({
 });
 
 /**
- * DevicePairPage handles the user interface for pairing a device within the GSConnect extension.
+ * DevicePairPage handles the user interface for pairing a device.
  *
- * This page is part of the preferences UI where users can see the device's status and initiate pairing.
- * The page includes a label showing the device's name, a spinner that indicates progress while pairing,
- * and a button that allows the user to start the pairing process. The class interacts with the GSConnect
- * settings and handles the device pairing action.
+ * This page is part of the preferences UI where users can see the
+ * device status and start pairing. It includes a device name label,
+ * a spinner for pairing progress, and a button to start pairing.
  *
  * @class DevicePairPage
  * @augments Adw.NavigationPage
@@ -1102,12 +1097,12 @@ export const DevicePairPage = GObject.registerClass({
     /**
      * Pair Device Callback
      *
-     * This method is invoked when the user clicks the "Pair" button to initiate the device pairing process.
+     * This method is invoked when the user clicks the "Pair" button.
      * It performs the following actions:
-     * - Activates the 'pair' action in the device's action group, triggering the pairing process.
+     * - Activates the 'pair' action in the device's action group.
      * - Displays a spinner to indicate that the pairing is in progress.
-     * - Hides the "Pair" button to prevent the user from clicking it again while the pairing is ongoing.
-     * - Calls `_stopSpinner()` to hide the spinner and show the "Pair" button again after a specified timeout.
+     * - Hides the "Pair" button while pairing is ongoing.
+     * - Calls `_stopSpinner()` to restore the UI after a timeout.
      *
      * @returns {void}
      */
@@ -1121,11 +1116,10 @@ export const DevicePairPage = GObject.registerClass({
     /**
      * Stop Pair Millis Timer
      *
-     * This method stops the spinner and restores the "Pair" button after a timeout to simulate
-     * the completion of the pairing process. It is called after initiating the pairing process
-     * to provide feedback to the user by updating the UI.
-     * The timeout duration is specified in milliseconds, so `PAIR_SPINNER_SEC` is multiplied by
-     * 1000 to convert seconds to milliseconds.
+     * This method stops the spinner and restores the "Pair" button after
+     * a timeout. It is called after pairing starts to provide UI feedback.
+     * `PAIR_SPINNER_SEC` is multiplied by 1000 to convert seconds to
+     * milliseconds.
      *
      * @returns {void}
      */

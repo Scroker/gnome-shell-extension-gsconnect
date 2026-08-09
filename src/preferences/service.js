@@ -28,13 +28,13 @@ OS:        ${GLib.get_os_info('PRETTY_NAME')}
 `);
 
 /**
- * Generate Support Log by fetching system journal logs since a specified start time.
+ * Generate a support log from journal entries since a start time.
  *
- * This function creates a temporary log file and writes a predefined log header to it.
- * It then executes `journalctl` to retrieve logs from the system journal since the specified start time
- * and appends the logs to the temporary file. Finally, it opens the generated log file for review.
+ * This function creates a temporary log file, writes the log header,
+ * then executes `journalctl` to append logs since the start time.
+ * Finally, it opens the generated log file for review.
  *
- * @param {string} time - Start time as a string (24-hour notation, e.g., "2025-04-26 14:00:00").
+ * @param {string} time - Start time in 24-hour notation
  *
  * @returns {Promise<void>} Resolves when the log generation is complete.
  */
@@ -102,11 +102,11 @@ const OpenSSLAlertDialog = GObject.registerClass({
 }, class OpenSSLAlertDialog extends Adw.AlertDialog {});
 
 /**
- * Settings dialog for GSConnect, allowing users to configure device settings.
+ * Settings dialog for configuring GSConnect device settings.
  *
- * This dialog enables the user to modify the device's display mode (either as a panel or a user menu) and rename the device.
- * It validates the device name input and ensures it does not contain any forbidden characters or exceed the character limit.
- * The dialog also reflects the current settings, and updates the device's settings based on user interactions.
+ * This dialog lets the user change the display mode and rename the
+ * device. It validates the device name and updates settings based on
+ * user interactions.
  *
  * @class SettingsDialog
  * @augments Adw.PreferencesDialog
@@ -136,7 +136,8 @@ const SettingsDialog = GObject.registerClass({
 
     /**
      * Gets or sets the display mode for the settings.
-     * If 'show-indicators' is enabled, the mode will be 'panel'; otherwise, 'user-menu'.
+     * If 'show-indicators' is enabled, the mode is 'panel';
+     * otherwise, it is 'user-menu'.
      *
      * @type {string} - The display mode, either 'panel' or 'user-menu'.
      */
@@ -153,9 +154,9 @@ const SettingsDialog = GObject.registerClass({
 
     /**
      * Handles setting the service name when the user confirms their input.
-     * Validates the input name and updates the service name in settings if valid.
+     * Validates the input name and updates the service name if valid.
      *
-     * @param {Gtk.Widget} widget - The widget that triggered the event (e.g., a button or entry).
+     * @param {Gtk.Widget} widget - The widget that triggered the event
      */
     _onSetServiceName(widget) {
         if (this._validateName(this.rename_entry.text))
@@ -166,11 +167,11 @@ const SettingsDialog = GObject.registerClass({
     /**
      * Validates the device name to ensure it meets specific criteria:
      * - The name must not contain any forbidden characters.
-     * - The name must not be empty (it must have at least one non-whitespace character).
+     * - The name must not be empty.
      * - The name must be between 1 and 32 characters in length.
      *
-     * If the validation fails, an error message is shown to the user, specifying the invalid characters
-     * and the acceptable length constraints.
+     * If validation fails, an error message shows the invalid characters
+     * and acceptable length constraints.
      *
      * @param {string} name - The device name to validate.
      * @returns {boolean} True if the name is valid, false otherwise.
@@ -222,7 +223,7 @@ const ConnectDialog = GObject.registerClass({
 
     /**
      * Handles the connect button action.
-     * Sets the response type to `Gtk.ResponseType.OK` when the button is clicked.
+     * Sets the response type to `Gtk.ResponseType.OK` when clicked.
      *
      * @returns {void} - This function does not return any value.
      */
@@ -231,10 +232,11 @@ const ConnectDialog = GObject.registerClass({
     }
 
     /**
-     * Handles the response when the dialog is closed. If the response is OK, it validates the host and port,
-     * and attempts to trigger the 'connect' action. If validation fails or an error occurs, an error message is displayed.
+     * Handles the response when the dialog is closed. If the response is
+     * OK, it validates the host and port and triggers the 'connect'
+     * action. If validation fails, an error message is displayed.
      *
-     * @param {Gtk.ResponseType} response - The response type from the dialog interaction (OK or others).
+     * @param {Gtk.ResponseType} response - The dialog response type
      *
      * @returns {void} - No return value. Closes the dialog after processing.
      */
@@ -266,12 +268,12 @@ const ConnectDialog = GObject.registerClass({
 
     /**
      * Validates the provided host and port.
-     * Ensures the host is non-empty and the port is within the valid range (1-65535).
+     * Ensures the host is non-empty and the port is in range (1-65535).
      * Checks if the host is a valid IP address.
      *
      * @param {string} host - The host to validate.
      * @param {number} port - The port to validate.
-     * @returns {boolean} - Returns true if the host is valid and the port is in range, false otherwise.
+     * @returns {boolean} True if the host and port are valid
      */
     _validateHostAndPort(host, port) {
         // Ensure host is non-empty and port is within valid range

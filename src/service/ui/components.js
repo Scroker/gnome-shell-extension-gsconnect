@@ -48,7 +48,9 @@ export const MessagingInputText = GObject.registerClass({
     }
 
     get sensitive() {
-        return this.message_entry.sensitive || this.send_text.sensitive || this.emoji_button.sensitive;
+        return this.message_entry.sensitive ||
+            this.send_text.sensitive ||
+            this.emoji_button.sensitive;
     }
 
     set sensitive(sensitive) {
@@ -79,7 +81,7 @@ export const MessagingInputText = GObject.registerClass({
     }
 
     /**
-     * Update the state of the entry and send button based on connection and input.
+     * Update the entry and send button state from connection and input.
      *
      * @private
      */

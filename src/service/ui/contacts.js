@@ -57,7 +57,7 @@ export function getDisplayNumber(contact, address) {
 }
 
 /**
- * AddressRow - A UI component representing a contact's address (usually a phone number).
+ * AddressRow displays a contact address, usually a phone number.
  *
  * This class displays a contact's name, phone number, and phone number type
  * inside an Adw.ActionRow for use in lists or forms.
@@ -65,7 +65,7 @@ export function getDisplayNumber(contact, address) {
  * @class AddressRow
  * @augments Adw.ActionRow
  * @param {object} contact - The contact object
- * @param {number} [index=0] - The index of the phone number in the contact's numbers array
+ * @param {number} [index=0] - The phone number index in the contact
  */
 const AddressRow = GObject.registerClass({
     GTypeName: 'GSConnectContactsAddressRow',

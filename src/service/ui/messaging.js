@@ -737,7 +737,9 @@ const MessagingConversation = GObject.registerClass({
         // Add date header if the last message was more than an hour ago
         let header = row.get_header();
 
-        if (before !== null && before.message !== undefined && (row.message.date - before.message.date) > TIME_SPAN_HOUR) {
+        if (before !== null &&
+            before.message !== undefined &&
+            (row.message.date - before.message.date) > TIME_SPAN_HOUR) {
             if (!header) {
                 header = new Gtk.Label({visible: true, selectable: true});
                 header.get_style_context().add_class('dim-label');
@@ -874,7 +876,9 @@ const ConversationSummary = GObject.registerClass({
     set message(message) {
         this._message = message;
 
-        const addresses = message.addresses.map(item => item.address).filter((elemento, indice, self) => self.indexOf(elemento) === indice);
+        const addresses = message.addresses
+            .map(item => item.address)
+            .filter((element, index, self) => self.indexOf(element) === index);
         this._sender = addresses[0] || 'unknown';
 
         // TRANSLATORS: Shown as the summary when a text message contains
@@ -1343,13 +1347,16 @@ export const MessagingWindow = GObject.registerClass({
                 this.thread_list.invalidate_sort();
             }
         }
-        addresses = addresses.map(item => formatPhoneNumber(item.address)).filter((item, index, self) => {
-            return self.indexOf(item) === index;
-        });
+        addresses = addresses
+            .map(item => formatPhoneNumber(item.address))
+            .filter((item, index, self) => self.indexOf(item) === index);
         if (row === null) {
             let need_row_init = true;
             this.internal_thread_list.forEach(row_item => {
-                if (Object.keys(row_item.contacts).map(item => formatPhoneNumber(item)).every(item => addresses.includes(item))) {
+                const contactAddresses = Object.keys(row_item.contacts)
+                    .map(item => formatPhoneNumber(item));
+
+                if (contactAddresses.every(item => addresses.includes(item))) {
                     row_item.message = message;
                     this.thread_list.invalidate_sort();
                     need_row_init = false;
@@ -1374,9 +1381,12 @@ export const MessagingWindow = GObject.registerClass({
             row.counter_label.set_label(`${conversation.inbox_counter}`);
         } else {
             Array.from(this.stack.values()).forEach(conversation => {
-                const contacts = conversation.addresses.map(item => formatPhoneNumber(item.address)).filter((item, index, self) => {
-                    return self.indexOf(item) === index && addresses.includes(item);
-                });
+                const contacts = conversation.addresses
+                    .map(item => formatPhoneNumber(item.address))
+                    .filter((item, index, self) => {
+                        return self.indexOf(item) === index &&
+                            addresses.includes(item);
+                    });
                 if (contacts.length > 0) {
                     conversation.thread_id = thread_id;
                     conversation.addMessage(message);
@@ -1402,8 +1412,8 @@ export const MessagingWindow = GObject.registerClass({
         let old_thread_id = null;
 
         if (conversation === null) {
-            // Try and find one by matching addresses, which is necessary if we've
-            // started a thread locally and haven't set the thread_id
+            // Try and find one by matching addresses, which is necessary
+            // if we've started a thread locally without the thread_id
             const addresses = message.addresses;
 
             for (const conversation of this.stack.values()) {
@@ -1413,8 +1423,8 @@ export const MessagingWindow = GObject.registerClass({
 
                 const caddrs = conversation.addresses;
 
-                // If we find a match, set `thread-id` on the conversation and the
-                // child property `name`.
+                // If we find a match, set `thread-id` on the conversation
+                // and the child property `name`.
                 if (addresses.every(addr => this._includesAddress(caddrs, addr))) {
                     old_thread_id = conversation._thread_id;
                     conversation._thread_id = thread_id;

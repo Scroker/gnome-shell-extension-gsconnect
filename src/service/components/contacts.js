@@ -384,8 +384,8 @@ const Store = GObject.registerClass({
                         if (!qname)
                             return contact;
 
-                        // Otherwise we might find an exact name match that shares
-                        // the number with another contact
+                        // Otherwise we might find an exact name match
+                        // that shares the number with another contact
                         matches.push(contact);
                     }
                 }
