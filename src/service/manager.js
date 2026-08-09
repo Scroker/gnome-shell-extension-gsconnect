@@ -13,6 +13,8 @@ import Device from './device.js';
 
 import * as LanBackend from './backends/lan.js';
 
+import {MissingOpensslError} from '../utils/exceptions.js';
+
 const DEVICE_NAME = 'org.gnome.Shell.Extensions.GSConnect.Device';
 const DEVICE_PATH = '/org/gnome/Shell/Extensions/GSConnect/Device';
 const DEVICE_IFACE = Config.DBUS.lookup_interface(DEVICE_NAME);
@@ -102,10 +104,22 @@ const Manager = GObject.registerClass({
 
     get certificate() {
         if (this._certificate === undefined) {
-            this._certificate = Gio.TlsCertificate.new_for_paths(
-                GLib.build_filenamev([Config.CONFIGDIR, 'certificate.pem']),
-                GLib.build_filenamev([Config.CONFIGDIR, 'private.pem']),
-                null);
+            const app = Gio.Application.get_default();
+            try {
+                this._certificate = Gio.TlsCertificate.new_for_paths(
+                    GLib.build_filenamev([Config.CONFIGDIR, 'certificate.pem']),
+                    GLib.build_filenamev([Config.CONFIGDIR, 'private.pem']),
+                    null);
+                if (this.settings.get_boolean('missing-openssl'))
+                    app?.withdraw_notification('gsconnect-missing-openssl');
+                this.settings.set_boolean('missing-openssl', false);
+            } catch (e) {
+                if (e instanceof MissingOpensslError) {
+                    this.settings.set_boolean('missing-openssl', true);
+                    app?.notify_error(e, 'gsconnect-missing-openssl');
+                }
+                throw e;
+            }
         }
 
         return this._certificate;
@@ -380,8 +394,8 @@ const Manager = GObject.registerClass({
     }
 
     /**
-     * Return a device for @packet, creating it and adding it to the list of
-     * of known devices if it doesn't exist.
+     * Return a device for {@link packet}, creating it and adding it
+     * to the list of of known devices if it doesn't exist.
      *
      * @param {Core.Packet} packet - An identity packet for the device
      * @returns {Device} A device object

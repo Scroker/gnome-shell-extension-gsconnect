@@ -93,7 +93,7 @@ async function postMessage(message) {
  * Forward a message from the browserAction popup to the NMH
  *
  * @param {object} message - A message from the NMH to forward
- * @param {*} sender - A message from the NMH to forward
+ * @param {object} sender - A message from the NMH to forward
  */
 async function onPopupMessage(message, sender) {
     try {
@@ -122,7 +122,8 @@ async function forwardPortMessage(message) {
 /**
  * Context Menu Item Callback
  *
- * @param {browser.menus.OnClickData} info - Information about the item and context
+ * @param {browser.menus.OnClickData} info
+ *        - Information about the item and context
  */
 async function onContextItem(info) {
     try {

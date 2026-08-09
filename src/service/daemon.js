@@ -17,7 +17,12 @@ import('gi://GIRepository?version=3.0').catch(() => {
     import('gi://GIRepository?version=2.0').catch(() => {});
 });
 
-import('gi://GioUnix?version=2.0').catch(() => {}); // Set version for optional dependency
+// DesktopAppInfo is no longer in Gio in GNOME 49
+const GioUnix = await import('gi://GioUnix?version=2.0').then((imp) => {
+    return imp.default;
+}).catch(() => {
+    return Gio;
+});
 
 import system from 'system';
 
@@ -27,6 +32,7 @@ import Config from '../config.js';
 import Device from './device.js';
 import Manager from './manager.js';
 import * as ServiceUI from './ui/service.js';
+import {MissingOpensslError} from '../utils/exceptions.js';
 
 
 /**
@@ -58,8 +64,8 @@ const Service = GObject.registerClass({
             GLib.build_filenamev([Config.CONFIGDIR, 'certificate.pem']),
             GLib.build_filenamev([Config.CONFIGDIR, 'private.pem']),
         ];
-        const certificate = Gio.TlsCertificate.new_for_paths(certPath, keyPath,
-            null);
+
+        const certificate = Gio.TlsCertificate.new_for_paths(certPath, keyPath, null);
 
         if (Device.validateId(certificate.common_name))
             return;
@@ -205,18 +211,20 @@ const Service = GObject.registerClass({
     }
 
     _preferences() {
-        Gio.Subprocess.new(
-            [`${Config.PACKAGE_DATADIR}/gsconnect-preferences`],
-            Gio.SubprocessFlags.NONE
+        const _launcher = Gio.SubprocessLauncher.new(
+            {flags: Gio.SubprocessFlags.NONE}
         );
+        _launcher.set_cwd(Config.PACKAGE_DATADIR);
+        _launcher.spawnv(['gjs', '-m', 'gsconnect-preferences.js']);
     }
 
     /**
      * Report a service-level error
      *
      * @param {object} error - An Error or object with name, message and stack
+     * @param {string} [notification_id] - An optional id for the notification
      */
-    notify_error(error) {
+    notify_error(error, notification_id) {
         try {
             // Always log the error
             logError(error);
@@ -230,8 +238,12 @@ const Service = GObject.registerClass({
             if (error.name === undefined)
                 error.name = 'Error';
 
+            if (notification_id !== undefined)
+                id = notification_id;
+            else
+                id = error.url || error.message.trim();
+
             if (error.url !== undefined) {
-                id = error.url;
                 body = _('Click for help troubleshooting');
                 priority = Gio.NotificationPriority.URGENT;
 
@@ -242,7 +254,6 @@ const Service = GObject.registerClass({
                     url: error.url,
                 });
             } else {
-                id = error.message.trim();
                 body = _('Click for more information');
                 priority = Gio.NotificationPriority.HIGH;
 
@@ -291,7 +302,7 @@ const Service = GObject.registerClass({
 
         // Ensure our handlers are registered
         try {
-            const appInfo = Gio.DesktopAppInfo.new(`${Config.APP_ID}.desktop`);
+            const appInfo = GioUnix.DesktopAppInfo.new(`${Config.APP_ID}.desktop`);
             appInfo.add_supports_type('x-scheme-handler/sms');
             appInfo.add_supports_type('x-scheme-handler/tel');
         } catch (e) {
@@ -302,7 +313,18 @@ const Service = GObject.registerClass({
         this._initActions();
 
         // TODO: remove after a reasonable period of time
-        this._migrateConfiguration();
+        try {
+            this._migrateConfiguration();
+            if (this.settings.get_boolean('missing-openssl'))
+                this.withdraw_notification('gsconnect-missing-openssl');
+            this.settings.set_boolean('missing-openssl', false);
+        } catch (e) {
+            if (e instanceof MissingOpensslError) {
+                this.settings.set_boolean('missing-openssl', true);
+                this.notify_error(e, 'gsconnect-missing-openssl');
+            }
+            throw e;
+        }
 
         this.manager.start();
     }
@@ -417,6 +439,15 @@ const Service = GObject.registerClass({
             GLib.OptionArg.STRING,
             _('Target Device'),
             '<device-id>'
+        );
+
+        this.add_main_option(
+            'name',
+            'n'.charCodeAt(0),
+            GLib.OptionFlags.NONE,
+            GLib.OptionArg.STRING,
+            _('Target Device Name'),
+            '<device-name>'
         );
 
         /**
@@ -694,6 +725,32 @@ const Service = GObject.registerClass({
         this._cliAction(device, 'shareText', GLib.Variant.new_string(text));
     }
 
+    _findDeviceID(name) {
+        const result = Gio.DBus.session.call_sync(
+            'org.gnome.Shell.Extensions.GSConnect',
+            '/org/gnome/Shell/Extensions/GSConnect',
+            'org.freedesktop.DBus.ObjectManager',
+            'GetManagedObjects',
+            null,
+            null,
+            Gio.DBusCallFlags.NONE,
+            -1,
+            null
+        );
+
+        const variant = result.unpack()[0].unpack();
+        let device;
+
+        for (let object of Object.values(variant)) {
+            object = object.recursiveUnpack();
+            device = object['org.gnome.Shell.Extensions.GSConnect.Device'];
+
+            if (name === device.Name)
+                return device.Id;
+        }
+        return null;
+    }
+
     vfunc_handle_local_options(options) {
         try {
             if (options.contains('version')) {
@@ -715,11 +772,15 @@ const Service = GObject.registerClass({
 
             // We need a device for anything else; exit since this is probably
             // the daemon being started.
-            if (!options.contains('device'))
+            let id = null;
+            if (options.contains('device')) {
+                id = options.lookup_value('device', null).unpack();
+            } else if (options.contains('name')) {
+                const name = options.lookup_value('name', null).unpack();
+                id = this._findDeviceID(name); // May return null if no match found
+            }
+            if (id === null)
                 return -1;
-
-            const id = options.lookup_value('device', null).unpack();
-
             // Pairing
             if (options.contains('pair')) {
                 this._cliAction(id, 'pair');

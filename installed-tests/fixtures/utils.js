@@ -165,7 +165,7 @@ export function generateIdentity(params = {}) {
 
 
 /**
- * Check if @subset is a subset of @obj.
+ * Check if {@link subset} is a subset of {@link obj}.
  *
  * @param {object} obj - The haystack to compare with
  * @param {object} subset - The needle to search for
@@ -259,7 +259,9 @@ function isolateDirectories() {
  * Patch in the mock components for plugin tests.
  */
 export async function mockComponents() {
-    const {functionOverrides} = await import(`file://${Config.PACKAGE_DATADIR}/service/components/index.js`);
+    const {functionOverrides} = await import(
+        `file://${Config.PACKAGE_DATADIR}/service/components/index.js`
+    );
     const MockComponents = await import('./components/index.js');
 
     functionOverrides.acquire = function (name) {

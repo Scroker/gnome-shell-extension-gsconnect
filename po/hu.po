@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gsconnect\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-24 16:26-0400\n"
-"PO-Revision-Date: 2025-07-30 22:42\n"
+"POT-Creation-Date: 2026-05-01 01:34-0400\n"
+"PO-Revision-Date: 2026-07-16 03:15\n"
 "Last-Translator: \n"
 "Language-Team: Hungarian\n"
 "Language: hu_HU\n"
@@ -33,7 +33,7 @@ msgstr "A GSConnect csapata"
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:41
 msgid "GSConnect is a complete implementation of KDE Connect especially for GNOME Shell with Nautilus, Chrome and Firefox integration. The KDE Connect team has applications for Linux, BSD, Android, Sailfish, iOS, macOS and Windows."
-msgstr "A GSConnect egy teljes KDE Connect implementáció, főként a GNOME Shell-hez, Nautilus, Chrome és Firefox integrációval. A KDE Connect csapatának alkalmazásai elérhetőek Linux, BSD, Android, Sailfish, iOS, macOS és Windows rendszereken."
+msgstr "A GSConnect egy teljes KDE Connect implementáció, főként a GNOME Shellhez, Nautilus, Chrome és Firefox integrációval. A KDE Connect csapatának alkalmazásai elérhetőek Linux, BSD, Android, Sailfish, iOS, macOS és Windows rendszereken."
 
 #: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:44
 msgid "With GSConnect you can securely connect to mobile devices and other desktops to:"
@@ -75,7 +75,7 @@ msgstr "Előre megadott parancsok végrehajtása"
 msgid "And more…"
 msgstr "És még sok más…"
 
-#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:165
+#: data/metainfo/org.gnome.Shell.Extensions.GSConnect.metainfo.xml.in:183
 msgid "GSConnect in GNOME Shell"
 msgstr "GSConnect a GNOME Shellben"
 
@@ -92,7 +92,7 @@ msgstr "Kapcsolódás egy eszközhöz…"
 #: data/ui/preferences-shortcut-editor.ui:19
 #: data/ui/service-device-chooser.ui:21 data/ui/service-device-chooser.ui:25
 #: data/ui/service-error-dialog.ui:20 data/ui/service-error-dialog.ui:28
-#: src/preferences/service.js:405 src/service/plugins/share.js:179
+#: src/preferences/service.js:417 src/service/plugins/share.js:179
 #: src/service/plugins/share.js:314 src/service/plugins/share.js:445
 msgid "Cancel"
 msgstr "Mégsem"
@@ -110,7 +110,7 @@ msgid "No contacts"
 msgstr "Nincsenek névjegyek"
 
 #: data/ui/contact-chooser.ui:68 data/ui/messaging-window.ui:103
-#: data/ui/mousepad-input-dialog.ui:56 data/ui/preferences-window.ui:847
+#: data/ui/mousepad-input-dialog.ui:56 data/ui/preferences-window.ui:949
 msgid "Help"
 msgstr "Súgó"
 
@@ -124,8 +124,8 @@ msgid "Other"
 msgstr "Egyéb"
 
 #. TRANSLATORS: Share URL by SMS
-#: data/ui/legacy-messaging-dialog.ui:15 src/service/daemon.js:333
-#: src/service/daemon.js:447 src/service/plugins/sms.js:62
+#: data/ui/legacy-messaging-dialog.ui:15 src/service/daemon.js:358
+#: src/service/daemon.js:481 src/service/plugins/sms.js:62
 #: webextension/gettext.js:41
 msgid "Send SMS"
 msgstr "SMS küldése"
@@ -216,7 +216,7 @@ msgstr "Válasszon egy programot"
 msgid "Open"
 msgstr "Megnyitás"
 
-#: data/ui/preferences-device-panel.ui:53 src/preferences/service.js:504
+#: data/ui/preferences-device-panel.ui:53 src/preferences/service.js:524
 msgid "Desktop"
 msgstr "Asztali gép"
 
@@ -250,11 +250,11 @@ msgstr "Fájlok mentése ide"
 
 #: data/ui/preferences-device-panel.ui:510
 msgid "Links"
-msgstr ""
+msgstr "Hivatkozások"
 
 #: data/ui/preferences-device-panel.ui:562
 msgid "Automatically open received URLs"
-msgstr ""
+msgstr "A beérkezett URL-ek automatikus megnyitása"
 
 #: data/ui/preferences-device-panel.ui:623
 #: data/ui/preferences-device-panel.ui:2286
@@ -386,7 +386,7 @@ msgstr "Régi fajta SMS támogatás"
 
 #: data/ui/preferences-device-panel.ui:2181
 msgid "SFTP Automount"
-msgstr "SFPT automatikus csatolása"
+msgstr "SFTP automatikus csatolása"
 
 #: data/ui/preferences-device-panel.ui:2236
 #: data/ui/preferences-device-panel.ui:2562
@@ -403,7 +403,7 @@ msgstr "Eszköz beállításai"
 
 #. TRANSLATORS: Send a pair request to the device
 #: data/ui/preferences-device-panel.ui:2624
-#: data/ui/preferences-device-panel.ui:2716 src/service/daemon.js:426
+#: data/ui/preferences-device-panel.ui:2716 src/service/daemon.js:460
 msgid "Pair"
 msgstr "Párosítás"
 
@@ -421,7 +421,7 @@ msgid "Encryption Info"
 msgstr "Titkosítási információ"
 
 #. TRANSLATORS: Unpair the device and notify it
-#: data/ui/preferences-device-panel.ui:2722 src/service/daemon.js:435
+#: data/ui/preferences-device-panel.ui:2722 src/service/daemon.js:469
 msgid "Unpair"
 msgstr "Párosítás megszűntetése"
 
@@ -502,7 +502,7 @@ msgstr "Eszköz nevének szerkesztése"
 msgid "Devices"
 msgstr "Eszközök"
 
-#: data/ui/preferences-window.ui:328 src/preferences/service.js:666
+#: data/ui/preferences-window.ui:328 src/preferences/service.js:686
 msgid "Searching for devices…"
 msgstr "Eszközök keresése…"
 
@@ -526,35 +526,51 @@ msgstr "Engedélyez"
 msgid "This device is invisible to unpaired devices"
 msgstr "Ez az eszköz nem látható a párosítatlan eszközök számára"
 
-#: data/ui/preferences-window.ui:772 src/service/manager.js:163
+#: data/ui/preferences-window.ui:772 src/service/manager.js:177
 msgid "Discovery Disabled"
 msgstr "Felderítés letiltva"
 
+#: data/ui/preferences-window.ui:826
+msgid "Retry"
+msgstr "Újrapróbálkozás"
+
+#: data/ui/preferences-window.ui:858
+msgid "The <tt>openssl</tt> command-line tool does not appear to be installed.\n"
+"Use your distro's package manager to install it.\n"
+"For more information, visit <a href=\"https://github.com/gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-found\">the GSConnect wiki</a>."
+msgstr "Úgy tűnik, hogy a parancssoros <tt>openssl</tt> program nincsen telepítve.\n"
+"A telepítéséhez használja a disztribúció csomagtelepítőjét.\n"
+"További információkért tekintse meg <a href=\"https://github.com/gsconnect/gnome-shell-extension-gsconnect/wiki/Error#openssl-not-found\">a GSConnect wikit</a>."
+
+#: data/ui/preferences-window.ui:874 src/service/init.js:361
+msgid "OpenSSL not found"
+msgstr "Az OpenSSL nem található"
+
 #. TRANSLATORS: Open a dialog to connect to an IP or Bluez device
-#: data/ui/preferences-window.ui:821
+#: data/ui/preferences-window.ui:923
 msgid "Add device by IP…"
 msgstr "Eszköz hozzáadása IP szerint…"
 
-#: data/ui/preferences-window.ui:826
+#: data/ui/preferences-window.ui:928
 msgid "Display Mode"
 msgstr "Megjelenítési mód"
 
 #. TRANSLATORS: Show device indicators in the top bar
-#: data/ui/preferences-window.ui:829
+#: data/ui/preferences-window.ui:931
 msgid "Panel"
 msgstr "Panel"
 
 #. TRANSLATORS: Show devices in the user menu like Bluetooth
-#: data/ui/preferences-window.ui:835
+#: data/ui/preferences-window.ui:937
 msgid "User Menu"
 msgstr "Felhasználói menü"
 
 #. TRANSLATORS: Generate a support log
-#: data/ui/preferences-window.ui:843 src/preferences/service.js:402
+#: data/ui/preferences-window.ui:945 src/preferences/service.js:414
 msgid "Generate Support Log"
 msgstr "Naplófájl készítése terméktámogatáshoz"
 
-#: data/ui/preferences-window.ui:851
+#: data/ui/preferences-window.ui:953
 msgid "About GSConnect"
 msgstr "A GSConnect névjegye"
 
@@ -643,148 +659,152 @@ msgstr "<b>%s</b> módosításához adjon meg egy új gyorsbillentyűt"
 msgid "%s is already being used"
 msgstr "%s már használatban van"
 
-#: src/preferences/service.js:361
+#: src/preferences/service.js:373
 msgid "A complete KDE Connect implementation for GNOME"
 msgstr "Teljes KDE Connect implementáció GNOME-hoz"
 
 #. TRANSLATORS: eg. 'Translator Name <your.email@domain.com>'
-#: src/preferences/service.js:370
+#: src/preferences/service.js:382
 msgid "translator-credits"
 msgstr "Báthory Péter <bathory86p@gmail.com>"
 
-#: src/preferences/service.js:403
+#: src/preferences/service.js:415
 msgid "Debug messages are being logged. Take any steps necessary to reproduce a problem then review the log."
 msgstr "A hibakeresési üzenetek naplózásra kerülnek. Tegye meg a hiba reprodukálásához szükséges lépést, majd nézze át a naplót."
 
-#: src/preferences/service.js:406
+#: src/preferences/service.js:418
 msgid "Review Log"
 msgstr "Napló átnézése"
 
-#: src/preferences/service.js:431
+#: src/preferences/service.js:443
 msgid "Invalid Device Name"
-msgstr ""
+msgstr "Érvénytelen eszköznév"
 
 #. TRANSLATOR: %s is a list of forbidden characters
-#: src/preferences/service.js:433
+#: src/preferences/service.js:445
 #, javascript-format
 msgid "Device name must not contain any of %s and have a length of 1-32 characters"
-msgstr ""
+msgstr "Az eszköz neve nem tartalmazhatja a(z) %s karaktereket, és 1-32 karakter hosszú kell legyen"
 
-#: src/preferences/service.js:496
+#: src/preferences/service.js:516
 msgid "Laptop"
 msgstr "Laptop"
 
-#: src/preferences/service.js:498
+#: src/preferences/service.js:518
 msgid "Smartphone"
 msgstr "Okostelefon"
 
-#: src/preferences/service.js:500
+#: src/preferences/service.js:520
 msgid "Tablet"
 msgstr "Táblagép"
 
-#: src/preferences/service.js:502
+#: src/preferences/service.js:522
 msgid "Television"
 msgstr "TV"
 
-#: src/preferences/service.js:524
+#: src/preferences/service.js:544
 msgid "Unpaired"
 msgstr "Nincs párosítva"
 
-#: src/preferences/service.js:528
+#: src/preferences/service.js:548
 msgid "Disconnected"
 msgstr "Nincs csatlakoztatva"
 
-#: src/preferences/service.js:532
+#: src/preferences/service.js:552
 msgid "Connected"
 msgstr "Csatlakoztatva"
 
-#: src/preferences/service.js:668
+#: src/preferences/service.js:688
 msgid "Waiting for service…"
 msgstr "Várakozás a szolgáltatásra…"
 
 #. Notify the user
-#: src/service/daemon.js:94
+#: src/service/daemon.js:103
 msgid "Settings Migrated"
-msgstr ""
+msgstr "Beállítások átmigrálva"
 
-#: src/service/daemon.js:95
+#: src/service/daemon.js:104
 msgid "GSConnect has updated to support changes to the KDE Connect protocol. Some devices may need to be re-paired."
-msgstr ""
+msgstr "A GSConnect frissült, hogy támogassa a KDE Connect protokoll változásait. Egyes eszközöket újra kellhet párosítani."
 
-#: src/service/daemon.js:231
+#: src/service/daemon.js:246
 msgid "Click for help troubleshooting"
 msgstr "Kattintson ide, hogy segítséget kapjon a hibaelhárításhoz"
 
-#: src/service/daemon.js:242
+#: src/service/daemon.js:256
 msgid "Click for more information"
 msgstr "További információért kattintson ide"
 
-#: src/service/daemon.js:339
+#: src/service/daemon.js:364
 msgid "Dial Number"
 msgstr "Telefonszám hívása"
 
-#: src/service/daemon.js:345 src/service/daemon.js:534
+#: src/service/daemon.js:370 src/service/daemon.js:568
 #: src/service/plugins/share.js:31
 msgid "Share File"
 msgstr "Fájl megosztása"
 
-#: src/service/daemon.js:396
+#: src/service/daemon.js:421
 msgid "List available devices"
 msgstr "Elérhető eszközök listázása"
 
-#: src/service/daemon.js:405
+#: src/service/daemon.js:430
 msgid "List all devices"
 msgstr "Összes eszköz listázása"
 
-#: src/service/daemon.js:414
+#: src/service/daemon.js:439
 msgid "Target Device"
 msgstr "Céleszköz"
 
-#: src/service/daemon.js:456
+#: src/service/daemon.js:448
+msgid "Target Device Name"
+msgstr ""
+
+#: src/service/daemon.js:490
 msgid "Message Body"
 msgstr "Üzenet szövege"
 
-#: src/service/daemon.js:468 src/service/plugins/notification.js:57
+#: src/service/daemon.js:502 src/service/plugins/notification.js:57
 msgid "Send Notification"
 msgstr "Értesítés küldése"
 
-#: src/service/daemon.js:477
+#: src/service/daemon.js:511
 msgid "Notification App Name"
-msgstr "Értesítés alkalmazásnév"
+msgstr "Értesítési alkalmazásnév"
 
-#: src/service/daemon.js:486
+#: src/service/daemon.js:520
 msgid "Notification Body"
-msgstr "Értesítés törzs"
+msgstr "Értesítés törzse"
 
-#: src/service/daemon.js:495
+#: src/service/daemon.js:529
 msgid "Notification Icon"
-msgstr "Értesítés ikon"
+msgstr "Értesítési ikon"
 
-#: src/service/daemon.js:504
+#: src/service/daemon.js:538
 msgid "Notification ID"
-msgstr "Értesítés ID"
+msgstr "Értesítés ID-je"
 
-#: src/service/daemon.js:513 src/service/plugins/ping.js:13
+#: src/service/daemon.js:547 src/service/plugins/ping.js:13
 #: src/service/plugins/ping.js:20 src/service/plugins/ping.js:47
 msgid "Ping"
 msgstr "Ping"
 
-#: src/service/daemon.js:522 src/service/plugins/battery.js:247
+#: src/service/daemon.js:556 src/service/plugins/battery.js:247
 #: src/service/plugins/battery.js:276 src/service/plugins/battery.js:305
 #: src/service/plugins/findmyphone.js:22
 msgid "Ring"
 msgstr "Csörgetés"
 
-#: src/service/daemon.js:543 src/service/plugins/share.js:47
+#: src/service/daemon.js:577 src/service/plugins/share.js:47
 #: src/service/ui/messaging.js:1257 src/service/ui/messaging.js:1265
 msgid "Share Link"
 msgstr "Hivatkozás megosztása"
 
-#: src/service/daemon.js:552 src/service/plugins/share.js:39
+#: src/service/daemon.js:586 src/service/plugins/share.js:39
 msgid "Share Text"
 msgstr "Szöveg megosztása"
 
-#: src/service/daemon.js:564
+#: src/service/daemon.js:598
 msgid "Show release version"
 msgstr "Kiadás verziószámának megjelenítése"
 
@@ -822,17 +842,13 @@ msgstr "Elfogadás"
 #: src/service/device.js:960
 #, javascript-format
 msgid "Failed to pair with %s"
-msgstr ""
+msgstr "Nem sikerült párosítani ezzel: %s"
 
 #: src/service/device.js:961
 msgid "Device clocks are out of sync"
-msgstr ""
+msgstr "Az eszközök órái nincsenek szinkronban"
 
-#: src/service/init.js:347
-msgid "OpenSSL not found"
-msgstr "Az OpenSSL nem található"
-
-#: src/service/manager.js:164
+#: src/service/manager.js:178
 msgid "Discovery has been disabled due to the number of devices on this network."
 msgstr "A felderítés le lett tiltva a hálózaton lévő eszközök száma miatt."
 
@@ -937,7 +953,7 @@ msgstr "MPRIS"
 msgid "Bidirectional remote media playback control"
 msgstr "Kétirányú médialejátszó-távirányító"
 
-#: src/service/plugins/mpris.js:355
+#: src/service/plugins/mpris.js:330
 msgid "Unknown"
 msgstr "Ismeretlen"
 
@@ -1026,7 +1042,7 @@ msgstr "Sikertelen átvitel"
 #: src/service/plugins/share.js:150
 #, javascript-format
 msgid "%s is not allowed to upload files"
-msgstr "%s zámára nem engedélyezett a fájlok feltöltése"
+msgstr "%s számára nem engedélyezett a fájlok feltöltése"
 
 #: src/service/plugins/share.js:172 src/service/plugins/share.js:307
 msgid "Transferring File"
@@ -1108,7 +1124,7 @@ msgstr "SMS"
 
 #: src/service/plugins/sms.js:17
 msgid "Send and read SMS of the paired device and be notified of new SMS"
-msgstr "Értesítés új SMS-ekről, és a párosított eszköz SMS-einek olvasása és SMS-ek küldése"
+msgstr "SMS-ek küldése és fogadása a párosított eszközről, és értesítés az érkező SMS-ekről"
 
 #: src/service/plugins/sms.js:38
 msgid "New SMS (URI)"
@@ -1122,21 +1138,21 @@ msgstr "SMS válasz"
 msgid "Share SMS"
 msgstr "SMS megosztása"
 
-#: src/service/plugins/systemvolume.js:27
+#: src/service/plugins/systemvolume.js:14
 msgid "System Volume"
 msgstr "Rendszerhangerő"
 
-#: src/service/plugins/systemvolume.js:28
+#: src/service/plugins/systemvolume.js:15
 msgid "Enable the paired device to control the system volume"
-msgstr "A rendszerhangerő állításának egedélyezése a párosított eszköz számára"
+msgstr "A rendszerhangerő állításának engedélyezése a párosított eszköz számára"
 
-#: src/service/plugins/systemvolume.js:72
+#: src/service/plugins/systemvolume.js:59
 msgid "PulseAudio not found"
 msgstr "PulseAudio nem található"
 
 #: src/service/plugins/telephony.js:17
 msgid "Be notified about calls and adjust system volume during ringing/ongoing calls"
-msgstr "Értesítés a hívásokról és a rendszerhangerő állítása csörgés/folyamatban lévő hívások közben"
+msgstr "Értesítés a hívásokról, és a rendszerhangerő állítása csörgés és folyamatban lévő hívások közben"
 
 #. TRANSLATORS: Silence the actively ringing call
 #: src/service/plugins/telephony.js:29
@@ -1188,7 +1204,7 @@ msgstr "Tegnap・%s"
 #, javascript-format
 msgid "%d minute"
 msgid_plural "%d minutes"
-msgstr[0] "%d perc"
+msgstr[0] "%d perce"
 msgstr[1] "%d perc"
 
 #: src/service/ui/messaging.js:407
@@ -1216,7 +1232,7 @@ msgstr[1] "És további %d"
 #: src/service/ui/mousepad.js:115
 #, javascript-format
 msgid "Remote keyboard on %s is not active"
-msgstr "A távoli billentyűzet %s eszközön nem aktív"
+msgstr "A távoli billentyűzet a(z) %s eszközön nem aktív"
 
 #. TRANSLATORS: When no time estimate for the battery is available
 #. EXAMPLE: 42% (Estimating…)

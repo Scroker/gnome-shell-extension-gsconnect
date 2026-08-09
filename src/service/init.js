@@ -10,10 +10,12 @@ import GLib from 'gi://GLib';
 
 import Config from '../config.js';
 import {setup, setupGettext} from '../utils/setup.js';
+import {MissingOpensslError} from '../utils/exceptions.js';
 
 
 // Promise Wrappers
-// We don't use top-level await since it returns control flow to importing module, causing bugs
+// We don't use top-level await since it returns control flow
+// to importing module, causing bugs
 import('gi://EBook').then(({default: EBook}) => {
     Gio._promisify(EBook.BookClient, 'connect');
     Gio._promisify(EBook.BookClient.prototype, 'get_view');
@@ -168,7 +170,7 @@ if (settings.get_boolean('debug')) {
  * Start wl_clipboard if not under Gnome
  */
 if (!globalThis.HAVE_GNOME) {
-    debug('Not running as a Gnome extension');
+    console.debug('Not running as a Gnome extension');
     watchService();
 }
 
@@ -180,7 +182,7 @@ if (!globalThis.HAVE_GNOME) {
  * @returns {string} Return the string stripped of leading 0, and ' ()-+'
  */
 String.prototype.toPhoneNumber = function () {
-    const strippedNumber = this.replace(/^0*|[ ()+-]/g, '');
+    const strippedNumber = this.replace(/[ ()+-]/g, '').replace(/^0*/, '');
 
     if (strippedNumber.length)
         return strippedNumber;
@@ -193,13 +195,13 @@ String.prototype.toPhoneNumber = function () {
  * A simple equality check for phone numbers based on `toPhoneNumber()`
  *
  * @param {string} number - A phone number string to compare
- * @returns {boolean} If `this` and @number are equivalent phone numbers
+ * @returns {boolean} If `this` and {@link number} are equivalent phone numbers
  */
 String.prototype.equalsPhoneNumber = function (number) {
     const a = this.toPhoneNumber();
     const b = number.toPhoneNumber();
 
-    return (a.length && b.length && (a.endsWith(b) || b.endsWith(a)));
+    return Boolean(a.length && b.length && (a.endsWith(b) || b.endsWith(a)));
 };
 
 
@@ -240,7 +242,8 @@ Gio.File.rm_rf = function (file) {
 /**
  * Extend GLib.Variant with a static method to recursively pack a variant
  *
- * @param {*} [obj] - May be a GLib.Variant, Array, standard Object or literal.
+ * @param {object} [obj]
+ *        - May be a GLib.Variant, Array, standard Object or literal.
  * @returns {GLib.Variant} The resulting GVariant
  */
 function _full_pack(obj) {
@@ -296,8 +299,9 @@ GLib.Variant.full_pack = _full_pack;
 /**
  * Extend GLib.Variant with a method to recursively deepUnpack() a variant
  *
- * @param {*} [obj] - May be a GLib.Variant, Array, standard Object or literal.
- * @returns {*} The resulting object
+ * @param {object} [obj]
+ *        - May be a GLib.Variant, Array, standard Object or literal.
+ * @returns {object} The resulting object
  */
 function _full_unpack(obj) {
     obj = (obj === undefined) ? this : obj;
@@ -352,10 +356,11 @@ GLib.Variant.prototype.full_unpack = _full_unpack;
  * @param {string} keyPath - Absolute path to a private key in PEM format
  * @param {string} commonName - A unique common name for the certificate
  * @returns {Gio.TlsCertificate} A TLS certificate
+ * @throws {MissingOpensslError} on missing openssl binary
  */
 Gio.TlsCertificate.new_for_paths = function (certPath, keyPath, commonName = null) {
     if (GLib.find_program_in_path(Config.OPENSSL_PATH) === null) {
-        const error = new Error();
+        const error = new MissingOpensslError();
         error.name = _('OpenSSL not found');
         error.url = `${Config.PACKAGE_URL}/wiki/Error#openssl-not-found`;
         throw error;
