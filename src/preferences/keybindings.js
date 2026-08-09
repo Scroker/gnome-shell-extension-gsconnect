@@ -136,8 +136,8 @@ export const ShortcutChooserDialog = GObject.registerClass({
 
     _check() {
         try {
-            // No known way to check availability, so don't. Don't grab input,
-            // so we don't accidentally overload accelerators as easily
+            // No known sane way to check availability, so don't. Don't grab
+            // input, so we don't accidentally overload accelerators as easily
             const available = true;
             this.set_button.visible = available;
         } catch (e) {
