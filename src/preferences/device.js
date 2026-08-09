@@ -158,7 +158,7 @@ const ActionRowBox = GObject.registerClass({
                 );
                 if (submenu.get_n_items() > 0) {
 
-                    // Expander row con contenuto da submenu
+                    // Expander row with submenu content
                     const expander = new Adw.ExpanderRow({
                         title: label,
                         activatable: false,

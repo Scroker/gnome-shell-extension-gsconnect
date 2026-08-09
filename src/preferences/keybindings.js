@@ -60,7 +60,7 @@ export const ShortcutChooserDialog = GObject.registerClass({
         const keyController = new Gtk.EventControllerKey();
         keyController.connect('key-pressed', this._onKeyPressed.bind(this));
 
-        // Aggiungi il controller al widget
+        // Add the controller to the widget
         this.add_controller(keyController);
 
         this.cancel_button.connect('clicked', () => {
@@ -91,51 +91,51 @@ export const ShortcutChooserDialog = GObject.registerClass({
 
     _onKeyPressed(controller, keyval, keycode, state) {
 
-        // Convertiamo il valore del tasto in minuscolo
+        // Convert the key value to lowercase
         let keyvalLower = Gdk.keyval_to_lower(keyval);
-        // Usiamo il state fornito, mascherando solo i bit di modificatore validi
+        // Use the provided state, masking only the valid modifier bits
         let realMask = state & Gtk.accelerator_get_default_mod_mask();
 
-        // Ignora i modificatori puri (es. Shift, Ctrl, Alt)
+        // Ignore pure modifiers (eg. Shift, Ctrl, Alt)
         if (_MODIFIERS.includes(keyvalLower))
             return Gdk.EVENT_STOP;
 
 
-        // Normalizziamo Tab
+        // Normalize Tab
         if (keyvalLower === Gdk.KEY_ISO_Left_Tab)
             keyvalLower = Gdk.KEY_Tab;
 
 
-        // Gestiamo lo Shift (maiuscole)
+        // Handle Shift (uppercase letters)
         if (keyvalLower !== keyval)
             realMask |= Gdk.ModifierType.SHIFT_MASK;
 
 
-        // Evita che Alt+Print venga interpretato come SysRq
+        // Prevent Alt+Print from being interpreted as SysRq
         if (keyvalLower === Gdk.KEY_Sys_Req &&
             (realMask & Gdk.ModifierType.MOD1_MASK) !== 0)
             keyvalLower = Gdk.KEY_Print;
 
 
-        // Esc cancella l'editing
+        // Esc cancels editing
         if (realMask === 0 && keyvalLower === Gdk.KEY_Escape) {
             this.response = Gtk.ResponseType.CANCEL;
             return Gdk.EVENT_STOP;
         }
 
-        // Backspace disabilita il collegamento corrente
+        // Backspace disables the current shortcut
         if (realMask === 0 && keyvalLower === Gdk.KEY_BackSpace) {
             this.response = Gtk.ResponseType.REJECT;
             return Gdk.EVENT_STOP;
         }
 
-        // Ignoriamo CapsLock
+        // Ignore CapsLock
         realMask &= ~Gdk.ModifierType.LOCK_MASK;
 
-        // Se abbiamo un tasto + modificatore valido
+        // If we have a valid key and modifier
         if (keyvalLower !== 0 && realMask !== 0) {
 
-            // Imposta l'acceleratore e aggiorna l'etichetta
+            // Set the accelerator and update the label
             this.accelerator = Gtk.accelerator_name(keyvalLower, realMask);
             this.conflict_label.label = _('%s è già in uso').format(
                 Gtk.accelerator_get_label(keyvalLower, realMask)

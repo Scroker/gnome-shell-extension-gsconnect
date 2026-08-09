@@ -145,7 +145,7 @@ export const InputDialog = GObject.registerClass({
         clickController.connect('released', this._onTouchpadLongPressEnd.bind(this));
 
 
-        // Controller per il movimento
+        // Motion controller
         const motionController = new Gtk.EventControllerMotion();
         motionController.connect('enter', this._onTouchpadDragBegin.bind(this));
         motionController.connect('motion', this._onTouchpadDragUpdate.bind(this));
@@ -173,10 +173,17 @@ export const InputDialog = GObject.registerClass({
         const keyvalLower = Gdk.keyval_to_lower(keyval);
         const realMask = state & Gtk.accelerator_get_default_mod_mask();
 
-        this.alt_label.sensitive = !isAlt(keyvalLower) && (realMask & Gdk.ModifierType.MOD1_MASK);
-        this.ctrl_label.sensitive = !isCtrl(keyvalLower) && (realMask & Gdk.ModifierType.CONTROL_MASK);
-        this.shift_label.sensitive = !isShift(keyvalLower) && (realMask & Gdk.ModifierType.SHIFT_MASK);
-        this.super_label.sensitive = !isSuper(keyvalLower) && (realMask & Gdk.ModifierType.SUPER_MASK);
+        this.alt_label.sensitive = !isAlt(keyvalLower) &&
+            (realMask & Gdk.ModifierType.MOD1_MASK);
+
+        this.ctrl_label.sensitive = !isCtrl(keyvalLower) &&
+            (realMask & Gdk.ModifierType.CONTROL_MASK);
+
+        this.shift_label.sensitive = !isShift(keyvalLower) &&
+            (realMask & Gdk.ModifierType.SHIFT_MASK);
+
+        this.super_label.sensitive = !isSuper(keyvalLower) &&
+            (realMask & Gdk.ModifierType.SUPER_MASK);
 
         return false;
     }
@@ -190,10 +197,17 @@ export const InputDialog = GObject.registerClass({
         let keyvalLower = Gdk.keyval_to_lower(keyval);
         let realMask = state & Gtk.accelerator_get_default_mod_mask();
 
-        this.alt_label.sensitive = isAlt(keyvalLower) || (realMask & Gdk.ModifierType.ALT_MASK);
-        this.ctrl_label.sensitive = isCtrl(keyvalLower) || (realMask & Gdk.ModifierType.CONTROL_MASK);
-        this.shift_label.sensitive = isShift(keyvalLower) || (realMask & Gdk.ModifierType.SHIFT_MASK);
-        this.super_label.sensitive = isSuper(keyvalLower) || (realMask & Gdk.ModifierType.SUPER_MASK);
+        this.alt_label.sensitive = isAlt(keyvalLower) ||
+            (realMask & Gdk.ModifierType.MOD1_MASK);
+
+        this.ctrl_label.sensitive = isCtrl(keyvalLower) ||
+            (realMask & Gdk.ModifierType.CONTROL_MASK);
+
+        this.shift_label.sensitive = isShift(keyvalLower) ||
+            (realMask & Gdk.ModifierType.SHIFT_MASK);
+
+        this.super_label.sensitive = isSuper(keyvalLower) ||
+            (realMask & Gdk.ModifierType.SUPER_MASK);
 
         if (MOD_KEYS.includes(keyvalLower))
             return false;

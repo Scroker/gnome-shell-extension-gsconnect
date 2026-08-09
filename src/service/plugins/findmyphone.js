@@ -170,7 +170,7 @@ const Dialog = GObject.registerClass({
             return Gdk.EVENT_STOP;
         });
 
-        // Aggiungi il controller alla finestra
+        // Add the controller to the window
         this.add_controller(motionController);
         this.add_controller(keyController);
     }
