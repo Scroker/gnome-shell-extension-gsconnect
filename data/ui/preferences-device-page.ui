@@ -809,7 +809,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                         <property name="header-suffix">
                           <object class="GtkSwitch" id="disable_all_plugins">
                             <property name="valign">center</property>
-                            <property name="tooltip-text">Disable all plugin</property>
+                            <property name="tooltip-text">Enable or disable all plugins</property>
                           </object>
                         </property>
                       </object>
@@ -818,12 +818,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                       <object class="AdwPreferencesGroup">
                         <property name="visible">True</property>
                         <property name="title" translatable="yes">Experimental</property>
-                        <property name="header-suffix">
-                          <object class="GtkSwitch" id="disable_all_experimental">
-                            <property name="valign">center</property>
-                            <property name="tooltip-text">Disable all experimental plugin</property>
-                          </object>
-                        </property>
                         <child>
                           <object class="AdwActionRow">
                             <property name="height-request">56</property>
@@ -836,6 +830,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                                 <property name="halign">end</property>
                                 <property name="valign">center</property>
                                 <property name="label" translatable="yes">Clear Cache…</property>
+                                <property name="action-name">device.clearCache</property>
                               </object>
                             </child>
                           </object>

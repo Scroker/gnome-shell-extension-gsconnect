@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-import Gdk from 'gi://Gdk';
+import Gdk from 'gi://Gdk?version=4.0';
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
-import Gtk from 'gi://Gtk';
+import Gtk from 'gi://Gtk?version=4.0';
+import Adw from 'gi://Adw';
 
 
 /*
@@ -26,6 +27,7 @@ const _MODIFIERS = [
     Gdk.KEY_Super_R,
 ];
 
+
 /**
  * Response enum for ShortcutChooserDialog
  */
@@ -44,27 +46,44 @@ export const ShortcutChooserDialog = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-shortcut-editor.ui',
     Children: [
         'cancel-button', 'set-button',
-        'stack', 'summary-label',
+        'stack', 'summary-label', 'confirm',
         'shortcut-label',
     ],
-}, class ShortcutChooserDialog extends Gtk.Dialog {
+    Signals: {
+        'response': {
+            param_types: [GObject.TYPE_OBJECT, GObject.TYPE_INT],
+        },
+    },
+}, class ShortcutChooserDialog extends Adw.Dialog {
 
     _init(params) {
-        super._init({
-            transient_for: Gio.Application.get_default().get_active_window(),
-            use_header_bar: true,
-        });
-
-        this._seat = Gdk.Display.get_default().get_default_seat();
-
-        // Current accelerator or %null
-        this.accelerator = params.accelerator;
+        super._init();
+        Object.assign(this, params);
 
         // TRANSLATORS: Summary of a keyboard shortcut function
         // Example: Enter a new shortcut to change Messaging
         this.summary = _('Enter a new shortcut to change <b>%s</b>').format(
             params.summary
         );
+
+        const keyController = new Gtk.EventControllerKey();
+        keyController.connect('key-pressed', this._onKeyPressed.bind(this));
+
+        // Add the controller to the widget
+        this.add_controller(keyController);
+
+        this.cancel_button.connect('clicked', () => {
+            this.response = ResponseType.CANCEL;
+        });
+
+        this.set_button.connect('clicked', () => {
+            this.response = ResponseType.SET;
+        });
+    }
+
+    set response(response) {
+        this.emit('response', this, response);
+        this.close();
     }
 
     get accelerator() {
@@ -83,55 +102,62 @@ export const ShortcutChooserDialog = GObject.registerClass({
         this.summary_label.label = value;
     }
 
-    vfunc_key_press_event(event) {
-        let keyvalLower = Gdk.keyval_to_lower(event.keyval);
-        let realMask = event.state & Gtk.accelerator_get_default_mod_mask();
+    _onKeyPressed(controller, keyval, keycode, state) {
 
-        // TODO: Critical: 'WIDGET_REALIZED_FOR_EVENT (widget, event)' failed
+        // Convert the key value to lowercase
+        let keyvalLower = Gdk.keyval_to_lower(keyval);
+        // Use the provided state, masking only the valid modifier bits
+        let realMask = state & Gtk.accelerator_get_default_mod_mask();
+
+        // Ignore pure modifiers (eg. Shift, Ctrl, Alt)
         if (_MODIFIERS.includes(keyvalLower))
-            return true;
+            return Gdk.EVENT_STOP;
+
 
         // Normalize Tab
         if (keyvalLower === Gdk.KEY_ISO_Left_Tab)
             keyvalLower = Gdk.KEY_Tab;
 
-        // Put shift back if it changed the case of the key, not otherwise.
-        if (keyvalLower !== event.keyval)
+
+        // Handle Shift (uppercase letters)
+        if (keyvalLower !== keyval)
             realMask |= Gdk.ModifierType.SHIFT_MASK;
 
-        // HACK: we don't want to use SysRq as a keybinding (but we do want
-        // Alt+Print), so we avoid translation from Alt+Print to SysRq
-        if (keyvalLower === Gdk.KEY_Sys_Req && (realMask & Gdk.ModifierType.MOD1_MASK) !== 0)
+
+        // Prevent Alt+Print from being interpreted as SysRq
+        if (keyvalLower === Gdk.KEY_Sys_Req &&
+            (realMask & Gdk.ModifierType.MOD1_MASK) !== 0)
             keyvalLower = Gdk.KEY_Print;
 
-        // A single Escape press cancels the editing
+
+        // Esc cancels editing
         if (realMask === 0 && keyvalLower === Gdk.KEY_Escape) {
-            this.response(ResponseType.CANCEL);
-            return false;
+            this.response = ResponseType.CANCEL;
+            return Gdk.EVENT_STOP;
         }
 
         // Backspace disables the current shortcut
         if (realMask === 0 && keyvalLower === Gdk.KEY_BackSpace) {
-            this.response(ResponseType.UNSET);
-            return false;
+            this.response = ResponseType.UNSET;
+            return Gdk.EVENT_STOP;
         }
 
-        // CapsLock isn't supported as a keybinding modifier, so keep it from
-        // confusing us
+        // Ignore CapsLock
         realMask &= ~Gdk.ModifierType.LOCK_MASK;
 
+        // If we have a valid key and modifier
         if (keyvalLower !== 0 && realMask !== 0) {
-            // Set the accelerator property/label
+
+            // Set the accelerator and update the label
             this.accelerator = Gtk.accelerator_name(keyvalLower, realMask);
 
-            // Show Cancel button and switch to confirm page
             this.cancel_button.visible = true;
-            this.stack.visible_child_name = 'confirm';
+            this.stack.visible_child = this.confirm;
 
             this._check();
         }
 
-        return true;
+        return Gdk.EVENT_STOP;
     }
 
     _check() {
@@ -142,13 +168,8 @@ export const ShortcutChooserDialog = GObject.registerClass({
             this.set_button.visible = available;
         } catch (e) {
             logError(e);
-            this.response(ResponseType.CANCEL);
+            this.response = ResponseType.CANCEL;
         }
-    }
-
-    // Override with a non-blocking version of Gtk.Dialog.run()
-    run() {
-        this.show();
     }
 });
 
@@ -166,7 +187,6 @@ export async function getAccelerator(summary, accelerator = null) {
             summary: summary,
             accelerator: accelerator,
         });
-
         accelerator = await new Promise((resolve, reject) => {
             dialog.connect('response', (dialog, response) => {
                 switch (response) {
@@ -182,13 +202,10 @@ export async function getAccelerator(summary, accelerator = null) {
                         // leave the accelerator as passed in
                         break;
                 }
-
-                dialog.destroy();
-
                 resolve(accelerator);
             });
 
-            dialog.run();
+            dialog.present(Gio.Application.get_default().get_active_window());
         });
 
         return accelerator;
