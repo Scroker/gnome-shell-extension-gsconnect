@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-import Gdk from 'gi://Gdk';
+import Gdk from 'gi://Gdk?version=4.0';
 import GObject from 'gi://GObject';
 
 import * as Components from '../components/index.js';
@@ -302,6 +302,7 @@ const MousepadPlugin = GObject.registerClass({
         } else if (KeyMap.get(input.specialKey) === Gdk.KEY_BackSpace) {
             this._dialog.entry.emit('backspace');
         }
+
     }
 
     /**
