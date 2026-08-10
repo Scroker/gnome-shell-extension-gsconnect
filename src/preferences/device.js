@@ -16,7 +16,7 @@ import * as Keybindings from './keybindings.js';
 const DEVICE_PLUGINS = [];
 const DEVICE_SHORTCUTS = {};
 
-// Duration of the pairing spinner timer in secon
+// Duration of the pairing spinner timer in seconds
 const PAIR_SPINNER_SEC = 30;
 
 for (const name in plugins) {
@@ -49,20 +49,6 @@ export function titleSortFunc(row1, row2) {
     return row1.title.localeCompare(row2.title);
 }
 
-/**
- * A GtkListBox that displays action rows from a menu model.
- *
- * This widget listens for model changes and updates the rows accordingly.
- * It supports hierarchical menus by creating expandable submenu rows.
- * It also adds a special row for encryption information. Each row is
- * linked to a corresponding action in the associated action group.
- *
- * The widget rebuilds its rows when actions are added, removed, enabled,
- * or disabled.
- *
- * @class ActionRowBox
- * @augments Gtk.ListBox
- */
 const ActionRowBox = GObject.registerClass({
     GTypeName: 'GSConnectActionRowBox',
 }, class ActionRowBox extends Gtk.ListBox {
@@ -95,20 +81,6 @@ const ActionRowBox = GObject.registerClass({
         );
     }
 
-    /**
-     * Rebuilds all the rows in the list based on the model.
-     *
-     * This method handles menu model changes by rebuilding the row list.
-     * It clears the existing rows, appends new rows from the updated model,
-     * then adds the encryption row.
-     *
-     * @param {Gio.MenuModel} model - The changed menu model
-     * @param {number} position - The changed position in the menu model
-     * @param {number} removed - The number of items removed
-     * @param {number} added - The number of items added
-     *
-     * @returns {void} This method does not return anything.
-     */
     _onItemsChanged(model, position, removed, added) {
         // Clear the menu
         this.remove_all();
@@ -120,20 +92,9 @@ const ActionRowBox = GObject.registerClass({
             this.append(row);
         });
         if (this.visible)
-            this.append(this._create_encription_row());
+            this.append(this._createEncryptionRow());
     }
 
-    /**
-     * Builds an array of rows from a menu model.
-     *
-     * This method processes a `Gio.MenuModel` and constructs a list of
-     * `Adw.ActionRow` or `Adw.ExpanderRow` rows. It handles submenus by
-     * creating expandable rows for hierarchical menu structures.
-     *
-     * @param {Gio.MenuModel} menuModel - The menu model to extract items from
-     *
-     * @returns {Array<Adw.ActionRow|Adw.ExpanderRow>} The action rows
-     */
     buildActionRowsFromMenuModel(menuModel) {
         const rows = [];
 
@@ -165,11 +126,11 @@ const ActionRowBox = GObject.registerClass({
                     });
 
                     if (icon) {
-                        const icon_row = new Gtk.Image({
+                        const iconRow = new Gtk.Image({
                             gicon: icon,
                             visible: true,
                         });
-                        expander.add_prefix(icon_row);
+                        expander.add_prefix(iconRow);
                     }
 
                     const childRows = this.buildActionRowsFromMenuModel(submenu);
@@ -187,11 +148,11 @@ const ActionRowBox = GObject.registerClass({
                 });
 
                 if (iconName) {
-                    const icon_row = new Gtk.Image({
+                    const iconRow = new Gtk.Image({
                         gicon: icon,
                         visible: true,
                     });
-                    row.add_prefix(icon_row);
+                    row.add_prefix(iconRow);
                 }
                 row.set_visible(this.action_group.get_action_enabled(actionName));
                 row.connect('activated', this._onRowActivated.bind(this, actionName, target));
@@ -202,16 +163,7 @@ const ActionRowBox = GObject.registerClass({
         return rows;
     }
 
-    /**
-     * Creates an encryption information row.
-     *
-     * This method creates an `Adw.ActionRow` with encryption information.
-     * The row has a title and an icon indicating encryption status.
-     * It is connected to the encryption info action when activated.
-     *
-     * @returns {Adw.ActionRow} The encryption info row
-     */
-    _create_encription_row() {
+    _createEncryptionRow() {
         const row = new Adw.ActionRow({
             visible: true,
             title: _('Encryption Info'),
@@ -228,44 +180,12 @@ const ActionRowBox = GObject.registerClass({
         return row;
     }
 
-    /**
-     * Activates an action from the action group.
-     *
-     * This method is called when a row in the list is activated.
-     * It uses the action group to activate the specified action by name.
-     * If the action has a target, it is passed along during activation.
-     *
-     * @param {string} action_name - The name of the action to activate
-     * @param {object} target - The target associated with the action
-     *
-     * @returns {void} - This method does not return anything.
-     */
     _onRowActivated(action_name, target) {
         this.action_group.activate_action(action_name, target);
     }
 
-    /**
-     * Disconnects signals and destroys the widget.
-     *
-     * This method cleans up resources when the widget is no longer needed.
-     * It disconnects signals and then calls the superclass `destroy`
-     * method to dispose of the widget.
-     *
-     * @returns {void} - This method does not return anything.
-     */
 });
 
-/**
- * A dialog for editing commands in the GSConnect preferences.
- *
- * This class represents a command editor dialog for defining and editing
- * custom commands. The dialog includes fields for the command name and
- * line, plus a button to browse for the command file. The save button is
- * enabled only when the command name and line are valid.
- *
- * @class CommandEditor
- * @augments Adw.Dialog
- */
 const CommandEditor = GObject.registerClass({
     GTypeName: 'GSConnectPreferencesCommandEditor',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-command-editor.ui',
@@ -321,14 +241,6 @@ const CommandEditor = GObject.registerClass({
     }
 });
 
-/**
- * DeviceNavigationPage manages navigation and settings for a device.
- * This class handles device-specific configuration, including sharing
- * settings, battery, commands, and notifications.
- *
- * @class DeviceNavigationPage
- * @augments Adw.NavigationPage
- */
 export const DeviceNavigationPage = GObject.registerClass({
     GTypeName: 'GSConnectDeviceNavigationPage',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-device-page.ui',
@@ -352,8 +264,8 @@ export const DeviceNavigationPage = GObject.registerClass({
         'battery-system',
         'battery-custom-notification-value',
         'action-row-box',
-        'ringing-volume-toogle',
-        'talking-volume-toogle',
+        'ringing-volume-toggle',
+        'talking-volume-toggle',
     ],
 
 }, class DeviceNavigationPage extends Adw.NavigationPage {
@@ -364,7 +276,7 @@ export const DeviceNavigationPage = GObject.registerClass({
         this.shortcuts_actions_list_rows = [];
         this.plugin_list_rows = [];
 
-        // GSetting
+        // GSettings
         this.settings = new Gio.Settings({
             settings_schema: Config.GSCHEMA.lookup(
                 'org.gnome.Shell.Extensions.GSConnect.Device',
@@ -386,29 +298,20 @@ export const DeviceNavigationPage = GObject.registerClass({
         this._advancedSettings();
 
         // Add device's action rows
-        const action_list_box = new ActionRowBox({
+        const actionListBox = new ActionRowBox({
             action_group: this.device.action_group,
             model: this.device.menu,
         });
-        action_list_box.bind_property(
+        actionListBox.bind_property(
             'visible',
             this.action_row_box,
             'visible',
             GObject.BindingFlags.SYNC_CREATE
 
         );
-        this.action_row_box.child = action_list_box;
+        this.action_row_box.child = actionListBox;
     }
 
-    /**
-     * Sets the window title and subtitle based on the device type.
-     *
-     * This function sets the main title of the window to the device's name,
-     * and updates the subtitle based on the type of device.
-     * The subtitle is translated into the current language.
-     *
-     * @returns {void}
-     */
     _setWindowTitle() {
         this.window_title.set_title(this.device.name);
         let device_type = _('Desktop');
@@ -530,12 +433,12 @@ export const DeviceNavigationPage = GObject.registerClass({
 
         const ringing_action = settings.create_action('ringing-volume');
         this.actions.add_action(ringing_action);
-        this._setupToggleGroup(this.ringing_volume_toogle, ringing_action);
+        this._setupToggleGroup(this.ringing_volume_toggle, ringing_action);
         this.actions.add_action(settings.create_action('ringing-pause'));
 
         const talking_action = settings.create_action('talking-volume');
         this.actions.add_action(talking_action);
-        this._setupToggleGroup(this.talking_volume_toogle, talking_action);
+        this._setupToggleGroup(this.talking_volume_toggle, talking_action);
         this.actions.add_action(settings.create_action('talking-pause'));
         this.actions.add_action(settings.create_action('talking-microphone'));
 
@@ -694,16 +597,6 @@ export const DeviceNavigationPage = GObject.registerClass({
         this._storeCommands();
     }
 
-    /**
-     * Inserts a new command row into the command list.
-     *
-     * This method creates a `CommandActionRow` for the given `uuid`.
-     * The row uses the command name as its title and the command line as
-     * its subtitle. It also attaches the `edit` and `delete` button click
-     * events to their handlers, then adds the row to `command_list`.
-     *
-     * @param {string} uuid - The unique identifier of the command to insert
-     */
     _insertCommand(uuid) {
         const row = new CommandActionRow({
             title: this._commands[uuid].name,
@@ -1028,17 +921,6 @@ export const DeviceNavigationPage = GObject.registerClass({
     }
 });
 
-/**
- * CommandActionRow represents a row in the command list.
- *
- * This class extends `Adw.ActionRow` and provides buttons for editing
- * and deleting commands. It uses the `ui/command-row.ui` template.
- * The class manages command-related actions within a list, such as
- * adding, editing, and deleting commands.
- *
- * @class CommandActionRow
- * @augments Adw.ActionRow
- */
 export const CommandActionRow = GObject.registerClass({
     GTypeName: 'GSConnectCommandActionRow',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/command-row.ui',
@@ -1055,16 +937,6 @@ export const CommandActionRow = GObject.registerClass({
 
 });
 
-/**
- * DevicePairPage handles the user interface for pairing a device.
- *
- * This page is part of the preferences UI where users can see the
- * device status and start pairing. It includes a device name label,
- * a spinner for pairing progress, and a button to start pairing.
- *
- * @class DevicePairPage
- * @augments Adw.NavigationPage
- */
 export const DevicePairPage = GObject.registerClass({
     GTypeName: 'GSConnectDevicePairPage',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-device-pair.ui',
@@ -1094,18 +966,6 @@ export const DevicePairPage = GObject.registerClass({
         this.actions.add_action(status_pair);
     }
 
-    /**
-     * Pair Device Callback
-     *
-     * This method is invoked when the user clicks the "Pair" button.
-     * It performs the following actions:
-     * - Activates the 'pair' action in the device's action group.
-     * - Displays a spinner to indicate that the pairing is in progress.
-     * - Hides the "Pair" button while pairing is ongoing.
-     * - Calls `_stopSpinner()` to restore the UI after a timeout.
-     *
-     * @returns {void}
-     */
     _pairDevice() {
         this.device.action_group.activate_action('pair', null);
         this.spinner.set_visible(true);
@@ -1113,16 +973,6 @@ export const DevicePairPage = GObject.registerClass({
         this._stopSpinner();
     }
 
-    /**
-     * Stop Pair Millis Timer
-     *
-     * This method stops the spinner and restores the "Pair" button after
-     * a timeout. It is called after pairing starts to provide UI feedback.
-     * `PAIR_SPINNER_SEC` is multiplied by 1000 to convert seconds to
-     * milliseconds.
-     *
-     * @returns {void}
-     */
     _stopSpinner() {
         const PAIR_SPINNER_MILLIS = PAIR_SPINNER_SEC * 1000;
         GLib.timeout_add(GLib.PRIORITY_DEFAULT, PAIR_SPINNER_MILLIS, () => {

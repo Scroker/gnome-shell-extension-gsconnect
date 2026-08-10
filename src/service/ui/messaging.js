@@ -452,8 +452,8 @@ const MessagingConversation = GObject.registerClass({
 
         // Lookup a contact for each address object, then loop back to correct
         // each address carried by the message.
-        this._addresses = addresses.filter((elemento, indice, self) => {
-            return self.indexOf(elemento) === indice;
+        this._addresses = addresses.filter((element, index, self) => {
+            return self.indexOf(element) === index;
         });
 
         for (let i = 0, len = this.addresses.length; i < len; i++) {
@@ -1287,7 +1287,7 @@ export const MessagingWindow = GObject.registerClass({
             return;
         }
 
-        // We're creating a nloew conversation
+        // We're creating a new conversation
         const conversation = new MessagingConversation({
             device: this.device,
             plugin: this.plugin,
@@ -1351,19 +1351,19 @@ export const MessagingWindow = GObject.registerClass({
             .map(item => formatPhoneNumber(item.address))
             .filter((item, index, self) => self.indexOf(item) === index);
         if (row === null) {
-            let need_row_init = true;
-            this.internal_thread_list.forEach(row_item => {
-                const contactAddresses = Object.keys(row_item.contacts)
+            let needsRowInit = true;
+            this.internal_thread_list.forEach(rowItem => {
+                const contactAddresses = Object.keys(rowItem.contacts)
                     .map(item => formatPhoneNumber(item));
 
                 if (contactAddresses.every(item => addresses.includes(item))) {
-                    row_item.message = message;
+                    rowItem.message = message;
                     this.thread_list.invalidate_sort();
-                    need_row_init = false;
+                    needsRowInit = false;
                 }
 
             });
-            if (need_row_init) {
+            if (needsRowInit) {
                 const contacts = this.device.contacts.lookupAddresses(message.addresses);
                 row = new ConversationSummary({
                     contacts: contacts,

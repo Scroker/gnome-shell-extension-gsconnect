@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-import Gdk from 'gi://Gdk?version=4.0';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -28,15 +27,9 @@ OS:        ${GLib.get_os_info('PRETTY_NAME')}
 `);
 
 /**
- * Generate a support log from journal entries since a start time.
+ * Generate a support log.
  *
- * This function creates a temporary log file, writes the log header,
- * then executes `journalctl` to append logs since the start time.
- * Finally, it opens the generated log file for review.
- *
- * @param {string} time - Start time in 24-hour notation
- *
- * @returns {Promise<void>} Resolves when the log generation is complete.
+ * @param {string} time - Start time as a string (24-hour notation)
  */
 async function generateSupportLog(time) {
     try {
@@ -101,16 +94,6 @@ const OpenSSLAlertDialog = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/openssl-dialog.ui',
 }, class OpenSSLAlertDialog extends Adw.AlertDialog {});
 
-/**
- * Settings dialog for configuring GSConnect device settings.
- *
- * This dialog lets the user change the display mode and rename the
- * device. It validates the device name and updates settings based on
- * user interactions.
- *
- * @class SettingsDialog
- * @augments Adw.PreferencesDialog
- */
 const SettingsDialog = GObject.registerClass({
     GTypeName: 'GSConnectSettingsDialog',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-settings.ui',
@@ -134,13 +117,6 @@ const SettingsDialog = GObject.registerClass({
         });
     }
 
-    /**
-     * Gets or sets the display mode for the settings.
-     * If 'show-indicators' is enabled, the mode is 'panel';
-     * otherwise, it is 'user-menu'.
-     *
-     * @type {string} - The display mode, either 'panel' or 'user-menu'.
-     */
     get display_mode() {
         if (this.settings.get_boolean('show-indicators'))
             return 'panel';
@@ -152,30 +128,12 @@ const SettingsDialog = GObject.registerClass({
         this.settings.set_boolean('show-indicators', (mode === 'panel'));
     }
 
-    /**
-     * Handles setting the service name when the user confirms their input.
-     * Validates the input name and updates the service name if valid.
-     *
-     * @param {Gtk.Widget} widget - The widget that triggered the event
-     */
     _onSetServiceName(widget) {
         if (this._validateName(this.rename_entry.text))
             this.settings.set_string('name', this.rename_entry.text);
 
     }
 
-    /**
-     * Validates the device name to ensure it meets specific criteria:
-     * - The name must not contain any forbidden characters.
-     * - The name must not be empty.
-     * - The name must be between 1 and 32 characters in length.
-     *
-     * If validation fails, an error message shows the invalid characters
-     * and acceptable length constraints.
-     *
-     * @param {string} name - The device name to validate.
-     * @returns {boolean} True if the name is valid, false otherwise.
-     */
     _validateName(name) {
         // None of the forbidden characters and at least one non-whitespace
         if (name.trim() && /^[^"',;:.!?()[\]<>]{1,32}$/.test(name))
@@ -221,25 +179,10 @@ const ConnectDialog = GObject.registerClass({
         });
     }
 
-    /**
-     * Handles the connect button action.
-     * Sets the response type to `Gtk.ResponseType.OK` when clicked.
-     *
-     * @returns {void} - This function does not return any value.
-     */
     _onConnectButton() {
         this.response = Gtk.ResponseType.OK;
     }
 
-    /**
-     * Handles the response when the dialog is closed. If the response is
-     * OK, it validates the host and port and triggers the 'connect'
-     * action. If validation fails, an error message is displayed.
-     *
-     * @param {Gtk.ResponseType} response - The dialog response type
-     *
-     * @returns {void} - No return value. Closes the dialog after processing.
-     */
     set response(response) {
         if (response === Gtk.ResponseType.OK) {
             try {
@@ -266,15 +209,6 @@ const ConnectDialog = GObject.registerClass({
         this.close();
     }
 
-    /**
-     * Validates the provided host and port.
-     * Ensures the host is non-empty and the port is in range (1-65535).
-     * Checks if the host is a valid IP address.
-     *
-     * @param {string} host - The host to validate.
-     * @param {number} port - The port to validate.
-     * @returns {boolean} True if the host and port are valid
-     */
     _validateHostAndPort(host, port) {
         // Ensure host is non-empty and port is within valid range
         if (!host || port < 1 || port > 65535)
@@ -395,18 +329,8 @@ export const Window = GObject.registerClass({
         this._initService();
     }
 
-    /**
-     * Cleans up resources on window close:
-     * - Removes and disposes pages.
-     * - Disconnects service signals and destroys the service.
-     * - Saves window geometry and removes the refresh source.
-     *
-     * @param {Gdk.Event} event - The close request event.
-     * @returns {boolean} - Returns false to allow window close.
-     */
     vfunc_close_request(event) {
         this.device_list.disconnect(this._deviceListId);
-        // Remove row inside the list
         this.rows.forEach(row => {
             if (row.device._connectedId)
                 row.device.disconnect(row.device._connectedId);
@@ -414,12 +338,11 @@ export const Window = GObject.registerClass({
                 row.device.disconnect(row.device._pairedId);
             this.device_list.remove(row);
         });
-        // Remove pages inside the Map
+
         Array.from(this.pages.keys()).forEach(id => {
             this.pages.delete(id);
         });
 
-        // Disconnect signals
         if (this.service) {
             this.service.disconnect(this._deviceAddedId);
             this.service.disconnect(this._deviceRemovedId);
@@ -428,7 +351,6 @@ export const Window = GObject.registerClass({
             this.service = null;
         }
 
-        // Save the window geometry
         this._saveGeometry();
         GLib.source_remove(this._refreshSource);
 
@@ -516,7 +438,7 @@ export const Window = GObject.registerClass({
     }
 
     _saveGeometry() {
-        const maximized = this.is_maximized();  // GTK 4 method
+        const maximized = this.is_maximized();
         this._windowState.set_boolean('window-maximized', maximized);
 
         if (maximized || this.is_fullscreen())
@@ -563,12 +485,6 @@ export const Window = GObject.registerClass({
         this._dialog.present(this);
     }
 
-    /**
-     * Displays the settings dialog. If it doesn't already exist,
-     * it creates a new SettingsDialog instance and presents it.
-     *
-     * @returns {void}
-     */
     _settingsDialog() {
         if (this._settings_dialog === undefined) {
             this._settings_dialog = new SettingsDialog({

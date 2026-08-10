@@ -7,11 +7,11 @@ name: CI
 on:
   push:
     branches:
-      - gtk4-port
+      - main
       - 'backports/gnome-*'
   pull_request:
     branches:
-      - gtk4-port
+      - main
       - 'backports/gnome-*'
   workflow_dispatch:
 

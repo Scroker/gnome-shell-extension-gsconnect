@@ -599,7 +599,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                             <property name="visible">True</property>
                             <property name="title" translatable="yes">Volume</property>
                             <child>
-                              <object class="AdwToggleGroup" id ="ringing-volume-toogle">
+                              <object class="AdwToggleGroup" id ="ringing-volume-toggle">
                                 <property name="valign">center</property>
                                 <property name="vexpand">false</property>
                                 <child>
@@ -652,7 +652,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                             <property name="visible">True</property>
                             <property name="title" translatable="yes">Volume</property>
                             <child>
-                              <object class="AdwToggleGroup" id ="talking-volume-toogle">
+                              <object class="AdwToggleGroup" id ="talking-volume-toggle">
                                 <property name="valign">center</property>
                                 <property name="vexpand">false</property>
                                 <child>

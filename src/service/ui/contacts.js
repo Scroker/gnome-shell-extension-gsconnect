@@ -341,11 +341,33 @@ export const ContactChooser = GObject.registerClass({
     }
 
     _filter(row) {
-        const re = new RegExp(this.search_entry.text, 'i');
-        let match = re.test(row.title);
-        if (!match)
-            match = re.test(row.subtitle);
-        return match;
+        // Dynamic contact always shown
+        if (row.__tmp)
+            return true;
+
+        const query = this.search_entry.text;
+
+        // Show contact if text is substring of name
+        const queryName = query.toLocaleLowerCase();
+
+        if (row.contact.name.toLocaleLowerCase().includes(queryName))
+            return true;
+
+        // Show contact if text is substring of number
+        const queryNumber = query.toPhoneNumber();
+
+        if (queryNumber.length) {
+            for (const number of row.contact.numbers) {
+                if (number.value.toPhoneNumber().includes(queryNumber))
+                    return true;
+            }
+
+        // Query is effectively empty
+        } else if (/^0+/.test(query)) {
+            return true;
+        }
+
+        return false;
     }
 
     _sort(row1, row2) {
