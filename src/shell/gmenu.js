@@ -182,11 +182,10 @@ export class ListBox extends PopupMenu.PopupMenuSection {
     }
 
     _onGMenuItemActivate(item, event) {
-        this.emit('activate', item);
-
         if (item.submenu) {
             this.submenu = item.submenu;
         } else if (item.action_name) {
+            this.emit('activate', item);
             this.action_group.activate_action(
                 item.action_name,
                 item.action_target
@@ -292,7 +291,6 @@ export class ListBox extends PopupMenu.PopupMenuSection {
             this.addMenuItem(prev, 0);
 
             prev.connectObject('activate', (item, event) => {
-                this.emit('activate', item);
                 this._parent.submenu = null;
             }, this);
         }
