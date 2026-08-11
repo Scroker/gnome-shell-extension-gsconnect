@@ -186,11 +186,9 @@ const ConnectDialog = GObject.registerClass({
     set response(response) {
         if (response === Gtk.ResponseType.OK) {
             try {
-                // Retrieve host and port from the input fields
                 const host = this.lan_ip.text.trim();
                 const port = this.lan_port.value;
 
-                // Validate host and port
                 if (!this._validateHostAndPort(host, port)) {
                     this._showErrorMessage(_('Invalid host or port.'));
                     return;
@@ -204,13 +202,11 @@ const ConnectDialog = GObject.registerClass({
             }
         }
 
-        // Close the dialog
         this.emit('response', response);
         this.close();
     }
 
     _validateHostAndPort(host, port) {
-        // Ensure host is non-empty and port is within valid range
         if (!host || port < 1 || port > 65535)
             return false;
 
@@ -232,17 +228,14 @@ const ConnectDialog = GObject.registerClass({
     _showErrorMessage(message) {
         const win = Gtk.Application.get_default().get_active_window();
 
-        // Create a transient error dialog
         const errorDialog = new Adw.AlertDialog({
             heading: _('Oops! An error occurred…'),
             body: message,
         });
 
-        // Add a close button to dismiss the dialog
         errorDialog.add_response('close', _('Close'));
         errorDialog.set_response_appearance('close', Adw.ResponseAppearance.DESTRUCTIVE);
 
-        // Handle the response to close the dialog
         errorDialog.connect('response', () => errorDialog.close());
 
         errorDialog.present(win);

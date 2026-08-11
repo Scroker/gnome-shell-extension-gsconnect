@@ -302,7 +302,6 @@ const MousepadPlugin = GObject.registerClass({
         } else if (KeyMap.get(input.specialKey) === Gdk.KEY_BackSpace) {
             this._dialog.entry.emit('backspace');
         }
-
     }
 
     /**

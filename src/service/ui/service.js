@@ -24,7 +24,7 @@ OS:        ${GLib.get_os_info('PRETTY_NAME')}
 `;
 
 
-/*
+/**
  * A dialog for selecting a device
  */
 export const DeviceChooser = GObject.registerClass({
@@ -47,7 +47,7 @@ export const DeviceChooser = GObject.registerClass({
         ),
     },
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/service-device-chooser.ui',
-    Singals: {
+    Signals: {
         'response': {
             param_types: [GObject.TYPE_OBJECT, GObject.TYPE_INT],
         },
@@ -226,4 +226,3 @@ export const ErrorDialog = GObject.registerClass({
         return uri;
     }
 });
-

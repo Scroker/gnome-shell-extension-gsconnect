@@ -247,11 +247,10 @@ export const InputDialog = GObject.registerClass({
             request.key = String.fromCodePoint(codePoint);
         }
 
-        const pack = {
+        this.device.sendPacket({
             type: 'kdeconnect.mousepad.request',
             body: request,
-        };
-        this.device.sendPacket(pack);
+        });
 
         if (request.alt || request.ctrl || request.super)
             return true;

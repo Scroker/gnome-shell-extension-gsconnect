@@ -57,15 +57,7 @@ export function getDisplayNumber(contact, address) {
 }
 
 /**
- * AddressRow displays a contact address, usually a phone number.
- *
- * This class displays a contact's name, phone number, and phone number type
- * inside an Adw.ActionRow for use in lists or forms.
- *
- * @class AddressRow
- * @augments Adw.ActionRow
- * @param {object} contact - The contact object
- * @param {number} [index=0] - The phone number index in the contact
+ * A row for a contact address (usually a phone number).
  */
 const AddressRow = GObject.registerClass({
     GTypeName: 'GSConnectContactsAddressRow',
@@ -399,13 +391,6 @@ export const ContactChooser = GObject.registerClass({
         return row;
     }
 
-    /**
-     * Adds a new contact to the address book.
-     *
-     * @param {object} contact The contact object to add.
-     *
-     * @returns {void}
-     */
     _addContact(contact) {
         try {
             // HACK: fix missing contact names
