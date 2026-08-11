@@ -51,7 +51,7 @@ export const ShortcutChooserDialog = GObject.registerClass({
     ],
     Signals: {
         'response': {
-            param_types: [GObject.TYPE_OBJECT, GObject.TYPE_INT],
+            param_types: [GObject.TYPE_INT],
         },
     },
 }, class ShortcutChooserDialog extends Adw.Dialog {
@@ -82,7 +82,7 @@ export const ShortcutChooserDialog = GObject.registerClass({
     }
 
     set response(response) {
-        this.emit('response', this, response);
+        this.emit('response', response);
         this.close();
     }
 
@@ -162,10 +162,11 @@ export const ShortcutChooserDialog = GObject.registerClass({
 
     _check() {
         try {
-            // No known sane way to check availability, so don't. Don't grab
-            // input, so we don't accidentally overload accelerators as easily
-            const available = true;
-            this.set_button.visible = available;
+            const message = this.checkAccelerator?.(this.accelerator) || '';
+
+            this.confirm.description = message;
+            this.set_button.visible = true;
+            this.set_button.sensitive = message === '';
         } catch (e) {
             logError(e);
             this.response = ResponseType.CANCEL;
@@ -179,13 +180,15 @@ export const ShortcutChooserDialog = GObject.registerClass({
  *
  * @param {string} summary - A description of the keybinding's function
  * @param {string} accelerator - An accelerator as taken by Gtk.ShortcutLabel
+ * @param {?function(string): ?string} checkAccelerator - An accelerator check
  * @returns {string} An accelerator or %null if it should be unset.
  */
-export async function getAccelerator(summary, accelerator = null) {
+export async function getAccelerator(summary, accelerator = null, checkAccelerator = null) {
     try {
         const dialog = new ShortcutChooserDialog({
             summary: summary,
             accelerator: accelerator,
+            checkAccelerator: checkAccelerator,
         });
         accelerator = await new Promise((resolve, reject) => {
             dialog.connect('response', (dialog, response) => {

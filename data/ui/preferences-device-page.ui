@@ -746,6 +746,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                         <property name="header-suffix">
                           <object class="GtkButton">
                             <property name="visible">True</property>
+                            <signal name="clicked" handler="_onResetActionShortcuts" swapped="no"/>
                             <property name="child">
                               <object class="AdwButtonContent">
                                 <property name="visible">True</property>

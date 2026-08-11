@@ -806,12 +806,15 @@ export const DeviceNavigationPage = GObject.registerClass({
     }
 
     _setPluginKeybindings() {
+        if (this._keybindingsSuspended)
+            return;
+
         const keybindings = this.settings.get_value('keybindings').deepUnpack();
 
         this.shortcuts_actions_list_rows.forEach(row => {
             if (keybindings[row.action]) {
-                const accel = Gtk.accelerator_parse(keybindings[row.action]);
-                row.label.set_label(Gtk.accelerator_get_label(...accel));
+                const [, key, mods] = Gtk.accelerator_parse(keybindings[row.action]);
+                row.label.set_label(Gtk.accelerator_get_label(key, mods));
             } else {
                 row.label.set_label(_('Disabled'));
             }
@@ -833,24 +836,87 @@ export const DeviceNavigationPage = GObject.registerClass({
         );
     }
 
+    _suspendKeybindings() {
+        this._keybindingsSuspended = true;
+        this.settings.set_value(
+            'keybindings',
+            new GLib.Variant('a{ss}', {})
+        );
+        Gio.Settings.sync();
+    }
+
+    _restoreKeybindings(keybindings) {
+        this._keybindingsSuspended = false;
+        this.settings.set_value(
+            'keybindings',
+            new GLib.Variant('a{ss}', keybindings)
+        );
+        Gio.Settings.sync();
+        this._setPluginKeybindings();
+    }
+
+    async _waitForKeybindingsChanged() {
+        await new Promise(resolve => {
+            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+    }
+
+    _getShortcutConflict(action, accelerator, keybindings) {
+        const [valid, key, mods] = Gtk.accelerator_parse(accelerator);
+        if (!valid)
+            return null;
+
+        const acceleratorName = Gtk.accelerator_name(key, mods);
+        const acceleratorLabel = Gtk.accelerator_get_label(key, mods);
+        const conflict = Object.entries(keybindings).find(([candidateAction, binding]) => {
+            const [bindingValid, bindingKey, bindingMods] = Gtk.accelerator_parse(binding);
+
+            return candidateAction !== action &&
+                bindingValid &&
+                Gtk.accelerator_name(bindingKey, bindingMods) === acceleratorName;
+        });
+
+        if (conflict === undefined)
+            return null;
+
+        // TRANSLATORS: When a keyboard shortcut is unavailable
+        // Example: [Ctrl]+[S] is already being used
+        return _('%s is already being used').format(acceleratorLabel);
+    }
+
     async _onShortcutRowActivated(box, row) {
+        let suspended = false;
+        let nextKeybindings = null;
+
         try {
             const keybindings = this.settings.get_value('keybindings').deepUnpack();
             let accel = keybindings[row.action] || null;
+            nextKeybindings = keybindings;
 
-            accel = await Keybindings.getAccelerator(row.title, accel);
+            suspended = true;
+            this._suspendKeybindings();
+            await this._waitForKeybindingsChanged();
 
-            if (accel)
+            accel = await Keybindings.getAccelerator(row.title, accel, accelerator => {
+                return this._getShortcutConflict(row.action, accelerator, keybindings);
+            });
+
+            if (accel) {
+                if (this._getShortcutConflict(row.action, accel, keybindings))
+                    return;
+
                 keybindings[row.action] = accel;
-            else
+            } else {
                 delete keybindings[row.action];
-
-            this.settings.set_value(
-                'keybindings',
-                new GLib.Variant('a{ss}', keybindings)
-            );
+            }
         } catch (e) {
             logError(e);
+        } finally {
+            if (suspended)
+                this._restoreKeybindings(nextKeybindings);
         }
     }
 
