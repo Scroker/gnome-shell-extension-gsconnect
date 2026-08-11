@@ -105,6 +105,17 @@ const SFTPPlugin = GObject.registerClass({
         }
     }
 
+    disconnected() {
+        super.disconnected();
+
+        if (this.device.getMenuAction('device.mount') > -1)
+            this._removeSubmenu();
+
+        this._gmount = null;
+        this._directories = {};
+        this._mounting = false;
+    }
+
     handlePacket(packet) {
         switch (packet.type) {
             case 'kdeconnect.sftp':
@@ -419,6 +430,9 @@ const SFTPPlugin = GObject.registerClass({
     async _addSubmenu(mount) {
         try {
             const directories = await this._listDirectories(mount);
+
+            if (!this.device.connected)
+                return;
 
             // Submenu sections
             const dirSection = new Gio.Menu();
