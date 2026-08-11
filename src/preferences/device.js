@@ -58,12 +58,10 @@ const ActionRowBox = GObject.registerClass({
         Object.assign(this, params);
 
         this.get_style_context().add_class('boxed-list');
+        this._menuModels = new Set();
 
         // Watch the model for changes
-        this._itemsChangedId = this.model.connect(
-            'items-changed',
-            this._onItemsChanged.bind(this)
-        );
+        this._watchMenuModel(this.model);
         this._onItemsChanged();
 
         // GActions
@@ -79,6 +77,14 @@ const ActionRowBox = GObject.registerClass({
             'action-removed',
             this._onItemsChanged.bind(this)
         );
+    }
+
+    _watchMenuModel(menuModel) {
+        if (this._menuModels.has(menuModel))
+            return;
+
+        this._menuModels.add(menuModel);
+        menuModel.connect('items-changed', this._onItemsChanged.bind(this));
     }
 
     _onItemsChanged(model, position, removed, added) {
@@ -100,29 +106,35 @@ const ActionRowBox = GObject.registerClass({
 
         const nItems = menuModel.get_n_items();
         for (let i = 0; i < nItems; i++) {
-            const label = menuModel.get_item_attribute_value(i, 'label', null).get_string()[0];
+            const section = menuModel.get_item_link(i, 'section');
+            if (section) {
+                this._watchMenuModel(section);
+                rows.push(...this.buildActionRowsFromMenuModel(section));
+                continue;
+            }
+
+            const labelValue = menuModel.get_item_attribute_value(i, 'label', null);
             const iconName = menuModel.get_item_attribute_value(i, 'icon', null);
-            const actionName = menuModel.get_item_attribute_value(i, 'action', null).get_string()[0].split('.')[1];
+            const action = menuModel.get_item_attribute_value(i, 'action', null);
             const target = menuModel.get_item_attribute_value(i, 'target', null);
             const submenu = menuModel.get_item_link(i, 'submenu');
 
-            const icon = Gio.Icon.deserialize(iconName);
+            const label = labelValue ? labelValue.get_string()[0] : null;
+            const actionName = action ? action.get_string()[0].split('.')[1] : null;
+            const icon = iconName ? Gio.Icon.deserialize(iconName) : null;
 
             if (!label)
                 continue;
 
             if (submenu) {
-                submenu.connect(
-                    'items-changed',
-                    this._onItemsChanged.bind(this)
-                );
-                if (submenu.get_n_items() > 0) {
+                this._watchMenuModel(submenu);
 
-                    // Expander row with submenu content
+                const childRows = this.buildActionRowsFromMenuModel(submenu);
+                if (childRows.length > 0) {
                     const expander = new Adw.ExpanderRow({
-                        title: label,
                         activatable: false,
                         selectable: false,
+                        title: label,
                     });
 
                     if (icon) {
@@ -133,12 +145,10 @@ const ActionRowBox = GObject.registerClass({
                         expander.add_prefix(iconRow);
                     }
 
-                    const childRows = this.buildActionRowsFromMenuModel(submenu);
                     for (const row of childRows)
                         expander.add_row(row);
 
-                    if (childRows.length > 0)
-                        rows.push(expander);
+                    rows.push(expander);
                 }
             } else {
                 const row = new Adw.ActionRow({
@@ -154,8 +164,13 @@ const ActionRowBox = GObject.registerClass({
                     });
                     row.add_prefix(iconRow);
                 }
-                row.set_visible(this.action_group.get_action_enabled(actionName));
-                row.connect('activated', this._onRowActivated.bind(this, actionName, target));
+                row.set_visible(
+                    actionName ? this.action_group.get_action_enabled(actionName) : true
+                );
+
+                if (actionName)
+                    row.connect('activated', this._onRowActivated.bind(this, actionName, target));
+
                 rows.push(row);
             }
         }
