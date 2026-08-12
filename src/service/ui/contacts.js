@@ -8,6 +8,8 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw';
 
+import {normalizePhoneNumber, phoneNumbersEqual} from '../utils/phone.js';
+
 /**
  * Return a localized string for a phone number type
  * See: http://www.ietf.org/rfc/rfc2426.txt
@@ -44,12 +46,8 @@ function getNumberTypeLabel(type) {
  * @returns {string} A (possibly) better display number for the address
  */
 export function getDisplayNumber(contact, address) {
-    const number = address.toPhoneNumber();
-
     for (const contactNumber of contact.numbers) {
-        const cnumber = contactNumber.value.toPhoneNumber();
-
-        if (number.endsWith(cnumber) || cnumber.endsWith(number))
+        if (phoneNumbersEqual(address, contactNumber.value))
             return GLib.markup_escape_text(contactNumber.value, -1);
     }
 
@@ -352,11 +350,11 @@ export const ContactChooser = GObject.registerClass({
             return true;
 
         // Show contact if text is substring of number
-        const queryNumber = query.toPhoneNumber();
+        const queryNumber = normalizePhoneNumber(query);
 
         if (queryNumber.length) {
             for (const number of row.contact.numbers) {
-                if (number.value.toPhoneNumber().includes(queryNumber))
+                if (normalizePhoneNumber(number.value).includes(queryNumber))
                     return true;
             }
 
