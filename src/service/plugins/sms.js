@@ -125,6 +125,10 @@ export const MessageBox = {
     QUEUED: 6,
 };
 
+const THREAD_REQUEST_DELAY = 250;
+const THREAD_REQUEST_TIMEOUT = 10000;
+const THREAD_REQUEST_RETRIES = 2;
+
 
 /**
  * SMS Plugin
@@ -147,6 +151,13 @@ const SMSPlugin = GObject.registerClass({
 
     _init(device) {
         super._init(device, 'sms');
+
+        this._pendingDigest = false;
+        this._requestedThreads = new Set();
+        this._pendingThreads = new Set();
+        this._threadRequests = new Map();
+        this._completeThreads = new Set();
+        this._activeThreadId = null;
 
         this.cacheProperties(['_threads']);
     }
@@ -184,12 +195,77 @@ const SMSPlugin = GObject.registerClass({
 
     clearCache() {
         this._threads = {};
+        this._pendingDigest = false;
+        this._requestedThreads.clear();
+        this._pendingThreads.clear();
+        this._clearThreadRequests();
+        this._completeThreads.clear();
+        this._activeThreadId = null;
         this.notify('threads');
     }
 
     cacheLoaded() {
         this._normalizeThreads();
+        this._completeThreads.clear();
+
+        for (const [thread_id, thread] of Object.entries(this.threads)) {
+            if (thread.length > 1)
+                this._completeThreads.add(thread_id);
+        }
+
         this.notify('threads');
+    }
+
+    isThreadLoading(thread_id) {
+        return this._pendingThreads.has(`${thread_id}`);
+    }
+
+    requestConversation(thread_id) {
+        thread_id = `${thread_id}`;
+        this._activeThreadId = thread_id;
+
+        const changed = this._cancelInactiveThreadRequests(thread_id);
+
+        if (!this._requestConversation(thread_id) && changed)
+            this.notify('threads');
+    }
+
+    _finishThreadRequest(thread_id) {
+        thread_id = `${thread_id}`;
+
+        const request = this._threadRequests.get(thread_id);
+
+        if (request !== undefined) {
+            if (request.source !== 0)
+                GLib.Source.remove(request.source);
+
+            this._threadRequests.delete(thread_id);
+        }
+
+        this._pendingThreads.delete(thread_id);
+        this._requestedThreads.delete(thread_id);
+    }
+
+    _cancelInactiveThreadRequests(active_thread_id) {
+        let changed = false;
+
+        for (const thread_id of [...this._pendingThreads]) {
+            if (thread_id !== active_thread_id) {
+                this._finishThreadRequest(thread_id);
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    _clearThreadRequests() {
+        for (const request of this._threadRequests.values()) {
+            if (request.source !== 0)
+                GLib.Source.remove(request.source);
+        }
+
+        this._threadRequests.clear();
     }
 
     _getThreadCache(thread_id) {
@@ -242,19 +318,25 @@ const SMSPlugin = GObject.registerClass({
 
         // Prune threads
         for (const thread_id of Object.keys(this.threads)) {
-            if (!thread_ids.includes(thread_id))
+            if (!thread_ids.includes(thread_id)) {
                 delete this.threads[thread_id];
+                this._finishThreadRequest(thread_id);
+                this._completeThreads.delete(thread_id);
+            }
         }
 
-        // Request each new or newer thread
+        // Merge each thread summary into the cache
         for (let i = 0, len = messages.length; i < len; i++) {
             const message = messages[i];
             const cache = this.threads[message.thread_id];
 
             if (cache === undefined) {
-                this._requestConversation(message.thread_id);
+                this.threads[message.thread_id] = [message];
+                this._completeThreads.delete(message.thread_id);
                 continue;
             }
+
+            const latest = (cache.length) ? cache[cache.length - 1].date : 0;
 
             // If this message is marked read, mark the rest as read
             if (message.read === MessageStatus.READ) {
@@ -262,12 +344,16 @@ const SMSPlugin = GObject.registerClass({
                     msg.read = MessageStatus.READ;
             }
 
-            // If we don't have a thread for this message or it's newer
-            // than the last message in the cache, request the thread
-            if (!cache.length || cache[cache.length - 1].date < message.date)
-                this._requestConversation(message.thread_id);
+            if (cache.find(msg => msg.date === message.date) === undefined) {
+                cache.push(message);
+                this.threads[message.thread_id] = cache.sort((a, b) => a.date - b.date);
+
+                if (message.date > latest)
+                    this._completeThreads.delete(message.thread_id);
+            }
         }
 
+        this._requestPendingConversations();
         this.notify('threads');
     }
 
@@ -292,13 +378,21 @@ const SMSPlugin = GObject.registerClass({
      * Parse a conversation (thread of messages) and sort them
      *
      * @param {object[]} thread - A list of sms message objects from a thread
+     * @param {boolean} requested - Whether this is a response to our request
      */
-    _handleThread(thread) {
-        // If there are no addresses this will cause major problems...
-        if (!thread[0].addresses || !thread[0].addresses[0])
-            return;
-
+    _handleThread(thread, requested = false) {
         const thread_id = thread[0].thread_id;
+
+        if (requested)
+            this._finishThreadRequest(thread_id);
+
+        // If there are no addresses this will cause major problems...
+        if (!thread[0].addresses || !thread[0].addresses[0]) {
+            if (requested)
+                this.notify('threads');
+            return;
+        }
+
         const cache = this._getThreadCache(thread_id);
 
         // Handle each message
@@ -324,6 +418,10 @@ const SMSPlugin = GObject.registerClass({
 
         // Sort the thread by ascending date and notify
         this.threads[thread_id] = cache.sort((a, b) => a.date - b.date);
+
+        if (requested)
+            this._completeThreads.add(thread_id);
+
         this.notify('threads');
     }
 
@@ -335,8 +433,16 @@ const SMSPlugin = GObject.registerClass({
     _handleMessages(messages) {
         try {
             // If messages is empty there's nothing to do...
-            if (messages.length === 0)
+            if (messages.length === 0) {
+                if (this._pendingDigest)
+                    this._pendingDigest = false;
+
+                this._requestedThreads.clear();
+                this._pendingThreads.clear();
+                this._clearThreadRequests();
+                this.notify('threads');
                 return;
+            }
 
             const thread_ids = [];
 
@@ -358,13 +464,20 @@ const SMSPlugin = GObject.registerClass({
                 }
             }
 
-            // If there's multiple thread_id's it's a summary of threads
-            if (thread_ids.some(id => id !== thread_ids[0]))
-                this._handleDigest(messages, thread_ids);
+            const unique_thread_ids = [...new Set(thread_ids)];
+            const requested = unique_thread_ids.length === 1 &&
+                this._requestedThreads.has(unique_thread_ids[0]);
 
-            // Otherwise this is single thread or new message
-            else
-                this._handleThread(messages);
+            // If this is a response to request_conversations or there's
+            // multiple thread_id's, it's a summary of threads
+            if ((this._pendingDigest && !requested) ||
+                unique_thread_ids.length > 1) {
+                this._pendingDigest = false;
+                this._handleDigest(messages, unique_thread_ids);
+            } else {
+                // Otherwise this is single thread or new message
+                this._handleThread(messages, requested);
+            }
         } catch (e) {
             debug(e, this.device.name);
         }
@@ -374,8 +487,74 @@ const SMSPlugin = GObject.registerClass({
      * Request a list of messages from a single thread.
      *
      * @param {number} thread_id - The id of the thread to request
+     * @returns {boolean} Whether a request is pending
      */
     _requestConversation(thread_id) {
+        thread_id = `${thread_id}`;
+
+        if (this._completeThreads.has(thread_id))
+            return false;
+
+        if (this.threads[thread_id] === undefined)
+            return false;
+
+        if (this._pendingThreads.has(thread_id))
+            return false;
+
+        this._pendingThreads.add(thread_id);
+        this.notify('threads');
+
+        if (this._pendingDigest)
+            return true;
+
+        this._queueConversationRequest(thread_id);
+        return true;
+    }
+
+    _queueConversationRequest(thread_id) {
+        if (this._requestedThreads.has(thread_id))
+            return;
+
+        const request = this._threadRequests.get(thread_id) ?? {
+            retries: 0,
+            source: 0,
+        };
+
+        if (request.source !== 0)
+            GLib.Source.remove(request.source);
+
+        request.source = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT,
+            THREAD_REQUEST_DELAY,
+            () => this._sendQueuedConversationRequest(thread_id)
+        );
+
+        this._threadRequests.set(thread_id, request);
+    }
+
+    _sendQueuedConversationRequest(thread_id) {
+        const request = this._threadRequests.get(`${thread_id}`);
+
+        if (request !== undefined)
+            request.source = 0;
+
+        if (!this._pendingThreads.has(`${thread_id}`))
+            return GLib.SOURCE_REMOVE;
+
+        if (this._activeThreadId !== null && `${thread_id}` !== this._activeThreadId)
+            return GLib.SOURCE_REMOVE;
+
+        this._sendConversationRequest(thread_id);
+        return GLib.SOURCE_REMOVE;
+    }
+
+    _sendConversationRequest(thread_id) {
+        if (this._requestedThreads.has(thread_id))
+            return;
+
+        this._requestedThreads.add(thread_id);
+        this._scheduleThreadRequestTimeout(thread_id);
+
         this.device.sendPacket({
             type: 'kdeconnect.sms.request_conversation',
             body: {
@@ -384,10 +563,71 @@ const SMSPlugin = GObject.registerClass({
         });
     }
 
+    _scheduleThreadRequestTimeout(thread_id) {
+        const request = this._threadRequests.get(thread_id) ?? {
+            retries: 0,
+            source: 0,
+        };
+
+        if (request.source !== 0)
+            GLib.Source.remove(request.source);
+
+        request.source = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT,
+            THREAD_REQUEST_TIMEOUT,
+            () => this._onThreadRequestTimeout(thread_id)
+        );
+
+        this._threadRequests.set(thread_id, request);
+    }
+
+    _retryThreadRequest(thread_id) {
+        thread_id = `${thread_id}`;
+
+        const request = this._threadRequests.get(thread_id);
+
+        if (request === undefined || !this._pendingThreads.has(thread_id))
+            return;
+
+        if (request.retries >= THREAD_REQUEST_RETRIES) {
+            debug(`Timed out requesting SMS thread ${thread_id}`, this.device.name);
+            this._finishThreadRequest(thread_id);
+            this.notify('threads');
+            return;
+        }
+
+        request.retries += 1;
+        this._requestedThreads.delete(thread_id);
+        this._sendConversationRequest(thread_id);
+    }
+
+    _onThreadRequestTimeout(thread_id) {
+        const request = this._threadRequests.get(`${thread_id}`);
+
+        if (request !== undefined)
+            request.source = 0;
+
+        this._retryThreadRequest(thread_id);
+        return GLib.SOURCE_REMOVE;
+    }
+
+    _requestPendingConversations() {
+        for (const thread_id of this._pendingThreads) {
+            if (this._activeThreadId !== null && thread_id !== this._activeThreadId)
+                continue;
+
+            this._queueConversationRequest(thread_id);
+        }
+    }
+
     /**
      * Request a list of the last message in each unarchived thread.
      */
     _requestConversations() {
+        if (this._pendingDigest)
+            return;
+
+        this._pendingDigest = true;
         this.device.sendPacket({
             type: 'kdeconnect.sms.request_conversations',
         });
@@ -567,6 +807,8 @@ const SMSPlugin = GObject.registerClass({
             window.close();
             window.disconnect(this._windowId);
         }
+
+        this._clearThreadRequests();
         super.destroy();
     }
 });
