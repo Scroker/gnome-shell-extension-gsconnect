@@ -13,6 +13,7 @@ import {MessagingInputText} from './components.js';
 
 import * as Contacts from './contacts.js';
 import * as Sms from '../plugins/sms.js';
+import {normalizePhoneNumber, phoneNumbersEqual} from '../utils/phone.js';
 import * as URI from '../utils/uri.js';
 import '../utils/ui.js';
 
@@ -451,15 +452,13 @@ const MessagingConversation = GObject.registerClass({
             const contact = this.device.contacts.query({number: address});
 
             // Get corrected address
-            let number = address.toPhoneNumber();
+            let number = normalizePhoneNumber(address);
 
             if (!number)
                 continue;
 
             for (const contactNumber of contact.numbers) {
-                const cnumber = contactNumber.value.toPhoneNumber();
-
-                if (cnumber && (number.endsWith(cnumber) || cnumber.endsWith(number))) {
+                if (phoneNumbersEqual(number, contactNumber.value)) {
                     number = contactNumber.value;
                     break;
                 }
@@ -1293,12 +1292,8 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _includesAddress(addresses, addressObj) {
-        const number = addressObj.address.toPhoneNumber();
-
         for (const haystackObj of addresses) {
-            const tnumber = haystackObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (phoneNumbersEqual(addressObj.address, haystackObj.address))
                 return true;
         }
 

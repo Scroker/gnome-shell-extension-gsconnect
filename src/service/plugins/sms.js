@@ -10,6 +10,7 @@ import Plugin from '../plugin.js';
 import LegacyMessagingDialog from '../ui/legacyMessaging.js';
 import {MessagingWindow, ConversationChooser} from '../ui/messaging.js';
 import SmsURI from '../utils/uri.js';
+import {normalizePhoneNumber, phoneNumbersEqual} from '../utils/phone.js';
 
 
 export const Metadata = {
@@ -505,7 +506,7 @@ const SMSPlugin = GObject.registerClass({
 
             // Lookup contacts
             const addresses = uri.recipients.map(number => {
-                return {address: number.toPhoneNumber()};
+                return {address: normalizePhoneNumber(number)};
             });
             const contacts = this.device.contacts.lookupAddresses(addresses);
 
@@ -526,12 +527,8 @@ const SMSPlugin = GObject.registerClass({
         if (!thread?.[0]?.addresses)
             return false;
 
-        const number = addressObj.address.toPhoneNumber();
-
         for (const taddressObj of thread[0].addresses) {
-            const tnumber = taddressObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (phoneNumbersEqual(addressObj.address, taddressObj.address))
                 return true;
         }
 
