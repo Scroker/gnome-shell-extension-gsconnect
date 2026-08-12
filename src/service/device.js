@@ -189,17 +189,16 @@ const Device = GObject.registerClass({
         if (!this.channel)
             return '';
 
-        // Bluetooth connections have no certificate so we use the host address
-        if (this.connection_type === 'bluetooth') {
-            // TRANSLATORS: Bluetooth address for remote device
-            return _('Bluetooth device at %s').format('???');
-        }
-
         // FIXME: another ugly reach-around
-        const localCert = this.service.manager.backends.get('lan')?.certificate;
+        const localCert = this.channel?.backend?.certificate ??
+            this.service.manager.backends.get('lan')?.certificate;
         const remoteCert = this.channel?.peer_certificate;
-        if (!localCert || !remoteCert)
+        if (!localCert || !remoteCert) {
+            if (this.connection_type === 'bluetooth')
+                return _('Bluetooth device at %s').format(this.channel.address);
+
             return '';
+        }
 
         const checksum = new GLib.Checksum(GLib.ChecksumType.SHA256);
         let [a, b] = [localCert.pubkey_der(), remoteCert.pubkey_der()];
@@ -912,13 +911,13 @@ const Device = GObject.registerClass({
     _setPaired(paired) {
         this._resetPairRequest();
 
-        // For TCP connections we store or reset the TLS Certificate
-        if (this.connection_type === 'lan') {
+        // Store or reset the peer certificate for transports that expose one.
+        if (['lan', 'bluetooth'].includes(this.connection_type)) {
             if (paired) {
-                this.settings.set_string(
-                    'certificate-pem',
-                    this.channel.peer_certificate.certificate_pem
-                );
+                const cert = this.channel?.peer_certificate?.certificate_pem;
+
+                if (cert)
+                    this.settings.set_string('certificate-pem', cert);
             } else {
                 this.settings.reset('certificate-pem');
             }

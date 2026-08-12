@@ -38,6 +38,11 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <key name="discoverable" type="b">
       <default>true</default>
     </key>
+    <key name="bluetooth-enabled" type="b">
+      <default>false</default>
+      <summary>Enable experimental Bluetooth transport</summary>
+      <description>Use BlueZ RFCOMM to communicate with devices over Bluetooth.</description>
+    </key>
     <key name="missing-openssl" type="b">
       <default>false</default>
     </key>
@@ -195,4 +200,3 @@ SPDX-License-Identifier: GPL-2.0-or-later
     </key>
   </schema>
 </schemalist>
-

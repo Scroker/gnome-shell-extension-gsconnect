@@ -7,6 +7,7 @@ backend_tests_metadir = join_paths(installed_tests_metadir, 'backends')
 
 # Backend Suites
 backend_tests = [
+  'BluetoothBackend',
   'LanBackend',
 ]
 
@@ -40,4 +41,3 @@ foreach test : backend_tests
     )
   endif
 endforeach
-

@@ -25,10 +25,14 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <!-- ProtocolDescriptorList -->
   <attribute id="0x0004">
     <sequence>
+      <!-- L2CAP -->
+      <sequence>
+        <uuid value="0x0100" />
+      </sequence>
       <!-- RFCOMM -->
       <sequence>
         <uuid value="0x0003" />
-        <!-- <uint8 value="0x06" /> -->
+        <uint8 value="0x06" name="channel" />
       </sequence>
     </sequence>
   </attribute>

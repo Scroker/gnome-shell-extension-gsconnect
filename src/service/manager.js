@@ -11,6 +11,7 @@ import * as Core from './core.js';
 import * as DBus from './utils/dbus.js';
 import Device from './device.js';
 
+import * as BluetoothBackend from './backends/bluetooth.js';
 import * as LanBackend from './backends/lan.js';
 
 import {MissingOpensslError} from '../utils/exceptions.js';
@@ -21,6 +22,7 @@ const DEVICE_IFACE = Config.DBUS.lookup_interface(DEVICE_NAME);
 
 
 const backends = {
+    bluetooth: BluetoothBackend,
     lan: LanBackend,
 };
 
@@ -80,6 +82,7 @@ const Manager = GObject.registerClass({
         super._init(params);
 
         this._exported = new WeakMap();
+        this._bluetoothEnabledId = 0;
         this._reconnectId = 0;
 
         this._settings = new Gio.Settings({
@@ -245,6 +248,11 @@ const Manager = GObject.registerClass({
         this.settings.bind('debug', this, 'debug', 0);
         this.settings.bind('discoverable', this, 'discoverable', 0);
         this.settings.bind('name', this, 'name', 0);
+
+        this._bluetoothEnabledId = this.settings.connect(
+            'changed::bluetooth-enabled',
+            this._syncBluetoothBackend.bind(this)
+        );
     }
 
     _onDebugChanged(debug = false) {
@@ -278,6 +286,12 @@ const Manager = GObject.registerClass({
                     return false;
             }
 
+            if (channel.address.startsWith('bluetooth://') &&
+                !this.settings.get_boolean('bluetooth-enabled')) {
+                debug(`${channel.identity.body.deviceName}: Bluetooth disabled`);
+                return false;
+            }
+
             device.setChannel(channel);
             return true;
         } catch (e) {
@@ -296,6 +310,7 @@ const Manager = GObject.registerClass({
 
                 // Try to create the backend and track it if successful
                 const backend = new module.ChannelService({
+                    certificate: this.certificate,
                     id: this.id,
                     name: this.name,
                 });
@@ -308,11 +323,30 @@ const Manager = GObject.registerClass({
                 );
 
                 // Now try to start the backend, allowing us to retry if we fail
-                backend.start();
+                if (name !== 'bluetooth')
+                    backend.start();
             } catch (e) {
                 if (Gio.Application.get_default())
                     Gio.Application.get_default().notify_error(e);
             }
+        }
+
+        this._syncBluetoothBackend();
+    }
+
+    _syncBluetoothBackend() {
+        const backend = this.backends.get('bluetooth');
+
+        if (backend === undefined)
+            return;
+
+        try {
+            if (this.settings.get_boolean('bluetooth-enabled'))
+                backend.start();
+            else
+                backend.stop();
+        } catch (e) {
+            logError(e, 'Bluetooth');
         }
     }
 
@@ -462,6 +496,10 @@ const Manager = GObject.registerClass({
                 continue;
 
             if (device.paired) {
+                if (device.connection_type === 'bluetooth' &&
+                    !this.settings.get_boolean('bluetooth-enabled'))
+                    continue;
+
                 this.identify(device.settings.get_string('last-connection'));
                 continue;
             }
@@ -554,6 +592,12 @@ const Manager = GObject.registerClass({
      */
     destroy() {
         this.stop();
+
+        if (this._bluetoothEnabledId !== 0) {
+            this.settings.disconnect(this._bluetoothEnabledId);
+            this._bluetoothEnabledId = 0;
+        }
+
         this.set_connection(null);
     }
 });
