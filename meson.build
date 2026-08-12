@@ -95,6 +95,18 @@ run_target(
   ]
 )
 
+npm = find_program('npm', required: false)
+
+if npm.found()
+  run_target(
+    'update-libphonenumber',
+    command: [
+      env_util,
+      join_paths(meson.project_source_root(), 'build-aux', 'update-libphonenumber.sh')
+    ]
+  )
+endif
+
 
 # Post-Install script for distributions without the hooks
 gnome.post_install(
