@@ -75,6 +75,18 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </child>
         <child>
           <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Experimental</property>
+            <child>
+              <object class="AdwSwitchRow" id="bluetooth-row">
+                <property name="title" translatable="yes">Bluetooth Transport</property>
+                <property name="subtitle" translatable="yes">Use Bluetooth to connect to devices</property>
+                <property name="action-name">win.bluetooth-enabled</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Support</property>
             <child>
               <object class="AdwButtonRow">

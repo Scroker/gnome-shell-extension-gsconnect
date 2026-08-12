@@ -344,6 +344,7 @@ export const Window = GObject.registerClass({
 
         // Setting: Keep Alive When Locked
         this.add_action(this.settings.create_action('keep-alive-when-locked'));
+        this.add_action(this.settings.create_action('bluetooth-enabled'));
 
         // Broadcast automatically every 5 seconds if there are no devices yet
         this._refreshSource = GLib.timeout_add_seconds(
