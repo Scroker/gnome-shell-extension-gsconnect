@@ -759,8 +759,9 @@ const MessagingConversation = GObject.registerClass({
      * Add a message to the conversation.
      *
      * @param {object} message - A message object
+     * @param {boolean} scroll - Whether to scroll to the message if it is new
      */
-    addMessage(message) {
+    addMessage(message, scroll = false) {
         try {
             // TODO: Unsupported MessageBox
             if (message.type !== Sms.MessageBox.INBOX &&
@@ -778,6 +779,7 @@ const MessagingConversation = GObject.registerClass({
                 return;
             }
 
+            const shouldScroll = scroll && message.date >= this.latest;
             const row = this._createMessageRow(message);
 
             // Insert the message in its sorted location
@@ -808,6 +810,9 @@ const MessagingConversation = GObject.registerClass({
 
             this.list.invalidate_sort();
             this.list.invalidate_headers();
+
+            if (shouldScroll)
+                this.scrollToLatest();
         } catch (e) {
             debug(e);
         }

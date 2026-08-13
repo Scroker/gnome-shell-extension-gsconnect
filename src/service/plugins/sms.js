@@ -352,8 +352,9 @@ const SMSPlugin = GObject.registerClass({
      * Handle a new single message
      *
      * @param {object} message - A message object
+     * @param {boolean} scroll - Whether to scroll an open conversation to it
      */
-    _handleMessage(message) {
+    _handleMessage(message, scroll = false) {
         let conversation = null;
 
         // If the window is open, try and find an active conversation
@@ -362,7 +363,7 @@ const SMSPlugin = GObject.registerClass({
 
         // If there's an active conversation, we should log the message now
         if (conversation)
-            conversation.addMessage(message);
+            conversation.addMessage(message, scroll);
     }
 
     /**
@@ -403,7 +404,7 @@ const SMSPlugin = GObject.registerClass({
                 Object.assign(cacheMessage, message);
             } else {
                 cache.push(message);
-                this._handleMessage(message);
+                this._handleMessage(message, !requested);
             }
         }
 
