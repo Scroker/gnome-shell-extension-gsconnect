@@ -118,6 +118,7 @@ const Device = GObject.registerClass({
 
         this._outputLock = false;
         this._outputQueue = [];
+        this._destroyed = false;
 
         // GSettings
         this.settings = new Gio.Settings({
@@ -382,11 +383,17 @@ const Device = GObject.registerClass({
         try {
             let packet = null;
 
-            while ((packet = await this.channel.readPacket())) {
+            while ((packet = await channel.readPacket())) {
+                if (this._destroyed || this.channel !== channel)
+                    break;
+
                 debug(packet, this.name);
                 this.handlePacket(packet);
             }
         } catch (e) {
+            if (this._destroyed)
+                return;
+
             if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 debug(e, this.name);
 
@@ -1159,13 +1166,17 @@ const Device = GObject.registerClass({
     }
 
     destroy() {
+        this._destroyed = true;
+
         // Drop the default contacts store if we were using it
         if (this._contacts !== undefined)
             this._contacts = Components.release('contacts');
 
         // Close the channel if still connected
-        if (this.channel !== null)
-            this.channel.close();
+        const channel = this.channel;
+        this._channel = null;
+        if (channel !== null)
+            channel.close();
 
         // Synchronously destroy plugins
         this._plugins.forEach(plugin => plugin.destroy());
