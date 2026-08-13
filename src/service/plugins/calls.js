@@ -257,18 +257,24 @@ const CallsPlugin = GObject.registerClass({
     }
 
     answerCall(phoneNumber = null, callPath = null) {
-        const window = this._ensureWindow();
-        window.showCall(phoneNumber, 'talking', callPath, 'close');
-
-        return this._bluetoothTelephony?.answerIncomingCall(this.device,
-            phoneNumber, callPath)
+        return Promise.resolve(this._bluetoothTelephony?.answerIncomingCall(
+            this.device, phoneNumber, callPath))
             .then(answeredPath => {
-                if (typeof answeredPath === 'string')
-                    window.call_path = answeredPath;
+                if (answeredPath) {
+                    const window = this._ensureWindow();
+                    const path = typeof answeredPath === 'string'
+                        ? answeredPath
+                        : callPath;
+
+                    window.showCall(phoneNumber, 'talking', path, 'close');
+                }
 
                 return answeredPath;
             })
-            .catch(e => debug(e, this.device.name));
+            .catch(e => {
+                debug(e, this.device.name);
+                return false;
+            });
     }
 
     showIncomingCall(phoneNumber = null) {
@@ -721,8 +727,28 @@ const CallStatusPage = GObject.registerClass({
     }
 
     _onAnswerClicked() {
-        this.state = 'talking';
-        this.plugin.answerCall(this.number, this.call_path);
+        this.answer_button.sensitive = false;
+
+        Promise.resolve(this.plugin.answerCall(this.number, this.call_path))
+            .then(answered => {
+                if (answered)
+                    this.state = 'talking';
+                else
+                    this.showAnswerError();
+            })
+            .catch(e => {
+                debug(e, this.plugin.device.name);
+                this.showAnswerError();
+            });
+    }
+
+    showAnswerError() {
+        // TRANSLATORS: An incoming call could not be answered from the PC
+        this.title_label.label = _('Could Not Answer Call');
+        this.status_image.icon_name = 'call-outgoing-unsuccessful-symbolic';
+        this.answer_button.sensitive = true;
+        this.answer_button.visible = true;
+        this.hangup_button.visible = true;
     }
 
     _onHangupClicked() {

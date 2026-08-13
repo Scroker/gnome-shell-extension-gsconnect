@@ -50,6 +50,17 @@ const Notifications = {
         isClearable: true,
         actions: ['One', 'Two', 'Three'],
     },
+    repliableActionable: {
+        appName: 'Application',
+        id: 'test-notification',
+        title: 'Notification Title',
+        text: 'Notification Body',
+        ticker: 'Notification Title - Notification Body',
+        time: '1599103247103',
+        isClearable: true,
+        requestReplyId: GLib.uuid_string_random(),
+        actions: ['Call Back'],
+    },
 };
 
 
@@ -244,6 +255,23 @@ describe('The notification plugin', function () {
         expect(notif.buttons[2].label).toBe('Three');
     });
 
+    it('uses the remote notification id for actions', async function () {
+        localPlugin._listener.fakeNotification(Notifications.repliableActionable);
+
+        await remotePlugin.awaitPacket('kdeconnect.notification',
+            Notifications.repliableActionable);
+
+        expect(remotePlugin.device.showNotification).toHaveBeenCalled();
+
+        const invocation = remotePlugin.device.showNotification.calls.first();
+        const notif = invocation.args[0];
+        const [id, action] = notif.buttons[0].parameter.deepUnpack();
+
+        expect(notif.id).toContain(Notifications.repliableActionable.requestReplyId);
+        expect(id).toBe(Notifications.repliableActionable.id);
+        expect(action).toBe('Call Back');
+    });
+
     it('can activate actions for notifications', function () {
         spyOn(localPlugin.device, 'sendPacket');
 
@@ -290,4 +318,3 @@ describe('The notification plugin', function () {
             expect(remotePlugin.device.get_action_enabled(action)).toBeFalse();
     });
 });
-

@@ -134,14 +134,34 @@ const BluetoothTelephony = GObject.registerClass({
     }
 
     async _getCalls(gatewayPath) {
-        const reply = await this._call(
-            gatewayPath,
-            OFONO_VOICE_CALL_MANAGER_IFACE,
-            'GetCalls',
-            null,
-            new GLib.VariantType('(a{oa{sv}})')
-        );
-        return reply.recursiveUnpack()[0];
+        try {
+            const reply = await this._call(
+                gatewayPath,
+                OFONO_VOICE_CALL_MANAGER_IFACE,
+                'GetCalls',
+                null,
+                new GLib.VariantType('(a{oa{sv}})')
+            );
+            return reply.recursiveUnpack()[0];
+        } catch (e) {
+            debug(e, 'Bluetooth org.ofono.VoiceCallManager.GetCalls');
+        }
+
+        const objects = await this._getManagedObjects();
+        const calls = {};
+
+        for (const [path, interfaces] of Object.entries(objects)) {
+            if (!path.startsWith(`${gatewayPath}/`))
+                continue;
+
+            const properties = interfaces[CALL_IFACE] ??
+                interfaces[OFONO_VOICE_CALL_IFACE];
+
+            if (properties)
+                calls[path] = properties;
+        }
+
+        return calls;
     }
 
     async _findGatewayPaths(device) {
@@ -258,11 +278,17 @@ const BluetoothTelephony = GObject.registerClass({
             return true;
         }
 
-        const path = await this._findCall(device, phoneNumber, [
-            'incoming',
-            'waiting',
-            'alerting',
-        ]);
+        let path = null;
+
+        try {
+            path = await this._findCall(device, phoneNumber, [
+                'incoming',
+                'waiting',
+                'alerting',
+            ]);
+        } catch (e) {
+            debug(e, 'Bluetooth find incoming call');
+        }
 
         if (path !== null) {
             try {
