@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-import GLib from 'gi://GLib';
-
 import * as Utils from '../fixtures/utils.js';
 
 
@@ -100,6 +98,10 @@ describe('The telephony plugin', function () {
         }
     });
 
+    afterEach(function () {
+        localCallsPlugin?._clearCallWatch();
+    });
+
     it('can be loaded', async function () {
         await testRig.loadPlugins();
 
@@ -154,19 +156,29 @@ describe('The telephony plugin', function () {
         ]);
     });
 
-    it('can answer and hang up Bluetooth calls', function () {
+    it('can answer and hang up Bluetooth calls', async function () {
+        const window = {
+            showCall: jasmine.createSpy('showCall'),
+            call_path: '',
+        };
+
+        spyOn(localCallsPlugin, '_ensureWindow').and.returnValue(window);
         spyOn(localCallsPlugin._bluetoothTelephony, 'answerIncomingCall')
             .and.callThrough();
         spyOn(localCallsPlugin._bluetoothTelephony, 'hangupCall')
             .and.callThrough();
 
-        localCallsPlugin.answerCall('555-555-5555');
-        localCallsPlugin.hangupCall('555-555-5555');
+        await localCallsPlugin.answerCall('555-555-5555');
+        await localCallsPlugin.hangupCall('555-555-5555');
 
         expect(localCallsPlugin._bluetoothTelephony.answerIncomingCall)
-            .toHaveBeenCalledWith(localCallsPlugin.device, '555-555-5555');
+            .toHaveBeenCalledWith(localCallsPlugin.device, '555-555-5555',
+                null);
         expect(localCallsPlugin._bluetoothTelephony.hangupCall)
-            .toHaveBeenCalledWith(localCallsPlugin.device, '555-555-5555');
+            .toHaveBeenCalledWith(localCallsPlugin.device, '555-555-5555',
+                null);
+        expect(window.showCall).toHaveBeenCalledWith(
+            '555-555-5555', 'talking', null, 'close');
     });
 
     it('can place outgoing calls', async function () {
@@ -175,12 +187,15 @@ describe('The telephony plugin', function () {
             '00:11:22:33:44:55'
         );
         spyOn(localCallsPlugin._bluetoothTelephony, 'dialCall').and.callThrough();
+        spyOn(localCallsPlugin, '_watchBluetoothCall');
 
         const callPath = await localCallsPlugin._dial('555-555-5555');
 
         expect(callPath).toBe('/mock/call');
         expect(localCallsPlugin._bluetoothTelephony.dialCall)
             .toHaveBeenCalledWith(localCallsPlugin.device, '555-555-5555');
+        expect(localCallsPlugin._watchBluetoothCall)
+            .toHaveBeenCalledWith('555-555-5555', '/mock/call');
     });
 
     it('can place outgoing calls from tel URIs', async function () {
@@ -189,12 +204,15 @@ describe('The telephony plugin', function () {
             '00:11:22:33:44:55'
         );
         spyOn(localCallsPlugin._bluetoothTelephony, 'dialCall').and.callThrough();
+        spyOn(localCallsPlugin, '_watchBluetoothCall');
 
         const callPath = await localCallsPlugin._dial('tel:555-555-5555');
 
         expect(callPath).toBe('/mock/call');
         expect(localCallsPlugin._bluetoothTelephony.dialCall)
             .toHaveBeenCalledWith(localCallsPlugin.device, '555-555-5555');
+        expect(localCallsPlugin._watchBluetoothCall)
+            .toHaveBeenCalledWith('555-555-5555', '/mock/call');
     });
 
     it('shows an error when Bluetooth calls are unavailable', async function () {
@@ -232,26 +250,12 @@ describe('The telephony plugin', function () {
         );
     });
 
-    it('finishes the call window when an outgoing Bluetooth call ends', async function () {
-        localCallsPlugin.device.settings.set_string(
-            'bluetooth-address',
-            '00:11:22:33:44:55'
-        );
+    it('finishes the call window when an outgoing Bluetooth call ends', function () {
         localCallsPlugin._window = {
             finishCall: jasmine.createSpy('finishCall'),
         };
-        spyOn(localCallsPlugin._bluetoothTelephony, 'dialCall')
-            .and.returnValue(Promise.resolve('/mock/call'));
-        spyOn(localCallsPlugin._bluetoothTelephony, 'hasActiveCall')
-            .and.returnValue(Promise.resolve(false));
 
-        await localCallsPlugin._dial('555-555-5555');
-        await new Promise(resolve => {
-            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
-                resolve();
-                return GLib.SOURCE_REMOVE;
-            });
-        });
+        localCallsPlugin._finishBluetoothCall();
 
         expect(localCallsPlugin._window.finishCall).toHaveBeenCalled();
 

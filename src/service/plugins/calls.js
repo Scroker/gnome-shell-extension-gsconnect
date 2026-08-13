@@ -168,6 +168,13 @@ const CallsPlugin = GObject.registerClass({
         }
     }
 
+    _finishBluetoothCall() {
+        this._clearCallWatch();
+
+        if (this._window !== null)
+            this._window.finishCall();
+    }
+
     _watchBluetoothCall(phoneNumber, callPath = null) {
         this._clearCallWatch();
 
@@ -203,10 +210,7 @@ const CallsPlugin = GObject.registerClass({
                         if (!seenCall && checks < 3)
                             return;
 
-                        this._clearCallWatch();
-
-                        if (this._window !== null)
-                            this._window.finishCall();
+                        this._finishBluetoothCall();
                     })
                     .catch(e => debug(e, this.device.name))
                     .finally(() => {
