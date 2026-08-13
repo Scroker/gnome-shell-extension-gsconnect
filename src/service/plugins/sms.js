@@ -317,15 +317,6 @@ const SMSPlugin = GObject.registerClass({
     _handleDigest(messages, thread_ids) {
         this._normalizeThreads();
 
-        // Prune threads
-        for (const thread_id of Object.keys(this.threads)) {
-            if (!thread_ids.includes(thread_id)) {
-                delete this.threads[thread_id];
-                this._finishThreadRequest(thread_id);
-                this._completeThreads.delete(thread_id);
-            }
-        }
-
         // Merge each thread summary into the cache
         for (let i = 0, len = messages.length; i < len; i++) {
             const message = messages[i];

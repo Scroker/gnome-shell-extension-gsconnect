@@ -328,6 +328,29 @@ describe('The sms plugin', function () {
         }
     });
 
+    it('does not prune cached conversations from partial digests', function () {
+        localPlugin.clearCache();
+        localPlugin.threads['1'] = [{
+            ...Packets.single_summary.body.messages[0],
+            thread_id: '1',
+        }];
+        localPlugin.threads['2'] = [{
+            ...Packets.summary.body.messages[1],
+            thread_id: '2',
+        }];
+        localPlugin._pendingThreads.add('2');
+        localPlugin._completeThreads.add('2');
+        spyOn(localPlugin, '_requestPendingConversations');
+
+        localPlugin._handleDigest([Packets.single_summary.body.messages[0]],
+            ['1']);
+
+        expect(localPlugin.threads['1']).toBeDefined();
+        expect(localPlugin.threads['2']).toBeDefined();
+        expect(localPlugin.isThreadLoading('2')).toBeTrue();
+        expect(localPlugin._completeThreads.has('2')).toBeTrue();
+    });
+
     it('retries unanswered conversation requests', function () {
         localPlugin.clearCache();
         localPlugin.threads['1'] = [{
