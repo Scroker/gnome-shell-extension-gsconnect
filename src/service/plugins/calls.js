@@ -219,24 +219,34 @@ const CallsPlugin = GObject.registerClass({
         if (settings === null)
             return;
 
-        if (this._mixer !== undefined && !hfp) {
+        if (this._mixer !== undefined) {
             switch (settings.get_string(`${eventType}-volume`)) {
                 case 'restore':
                     this._mixer.restore();
                     break;
 
                 case 'lower':
-                    this._mixer.lowerVolume();
+                    if (hfp)
+                        this._mixer.lowerApplicationVolumes();
+                    else
+                        this._mixer.lowerVolume();
                     break;
 
                 case 'mute':
-                    this._mixer.muteVolume();
+                    if (hfp)
+                        this._mixer.muteApplicationVolumes();
+                    else
+                        this._mixer.muteVolume();
                     break;
             }
 
             if (eventType === 'talking' &&
-                settings.get_boolean('talking-microphone'))
-                this._mixer.muteMicrophone();
+                settings.get_boolean('talking-microphone')) {
+                if (hfp)
+                    this._mixer.muteApplicationMicrophones();
+                else
+                    this._mixer.muteMicrophone();
+            }
         }
 
         if (this._mpris && settings.get_boolean(`${eventType}-pause`))
@@ -409,6 +419,7 @@ const CallsPlugin = GObject.registerClass({
                     this.device, dialNumber);
 
                 if (callPath) {
+                    this._setMediaState('talking', true);
                     this._watchBluetoothCall(dialNumber,
                         typeof callPath === 'string' ? callPath : null);
                     return callPath;
@@ -523,6 +534,7 @@ const CallsPlugin = GObject.registerClass({
                         ? answeredPath
                         : callPath;
 
+                    this._setMediaState('talking', true);
                     window.showCall(phoneNumber, 'talking', path, 'close');
                     this._watchBluetoothCall(phoneNumber, path);
                 }
