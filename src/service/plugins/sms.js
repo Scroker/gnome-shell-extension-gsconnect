@@ -631,9 +631,11 @@ const SMSPlugin = GObject.registerClass({
      * @param {string} hint - Could be either a contact name or phone number
      */
     replySms(hint) {
-        this.window.present();
-        // FIXME: causes problems now that non-numeric addresses are allowed
-        // this.window.address = hint.toPhoneNumber();
+        const window = this.window;
+
+        window.present();
+        this._requestConversations();
+        window.openConversationForHint(hint);
     }
 
     /**

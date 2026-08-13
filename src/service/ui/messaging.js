@@ -13,6 +13,7 @@ import {MessagingInputText} from './components.js';
 
 import * as Contacts from './contacts.js';
 import * as Sms from '../plugins/sms.js';
+import {normalizePhoneNumber, phoneNumbersEqual} from '../utils/phone.js';
 import * as URI from '../utils/uri.js';
 import '../utils/ui.js';
 
@@ -1267,6 +1268,10 @@ export const MessagingWindow = GObject.registerClass({
 
         // Re-sort the summaries
         this.thread_list.invalidate_sort();
+
+        if (this._notificationHint &&
+            this._selectConversationForHint(this._notificationHint))
+            this._notificationHint = null;
     }
 
     // GtkListBox::row-activated
@@ -1296,6 +1301,56 @@ export const MessagingWindow = GObject.registerClass({
 
     _sortThreads(row1, row2) {
         return (row1.date > row2.date) ? -1 : 1;
+    }
+
+    _rowMatchesHint(row, hint) {
+        const number = normalizePhoneNumber(hint);
+
+        for (const [address, contact] of Object.entries(row.contacts ?? {})) {
+            if (number && phoneNumbersEqual(number, address))
+                return true;
+
+            if (contact?.name === hint)
+                return true;
+
+            for (const contactNumber of contact?.numbers ?? []) {
+                if (number && phoneNumbersEqual(number, contactNumber.value))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    _selectConversationForHint(hint) {
+        hint = hint?.trim();
+
+        if (!hint)
+            return false;
+
+        for (const row of this.internal_thread_list) {
+            if (this._rowMatchesHint(row, hint)) {
+                this._selectExistingContactRow(row);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Open a conversation from a notification hint.
+     *
+     * @param {string} hint - A contact name or phone number
+     */
+    openConversationForHint(hint) {
+        this._notificationHint = hint?.trim() || null;
+
+        if (this._notificationHint &&
+            this._selectConversationForHint(this._notificationHint))
+            this._notificationHint = null;
+        else
+            this.thread_list.select_row(null);
     }
 
     _timestampThreads() {
