@@ -9,6 +9,7 @@ plugin_tests_metadir = join_paths(installed_tests_metadir, 'plugins')
 plugin_tests = [
   'BatteryPlugin',
   'ClipboardPlugin',
+  'CallsPlugin',
   'ContactsPlugin',
   'FindmyphonePlugin',
   'MousepadPlugin',
@@ -54,4 +55,3 @@ foreach test : plugin_tests
     )
   endif
 endforeach
-

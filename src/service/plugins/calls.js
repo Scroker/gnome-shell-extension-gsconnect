@@ -69,7 +69,9 @@ export const Metadata = {
     label: _('Calls'),
     description: _('Place and control Bluetooth calls from the PC'),
     id: 'org.gnome.Shell.Extensions.GSConnect.Plugin.Calls',
-    incomingCapabilities: [],
+    incomingCapabilities: [
+        'kdeconnect.telephony',
+    ],
     outgoingCapabilities: [],
     actions: {
         call: {
@@ -117,6 +119,15 @@ export const Metadata = {
             incoming: [],
             outgoing: [],
         },
+        muteIncomingCall: {
+            // TRANSLATORS: Silence the actively ringing call
+            label: _('Mute Call'),
+            icon_name: 'audio-volume-muted-symbolic',
+
+            parameter_type: null,
+            incoming: ['kdeconnect.telephony'],
+            outgoing: ['kdeconnect.telephony.request_mute'],
+        },
     },
 };
 
@@ -132,9 +143,218 @@ const CallsPlugin = GObject.registerClass({
         super._init(device, 'calls');
 
         this._bluetoothTelephony = Components.acquire('bluetoothtelephony');
+        this._mixer = Components.acquire('pulseaudio');
+        this._mpris = Components.acquire('mpris');
         this._window = null;
         this._callWatchId = 0;
         this._callWatchToken = 0;
+        this._bluetoothCallsChangedId = 0;
+        this._bluetoothCallSyncing = false;
+        this._incomingSender = null;
+    }
+
+    get telephony_settings() {
+        return this.device._plugins.get('telephony')?.settings ?? null;
+    }
+
+    connected() {
+        super.connected();
+
+        if (this._bluetoothCallsChangedId === 0 &&
+            this._bluetoothTelephony?.connect instanceof Function) {
+            this._bluetoothCallsChangedId = this._bluetoothTelephony.connect(
+                'calls-changed',
+                this._syncBluetoothCallNotification.bind(this)
+            );
+        }
+
+        this._syncBluetoothCallNotification();
+    }
+
+    disconnected() {
+        super.disconnected();
+
+        if (this._bluetoothCallsChangedId !== 0) {
+            this._bluetoothTelephony.disconnect(this._bluetoothCallsChangedId);
+            this._bluetoothCallsChangedId = 0;
+        }
+
+        this._incomingSender = null;
+    }
+
+    handlePacket(packet) {
+        if (packet.type !== 'kdeconnect.telephony')
+            return;
+
+        if (!['ringing', 'talking'].includes(packet.body.event))
+            return;
+
+        if (packet.body.isCancel) {
+            this._cancelTelephonyEvent(packet);
+            return;
+        }
+
+        this._handleTelephonyEvent(packet);
+    }
+
+    _getSender(packet) {
+        // TRANSLATORS: No name or phone number
+        let sender = _('Unknown Contact');
+
+        if (packet.body.contactName)
+            sender = packet.body.contactName;
+        else if (packet.body.phoneNumber)
+            sender = packet.body.phoneNumber;
+
+        return sender;
+    }
+
+    _setMediaState(eventType, hfp = false) {
+        const settings = this.telephony_settings;
+
+        if (settings === null)
+            return;
+
+        if (this._mixer !== undefined && !hfp) {
+            switch (settings.get_string(`${eventType}-volume`)) {
+                case 'restore':
+                    this._mixer.restore();
+                    break;
+
+                case 'lower':
+                    this._mixer.lowerVolume();
+                    break;
+
+                case 'mute':
+                    this._mixer.muteVolume();
+                    break;
+            }
+
+            if (eventType === 'talking' &&
+                settings.get_boolean('talking-microphone'))
+                this._mixer.muteMicrophone();
+        }
+
+        if (this._mpris && settings.get_boolean(`${eventType}-pause`))
+            this._mpris.pauseAll();
+    }
+
+    _restoreMediaState() {
+        if (this._mpris)
+            this._mpris.unpauseAll();
+
+        if (this._mixer)
+            this._mixer.restore();
+    }
+
+    _cancelTelephonyEvent(packet) {
+        this.device.hideNotification(`${packet.body.event}|${this._getSender(packet)}`);
+        this._restoreMediaState();
+    }
+
+    _handleTelephonyEvent(packet) {
+        const sender = this._getSender(packet);
+
+        if (packet.body.event === 'ringing') {
+            this._notifyIncomingCall({
+                id: `ringing|${sender}`,
+                sender,
+                phoneNumber: packet.body.phoneNumber ?? '',
+                hfp: false,
+            });
+            return;
+        }
+
+        if (packet.body.event === 'talking') {
+            this.device.hideNotification(`ringing|${sender}`);
+            this._setMediaState('talking');
+            this.device.showNotification({
+                id: `talking|${sender}`,
+                title: sender,
+                // TRANSLATORS: A phone call is active
+                body: _('Ongoing call'),
+                icon: new Gio.ThemedIcon({name: 'call-start-symbolic'}),
+                priority: Gio.NotificationPriority.NORMAL,
+            });
+        }
+    }
+
+    _notifyIncomingCall({id, sender, phoneNumber, hfp = true}) {
+        this._incomingSender = sender;
+        this._setMediaState('ringing', hfp);
+
+        const parameter = new GLib.Variant('s', phoneNumber ?? '');
+        const buttons = [{
+            action: 'answerCall',
+            // TRANSLATORS: Answer the actively ringing call
+            label: _('Answer'),
+            parameter,
+        }];
+
+        if (!hfp) {
+            buttons.push({
+                action: 'muteIncomingCall',
+                // TRANSLATORS: Silence the actively ringing call
+                label: _('Mute'),
+                parameter: null,
+            });
+        }
+
+        buttons.push({
+            action: 'hangupCall',
+            // TRANSLATORS: Decline the actively ringing call
+            label: _('Decline'),
+            parameter,
+        });
+
+        this.device.showNotification({
+            id,
+            title: sender,
+            // TRANSLATORS: The phone is ringing
+            body: _('Incoming call'),
+            icon: new Gio.ThemedIcon({name: 'call-start-symbolic'}),
+            priority: Gio.NotificationPriority.URGENT,
+            action: {
+                name: 'showIncomingCall',
+                parameter,
+            },
+            buttons,
+        });
+    }
+
+    async _syncBluetoothCallNotification() {
+        if (this._bluetoothCallSyncing)
+            return;
+
+        this._bluetoothCallSyncing = true;
+
+        try {
+            const call = await this._bluetoothTelephony?.findCallInfo(
+                this.device,
+                null,
+                ['incoming', 'waiting', 'alerting']
+            );
+
+            if (call !== null && call !== undefined) {
+                const sender = call.name || call.phoneNumber ||
+                    _('Unknown Contact');
+
+                this._notifyIncomingCall({
+                    id: `ringing|${sender}`,
+                    sender,
+                    phoneNumber: call.phoneNumber,
+                    hfp: true,
+                });
+            } else if (this._incomingSender !== null) {
+                this.device.hideNotification(`ringing|${this._incomingSender}`);
+                this._incomingSender = null;
+                this._restoreMediaState();
+            }
+        } catch (e) {
+            debug(e, this.device.name);
+        } finally {
+            this._bluetoothCallSyncing = false;
+        }
     }
 
     async _dial(number) {
@@ -284,10 +504,20 @@ const CallsPlugin = GObject.registerClass({
 
     hangupCall(phoneNumber = null, callPath = null) {
         this._clearCallWatch();
+        this._restoreMediaState();
 
         return Promise.resolve(this._bluetoothTelephony?.hangupCall(
             this.device, phoneNumber, callPath))
             .catch(e => debug(e, this.device.name));
+    }
+
+    muteIncomingCall() {
+        this.device.sendPacket({
+            type: 'kdeconnect.telephony.request_mute',
+            body: {},
+        });
+
+        this._restoreMediaState();
     }
 
     _ensureWindow() {
@@ -313,8 +543,19 @@ const CallsPlugin = GObject.registerClass({
 
         this._clearCallWatch();
 
+        if (this._bluetoothCallsChangedId !== 0) {
+            this._bluetoothTelephony.disconnect(this._bluetoothCallsChangedId);
+            this._bluetoothCallsChangedId = 0;
+        }
+
         if (this._bluetoothTelephony !== undefined)
             this._bluetoothTelephony = Components.release('bluetoothtelephony');
+
+        if (this._mixer !== undefined)
+            this._mixer = Components.release('pulseaudio');
+
+        if (this._mpris !== undefined)
+            this._mpris = Components.release('mpris');
 
         super.destroy();
     }

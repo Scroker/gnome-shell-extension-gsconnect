@@ -2,7 +2,23 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-export default class MockBluetoothTelephony {
+import GObject from 'gi://GObject';
+
+
+const MockBluetoothTelephony = GObject.registerClass({
+    GTypeName: 'GSConnectMockBluetoothTelephony',
+    Signals: {
+        'calls-changed': {
+            flags: GObject.SignalFlags.RUN_FIRST,
+        },
+    },
+}, class MockBluetoothTelephony extends GObject.Object {
+
+    _init() {
+        super._init();
+
+        this.call_info = null;
+    }
 
     canControl(device) {
         return device.connection_type === 'bluetooth';
@@ -30,5 +46,11 @@ export default class MockBluetoothTelephony {
         return Promise.resolve(true);
     }
 
+    findCallInfo() {
+        return Promise.resolve(this.call_info);
+    }
+
     destroy() {}
-}
+});
+
+export default MockBluetoothTelephony;
