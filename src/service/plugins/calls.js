@@ -9,6 +9,7 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw';
 
+import Config from '../../config.js';
 import * as Components from '../components/index.js';
 import * as Contacts from '../ui/contacts.js';
 import Plugin from '../plugin.js';
@@ -145,6 +146,7 @@ const CallsPlugin = GObject.registerClass({
         this._bluetoothTelephony = Components.acquire('bluetoothtelephony');
         this._mixer = Components.acquire('pulseaudio');
         this._mpris = Components.acquire('mpris');
+        this._telephonySettings = null;
         this._window = null;
         this._callWatchId = 0;
         this._callWatchToken = 0;
@@ -156,7 +158,17 @@ const CallsPlugin = GObject.registerClass({
     }
 
     get telephony_settings() {
-        return this.device._plugins.get('telephony')?.settings ?? null;
+        if (this._telephonySettings === null) {
+            this._telephonySettings = new Gio.Settings({
+                settings_schema: Config.GSCHEMA.lookup(
+                    'org.gnome.Shell.Extensions.GSConnect.Plugin.Telephony',
+                    true
+                ),
+                path: `${this.device.settings.path}plugin/telephony/`,
+            });
+        }
+
+        return this._telephonySettings;
     }
 
     connected() {

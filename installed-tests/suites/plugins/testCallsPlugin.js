@@ -157,6 +157,27 @@ describe('The calls plugin', function () {
         expect(localMixer.muteMicrophone).not.toHaveBeenCalled();
     });
 
+    it('uses Telephony settings when the Telephony plugin is unavailable', function () {
+        const localMixer = localPlugin._mixer;
+        const telephonyPlugin = localPlugin.device._plugins.get('telephony');
+
+        spyOn(localMixer, 'lowerApplicationVolumes');
+        spyOn(localMixer, 'lowerVolume');
+
+        localPlugin._telephonySettings = null;
+        localPlugin.device._plugins.delete('telephony');
+
+        try {
+            localPlugin.telephony_settings.set_string('ringing-volume', 'lower');
+            localPlugin._setMediaState('ringing', true);
+        } finally {
+            localPlugin.device._plugins.set('telephony', telephonyPlugin);
+        }
+
+        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
+        expect(localMixer.lowerVolume).not.toHaveBeenCalled();
+    });
+
     it('finishes the call window when an incoming HFP call ends', async function () {
         localPlugin._bluetoothTelephony.call_info = {
             path: '/mock/call',
