@@ -42,6 +42,7 @@ const MESSAGE_READ = 3;
 const MESSAGE_WRITE = 4;
 const MULTIPLEX_PROTOCOL_VERSION = 1;
 const BUFFER_SIZE = 4096;
+const CONTROL_BUFFER_SIZE = 1024;
 const RECONNECT_COOLDOWN = 30000;
 const OUTBOUND_HANDSHAKE_GRACE = 15000;
 const CONNECT_OUTGOING = GLib.getenv('GSCONNECT_BLUETOOTH_CONNECT') === '1';
@@ -231,9 +232,10 @@ async function _readBytes(stream, size, cancellable) {
 
 class MultiplexChannel {
 
-    constructor(multiplexer, uuid) {
+    constructor(multiplexer, uuid, bufferSize = BUFFER_SIZE) {
         this.multiplexer = multiplexer;
         this.uuid = uuid;
+        this.bufferSize = bufferSize;
         this.connected = true;
         this.closeAfterWrite = false;
         this.freeWriteAmount = 0;
@@ -314,10 +316,10 @@ class MultiplexChannel {
 
         const pending = this.readLength + this.requestedReadAmount;
 
-        if (pending >= BUFFER_SIZE)
+        if (pending >= this.bufferSize)
             return;
 
-        const amount = BUFFER_SIZE - pending;
+        const amount = this.bufferSize - pending;
         this.requestedReadAmount += amount;
         this.multiplexer._sendMessage(MESSAGE_READ, this.uuid, _uint16(amount));
     }
@@ -461,7 +463,7 @@ class ConnectionMultiplexer {
             ..._uint16(MULTIPLEX_PROTOCOL_VERSION),
             ..._uint16(MULTIPLEX_PROTOCOL_VERSION),
         ]);
-        this._addChannel(DEFAULT_CHANNEL_UUID);
+        this._addChannel(DEFAULT_CHANNEL_UUID, true, CONTROL_BUFFER_SIZE);
         this._readLoop();
     }
 
@@ -469,11 +471,11 @@ class ConnectionMultiplexer {
         return this.channels.get(DEFAULT_CHANNEL_UUID);
     }
 
-    _addChannel(uuid, requestRead = true) {
+    _addChannel(uuid, requestRead = true, bufferSize = BUFFER_SIZE) {
         if (this.channels.has(uuid))
             return this.channels.get(uuid);
 
-        const channel = new MultiplexChannel(this, uuid);
+        const channel = new MultiplexChannel(this, uuid, bufferSize);
         this.channels.set(uuid, channel);
 
         if (requestRead)
@@ -515,7 +517,7 @@ class ConnectionMultiplexer {
             for (const [uuid, channel] of this.channels) {
                 while (channel.writeLength > 0 && channel.freeWriteAmount > 0) {
                     const amount = Math.min(channel.writeLength,
-                        channel.freeWriteAmount, BUFFER_SIZE);
+                        channel.freeWriteAmount, channel.bufferSize);
                     const data = channel._consumeWrite(amount);
 
                     channel.freeWriteAmount -= amount;

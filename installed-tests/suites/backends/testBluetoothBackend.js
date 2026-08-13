@@ -132,7 +132,7 @@ describe('Bluetooth certificates', function () {
 
 
 describe('A Bluetooth multiplexer', function () {
-    it('caps write frames to the Bluetooth buffer size', async function () {
+    it('uses a smaller read window for control packets', async function () {
         const writes = [];
         const connection = {
             input_stream: {
@@ -150,7 +150,38 @@ describe('A Bluetooth multiplexer', function () {
         };
         const multiplexer = new Bluetooth._testInternals.ConnectionMultiplexer(
             connection, new Gio.Cancellable());
-        const channel = multiplexer.defaultChannel;
+
+        await new Promise(resolve => GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            resolve();
+            return GLib.SOURCE_REMOVE;
+        }));
+
+        const readFrame = writes.find(data => data[0] === 3);
+
+        expect(Bluetooth._readUint16(readFrame, 19)).toBe(1024);
+        multiplexer.close();
+    });
+
+    it('caps payload write frames to the Bluetooth buffer size', async function () {
+        const writes = [];
+        const connection = {
+            input_stream: {
+                read_bytes_async() {
+                    return new Promise(() => {});
+                },
+            },
+            output_stream: {
+                write_all_async(data) {
+                    writes.push(data);
+                    return Promise.resolve([true, data.length]);
+                },
+            },
+            close_async() {},
+        };
+        const multiplexer = new Bluetooth._testInternals.ConnectionMultiplexer(
+            connection, new Gio.Cancellable());
+        const uuid = multiplexer.newChannel();
+        const channel = multiplexer.getChannel(uuid);
         const payload = new Uint8Array(5000);
 
         writes.splice(0);
