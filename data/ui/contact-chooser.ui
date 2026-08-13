@@ -55,19 +55,6 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     </style>
                   </object>
                 </child>
-                <child type="end">
-                  <object class="GtkButton" id="confirm-button">
-                    <property name="visible">False</property>
-                    <property name="sensitive">False</property>
-                    <property name="icon-name">emblem-ok-symbolic</property>
-                    <property name="has-tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Done</property>
-                    <signal name="clicked" handler="_onConfirmSelection" swapped="no"/>
-                    <accessibility>
-                      <property name="label" translatable="yes">Done</property>
-                    </accessibility>
-                  </object>
-                </child>
               </object>
             </child>
             <child>
@@ -115,6 +102,31 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     </style>
                   </object>
                 </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child type="bottom">
+          <object class="AdwClamp" id="selection-bar">
+            <property name="visible">False</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <child>
+              <object class="GtkButton" id="confirm-button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="label" translatable="yes">Confirm</property>
+                <property name="has-tooltip">True</property>
+                <property name="tooltip-text" translatable="yes">Confirm</property>
+                <signal name="clicked" handler="_onConfirmSelection" swapped="no"/>
+                <accessibility>
+                  <property name="label" translatable="yes">Confirm</property>
+                </accessibility>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
             </child>
           </object>
