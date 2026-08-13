@@ -351,7 +351,7 @@ const MessagingConversation = GObject.registerClass({
 
         this._sendmessageId = this.message_bar.connect(
             'message-send',
-            this._onSendMessage.bind(this)
+            (entry, text) => this._onSendMessage(text)
         );
         this._textChangedId = this.message_bar.connect('text-changed', (entry, text) => {
             this.emit('draft-changed', text);
@@ -579,11 +579,11 @@ const MessagingConversation = GObject.registerClass({
         return false;
     }
 
-    _onSendMessage(entry, text) {
-        const body = (text !== undefined) ? text : this.message_bar.text;
+    _onSendMessage(text = this.message_bar.text) {
+        const body = text.trim();
 
         // Don't send empty texts
-        if (!body.trim())
+        if (!body)
             return;
 
         // Send the message
@@ -846,6 +846,7 @@ const MessagingConversation = GObject.registerClass({
 
         this.list.set_header_func(null);
         this.message_bar.disconnect(this._sendmessageId);
+        this.message_bar.disconnect(this._textChangedId);
         this.participants_button.disconnect(this._participantsId);
         this.device.disconnect(this._connectedId);
         this.plugin.disconnect(this._threadsChangedId);
