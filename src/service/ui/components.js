@@ -16,6 +16,9 @@ export const MessagingInputText = GObject.registerClass({
         'message-send': {
             param_types: [GObject.TYPE_STRING],
         },
+        'text-changed': {
+            param_types: [GObject.TYPE_STRING],
+        },
     },
 }, class MessagingInputText extends Gtk.Box {
 
@@ -37,6 +40,10 @@ export const MessagingInputText = GObject.registerClass({
             }
         });
         this.message_entry.add_controller(keyController);
+        this._bufferChangedId = this.message_entry.buffer.connect('changed', () => {
+            this._onStateChanged();
+            this.emit('text-changed', this.text);
+        });
     }
 
     get text() {
@@ -71,7 +78,6 @@ export const MessagingInputText = GObject.registerClass({
     _onEmojiPicked(widget, emoticon) {
         const text = this.message_entry.buffer.text;
         this.message_entry.buffer.text = text + emoticon;
-        this._onStateChanged();
     }
 
     _onSendMessage() {
