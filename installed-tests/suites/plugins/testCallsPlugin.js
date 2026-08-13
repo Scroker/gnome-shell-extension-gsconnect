@@ -131,6 +131,32 @@ describe('The calls plugin', function () {
         ]);
     });
 
+    it('uses application audio controls for HFP calls', function () {
+        const localMixer = localPlugin._mixer;
+
+        spyOn(localMixer, 'lowerApplicationVolumes');
+        spyOn(localMixer, 'muteApplicationVolumes');
+        spyOn(localMixer, 'muteApplicationMicrophones');
+        spyOn(localMixer, 'lowerVolume');
+        spyOn(localMixer, 'muteVolume');
+        spyOn(localMixer, 'muteMicrophone');
+
+        localTelephonyPlugin.settings.set_string('ringing-volume', 'lower');
+        localPlugin._setMediaState('ringing', true);
+
+        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
+        expect(localMixer.lowerVolume).not.toHaveBeenCalled();
+
+        localTelephonyPlugin.settings.set_string('talking-volume', 'mute');
+        localTelephonyPlugin.settings.set_boolean('talking-microphone', true);
+        localPlugin._setMediaState('talking', true);
+
+        expect(localMixer.muteApplicationVolumes).toHaveBeenCalled();
+        expect(localMixer.muteApplicationMicrophones).toHaveBeenCalled();
+        expect(localMixer.muteVolume).not.toHaveBeenCalled();
+        expect(localMixer.muteMicrophone).not.toHaveBeenCalled();
+    });
+
     it('finishes the call window when an incoming HFP call ends', async function () {
         localPlugin._bluetoothTelephony.call_info = {
             path: '/mock/call',
