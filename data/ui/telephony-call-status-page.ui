@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+SPDX-FileCopyrightText: GSConnect Developers https://github.com/GSConnect
+
+SPDX-License-Identifier: GPL-2.0-or-later
+-->
+
+<interface domain="org.gnome.Shell.Extensions.GSConnect">
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="Adw" version="1.0"/>
+
+  <template class="GSConnectTelephonyCallStatusPage" parent="AdwNavigationPage">
+    <property name="title" translatable="yes">Call</property>
+    <property name="tag">call-status</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <property name="visible">True</property>
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="visible">True</property>
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title" translatable="yes">Call</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <property name="content">
+          <object class="AdwClamp">
+            <property name="visible">True</property>
+            <property name="maximum-size">272</property>
+            <property name="margin-top">48</property>
+            <property name="margin-bottom">24</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">18</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkImage" id="status-image">
+                    <property name="visible">True</property>
+                    <property name="icon-name">call-start-symbolic</property>
+                    <property name="pixel-size">64</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="title-label">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Calling</property>
+                    <property name="halign">center</property>
+                    <property name="wrap">True</property>
+                    <attributes>
+                      <attribute name="scale" value="1.4"/>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="number-label">
+                    <property name="visible">True</property>
+                    <property name="halign">center</property>
+                    <property name="selectable">True</property>
+                    <property name="wrap">True</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="answer-button">
+                    <property name="visible">False</property>
+                    <property name="halign">center</property>
+                    <property name="icon-name">call-start-symbolic</property>
+                    <property name="label" translatable="yes">Answer</property>
+                    <property name="has-tooltip">True</property>
+                    <property name="tooltip-text" translatable="yes">Answer Call</property>
+                    <signal name="clicked" handler="_onAnswerClicked" swapped="no"/>
+                    <style>
+                      <class name="suggested-action"/>
+                    </style>
+                    <accessibility>
+                      <property name="label" translatable="yes">Answer Call</property>
+                    </accessibility>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="hangup-button">
+                    <property name="visible">True</property>
+                    <property name="halign">center</property>
+                    <property name="icon-name">call-stop-symbolic</property>
+                    <property name="has-tooltip">True</property>
+                    <property name="tooltip-text" translatable="yes">Hang Up</property>
+                    <signal name="clicked" handler="_onHangupClicked" swapped="no"/>
+                    <style>
+                      <class name="circular"/>
+                      <class name="destructive-action"/>
+                      <class name="call-control-button"/>
+                    </style>
+                    <accessibility>
+                      <property name="label" translatable="yes">Hang Up</property>
+                    </accessibility>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

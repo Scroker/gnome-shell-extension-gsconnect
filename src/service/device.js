@@ -293,8 +293,14 @@ const Device = GObject.registerClass({
         this.freeze_notify();
 
         // If we're connected, record the reconnect URI
-        if (this.channel !== null)
+        if (this.channel !== null) {
             this.settings.set_string('last-connection', this.channel.address);
+
+            if (this.channel.address.startsWith('bluetooth://')) {
+                this.settings.set_string('bluetooth-address',
+                    this.channel.address.replace(/^bluetooth:\/\//, ''));
+            }
+        }
 
         // The type won't change, but it might not be properly set yet
         if (this.type !== packet.body.deviceType) {
@@ -968,6 +974,7 @@ const Device = GObject.registerClass({
                     this.settings.set_string('certificate-pem', cert);
             } else {
                 this.settings.reset('certificate-pem');
+                this.settings.reset('bluetooth-address');
             }
         }
 

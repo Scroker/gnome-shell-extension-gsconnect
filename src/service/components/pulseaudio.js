@@ -69,6 +69,10 @@ class Stream {
         this._stream.change_is_muted(bool);
     }
 
+    get id() {
+        return this._stream.id;
+    }
+
     // Volume is a double in the range 0-1
     get volume() {
         return Math.floor(100 * this._stream.volume / this._max) / 100;
@@ -129,6 +133,9 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         super._init({name: 'GSConnect'});
 
         this._previousVolume = undefined;
+        this._previousApplicationVolumes = new Map();
+        this._applicationVolumeMuted = new Set();
+        this._applicationMicrophoneMuted = new Set();
         this._volumeMuted = false;
         this._microphoneMuted = false;
 
@@ -195,6 +202,38 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         }
     }
 
+    _isCallStream(stream) {
+        const streamId = `${stream.get_application_id?.() ??
+            stream.application_id ?? ''} ${stream.name ?? ''} ${
+            stream.description ?? ''}`.toLowerCase();
+
+        return streamId.includes('bluez') ||
+            streamId.includes('bluetooth') ||
+            streamId.includes('handsfree') ||
+            streamId.includes('headset') ||
+            streamId.includes('ofono') ||
+            streamId.includes('telephony');
+    }
+
+    _isApplicationStream(stream) {
+        return stream !== null &&
+            !stream.is_event_stream &&
+            !stream.is_virtual &&
+            !this._isCallStream(stream);
+    }
+
+    _getSinkInputs() {
+        return this.get_sink_inputs()
+            .filter(stream => this._isApplicationStream(stream))
+            .map(stream => new Stream(this, stream));
+    }
+
+    _getSourceOutputs() {
+        return this.get_source_outputs()
+            .filter(stream => this._isApplicationStream(stream))
+            .map(stream => new Stream(this, stream));
+    }
+
     /**
      * Store the current output volume then lower it to %15
      *
@@ -205,6 +244,25 @@ const Mixer = !Gvc ? null : GObject.registerClass({
             if (this.output && this.output.volume > 0.15) {
                 this._previousVolume = Number(this.output.volume);
                 this.output.fade(0.15, duration);
+            }
+        } catch (e) {
+            logError(e);
+        }
+    }
+
+    /**
+     * Store current application output volumes then lower them to %15.
+     *
+     * @param {number} duration - Duration in seconds to fade
+     */
+    lowerApplicationVolumes(duration = 1) {
+        try {
+            for (const stream of this._getSinkInputs()) {
+                if (stream.volume <= 0.15)
+                    continue;
+
+                this._previousApplicationVolumes.set(stream.id, Number(stream.volume));
+                stream.fade(0.15, duration);
             }
         } catch (e) {
             logError(e);
@@ -227,6 +285,23 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     }
 
     /**
+     * Mute application output streams.
+     */
+    muteApplicationVolumes() {
+        try {
+            for (const stream of this._getSinkInputs()) {
+                if (stream.muted)
+                    continue;
+
+                stream.muted = true;
+                this._applicationVolumeMuted.add(stream.id);
+            }
+        } catch (e) {
+            logError(e);
+        }
+    }
+
+    /**
      * Mute the input volume (microphone)
      */
     muteMicrophone() {
@@ -236,6 +311,23 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
             this.input.muted = true;
             this._microphoneMuted = true;
+        } catch (e) {
+            logError(e);
+        }
+    }
+
+    /**
+     * Mute application recording streams without muting the input device.
+     */
+    muteApplicationMicrophones() {
+        try {
+            for (const stream of this._getSourceOutputs()) {
+                if (stream.muted)
+                    continue;
+
+                stream.muted = true;
+                this._applicationMicrophoneMuted.add(stream.id);
+            }
         } catch (e) {
             logError(e);
         }
@@ -263,6 +355,25 @@ const Mixer = !Gvc ? null : GObject.registerClass({
                 this.output.fade(this._previousVolume);
                 this._previousVolume = undefined;
             }
+
+            for (const stream of this._getSinkInputs()) {
+                if (this._applicationVolumeMuted.has(stream.id))
+                    stream.muted = false;
+
+                if (this._previousApplicationVolumes.has(stream.id)) {
+                    stream.fade(this._previousApplicationVolumes.get(
+                        stream.id));
+                }
+            }
+
+            for (const stream of this._getSourceOutputs()) {
+                if (this._applicationMicrophoneMuted.has(stream.id))
+                    stream.muted = false;
+            }
+
+            this._applicationVolumeMuted.clear();
+            this._applicationMicrophoneMuted.clear();
+            this._previousApplicationVolumes.clear();
         } catch (e) {
             logError(e);
         }

@@ -23,6 +23,8 @@ data/ui/preferences-window.ui
 data/ui/service-device-chooser.ui
 data/ui/service-error-dialog.ui
 data/ui/share-dialog.ui
+data/ui/telephony-call-dialer-page.ui
+data/ui/telephony-call-status-page.ui
 nautilus-extension/nautilus-gsconnect.py
 src/extension.js
 src/preferences/device.js

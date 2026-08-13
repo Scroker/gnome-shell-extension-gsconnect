@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+import GLib from 'gi://GLib';
+
 import * as Utils from '../fixtures/utils.js';
 
 
@@ -40,6 +42,15 @@ const Packets = {
             event: 'ringing',
         },
     },
+    busyCancel: {
+        type: 'kdeconnect.telephony',
+        body: {
+            isCancel: true,
+            contactName: 'Name',
+            phoneNumber: '555-555-5555',
+            event: 'missedCall',
+        },
+    },
 };
 
 
@@ -54,6 +65,7 @@ describe('The telephony plugin', function () {
         await testRig.prepare({
             localDevice: {
                 incomingCapabilities: [
+                    'kdeconnect.share.request',
                     'kdeconnect.telephony.request',
                     'kdeconnect.telephony.request_mute',
                 ],
@@ -63,6 +75,7 @@ describe('The telephony plugin', function () {
             },
             remoteDevice: {
                 incomingCapabilities: [
+                    'kdeconnect.share.request',
                     'kdeconnect.telephony.request',
                     'kdeconnect.telephony.request_mute',
                 ],
@@ -119,6 +132,128 @@ describe('The telephony plugin', function () {
         expect(localPlugin.device.showNotification).toHaveBeenCalled();
     });
 
+    it('adds Bluetooth call controls to ringing notifications', async function () {
+        localPlugin.device.settings.set_string(
+            'last-connection',
+            'bluetooth://00:11:22:33:44:55'
+        );
+
+        remotePlugin.device.sendPacket(Packets.ringing);
+        await localPlugin.awaitPacket('kdeconnect.telephony',
+            Packets.ringing.body);
+
+        const notification = localPlugin.device.showNotification
+            .calls.mostRecent().args[0];
+
+        expect(notification.buttons.map(button => button.action)).toEqual([
+            'answerCall',
+            'muteCall',
+            'hangupCall',
+        ]);
+    });
+
+    it('can answer and hang up Bluetooth calls', function () {
+        spyOn(localPlugin._bluetoothTelephony, 'answerIncomingCall')
+            .and.callThrough();
+        spyOn(localPlugin._bluetoothTelephony, 'hangupCall').and.callThrough();
+
+        localPlugin.answerCall('555-555-5555');
+        localPlugin.hangupCall('555-555-5555');
+
+        expect(localPlugin._bluetoothTelephony.answerIncomingCall)
+            .toHaveBeenCalledWith(localPlugin.device, '555-555-5555');
+        expect(localPlugin._bluetoothTelephony.hangupCall)
+            .toHaveBeenCalledWith(localPlugin.device, '555-555-5555');
+    });
+
+    it('can place outgoing calls', async function () {
+        localPlugin.device.settings.set_string(
+            'bluetooth-address',
+            '00:11:22:33:44:55'
+        );
+        spyOn(localPlugin._bluetoothTelephony, 'dialCall').and.callThrough();
+
+        const callPath = await localPlugin._dial('555-555-5555');
+
+        expect(callPath).toBe('/mock/call');
+        expect(localPlugin._bluetoothTelephony.dialCall)
+            .toHaveBeenCalledWith(localPlugin.device, '555-555-5555');
+    });
+
+    it('can place outgoing calls from tel URIs', async function () {
+        localPlugin.device.settings.set_string(
+            'bluetooth-address',
+            '00:11:22:33:44:55'
+        );
+        spyOn(localPlugin._bluetoothTelephony, 'dialCall').and.callThrough();
+
+        const callPath = await localPlugin._dial('tel:555-555-5555');
+
+        expect(callPath).toBe('/mock/call');
+        expect(localPlugin._bluetoothTelephony.dialCall)
+            .toHaveBeenCalledWith(localPlugin.device, '555-555-5555');
+    });
+
+    it('shows an error when Bluetooth calls are unavailable', async function () {
+        localPlugin.device.settings.set_string(
+            'bluetooth-address',
+            '00:11:22:33:44:55'
+        );
+        spyOn(remotePlugin.device, 'handlePacket').and.callThrough();
+        spyOn(localPlugin._bluetoothTelephony, 'dialCall')
+            .and.returnValue(Promise.resolve(false));
+
+        const result = await localPlugin._dial('tel:555-555-5555');
+
+        expect(result).toEqual(jasmine.objectContaining({
+            error: 'bluetooth-call-unavailable',
+        }));
+        expect(remotePlugin.device.handlePacket).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'kdeconnect.share.request'})
+        );
+    });
+
+    it('requires a saved Bluetooth address for outgoing HFP calls', async function () {
+        spyOn(localPlugin._bluetoothTelephony, 'dialCall').and.callThrough();
+        spyOn(remotePlugin.device, 'handlePacket').and.callThrough();
+
+        const result = await localPlugin._dial('tel:555-555-5555');
+
+        expect(result).toEqual(jasmine.objectContaining({
+            error: 'bluetooth-association-required',
+        }));
+        expect(localPlugin._bluetoothTelephony.dialCall).not.toHaveBeenCalled();
+        expect(remotePlugin.device.handlePacket).not.toHaveBeenCalledWith(
+            jasmine.objectContaining({type: 'kdeconnect.share.request'})
+        );
+    });
+
+    it('finishes the call window when an outgoing Bluetooth call ends', async function () {
+        localPlugin.device.settings.set_string(
+            'bluetooth-address',
+            '00:11:22:33:44:55'
+        );
+        localPlugin._window = {
+            finishCall: jasmine.createSpy('finishCall'),
+        };
+        spyOn(localPlugin._bluetoothTelephony, 'dialCall')
+            .and.returnValue(Promise.resolve('/mock/call'));
+        spyOn(localPlugin._bluetoothTelephony, 'hasActiveCall')
+            .and.returnValue(Promise.resolve(false));
+
+        await localPlugin._dial('555-555-5555');
+        await new Promise(resolve => {
+            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+
+        expect(localPlugin._window.finishCall).toHaveBeenCalled();
+
+        localPlugin._window = null;
+    });
+
     it('hides the notification if the phone stops ringing', async function () {
         remotePlugin.device.sendPacket(Packets.ringingCancel);
         await localPlugin.awaitPacket('kdeconnect.telephony',
@@ -143,10 +278,28 @@ describe('The telephony plugin', function () {
         expect(localPlugin.device.hideNotification).toHaveBeenCalled();
     });
 
+    it('finishes the call window when an outgoing call fails', async function () {
+        localPlugin._window = {
+            finishCall: jasmine.createSpy('finishCall'),
+        };
+
+        remotePlugin.device.sendPacket(Packets.busyCancel);
+        await localPlugin.awaitPacket('kdeconnect.telephony',
+            Packets.busyCancel.body);
+
+        expect(localPlugin._window.finishCall).toHaveBeenCalled();
+
+        localPlugin._window = null;
+    });
+
     describe('can lower and restore the volume', function () {
         let localMixer;
 
         beforeEach(function () {
+            localPlugin.device.settings.set_string(
+                'last-connection',
+                'tcp://127.0.0.1'
+            );
             localMixer = localPlugin._mixer;
             spyOn(localMixer, 'lowerVolume');
             spyOn(localMixer, 'restore');
@@ -191,6 +344,10 @@ describe('The telephony plugin', function () {
         let localMixer;
 
         beforeEach(function () {
+            localPlugin.device.settings.set_string(
+                'last-connection',
+                'tcp://127.0.0.1'
+            );
             localMixer = localPlugin._mixer;
             spyOn(localMixer, 'muteVolume');
             spyOn(localMixer, 'restore');
@@ -235,6 +392,10 @@ describe('The telephony plugin', function () {
         let localMixer;
 
         beforeEach(function () {
+            localPlugin.device.settings.set_string(
+                'last-connection',
+                'tcp://127.0.0.1'
+            );
             localMixer = localPlugin._mixer;
             spyOn(localMixer, 'muteMicrophone');
             spyOn(localMixer, 'restore');
@@ -256,6 +417,59 @@ describe('The telephony plugin', function () {
                 Packets.talkingCancel.body);
 
             expect(localMixer.restore).toHaveBeenCalled();
+        });
+    });
+
+    describe('uses application audio controls for Bluetooth calls', function () {
+        let localMixer;
+
+        beforeEach(function () {
+            localPlugin.device.settings.set_string(
+                'last-connection',
+                'bluetooth://00:11:22:33:44:55'
+            );
+            localPlugin.settings.set_string('talking-volume', 'nothing');
+            localPlugin.settings.set_boolean('talking-microphone', false);
+            localMixer = localPlugin._mixer;
+            spyOn(localMixer, 'lowerApplicationVolumes');
+            spyOn(localMixer, 'muteApplicationVolumes');
+            spyOn(localMixer, 'muteApplicationMicrophones');
+            spyOn(localMixer, 'lowerVolume');
+            spyOn(localMixer, 'muteVolume');
+            spyOn(localMixer, 'muteMicrophone');
+        });
+
+        it('when lowering volume during a call', async function () {
+            localPlugin.settings.set_string('talking-volume', 'lower');
+
+            remotePlugin.device.sendPacket(Packets.talking);
+            await localPlugin.awaitPacket('kdeconnect.telephony',
+                Packets.talking.body);
+
+            expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
+            expect(localMixer.lowerVolume).not.toHaveBeenCalled();
+        });
+
+        it('when muting volume during a call', async function () {
+            localPlugin.settings.set_string('talking-volume', 'mute');
+
+            remotePlugin.device.sendPacket(Packets.talking);
+            await localPlugin.awaitPacket('kdeconnect.telephony',
+                Packets.talking.body);
+
+            expect(localMixer.muteApplicationVolumes).toHaveBeenCalled();
+            expect(localMixer.muteVolume).not.toHaveBeenCalled();
+        });
+
+        it('when muting microphones during a call', async function () {
+            localPlugin.settings.set_boolean('talking-microphone', true);
+
+            remotePlugin.device.sendPacket(Packets.talking);
+            await localPlugin.awaitPacket('kdeconnect.telephony',
+                Packets.talking.body);
+
+            expect(localMixer.muteApplicationMicrophones).toHaveBeenCalled();
+            expect(localMixer.muteMicrophone).not.toHaveBeenCalled();
         });
     });
 
@@ -309,4 +523,3 @@ describe('The telephony plugin', function () {
         expect(localPlugin.device.get_action_enabled('muteCall')).toBeFalse();
     });
 });
-

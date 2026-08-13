@@ -367,7 +367,7 @@ const Service = GObject.registerClass({
 
                     case 'tel':
                         title = _('Dial Number');
-                        action = 'shareUri';
+                        action = 'uriCall';
                         parameter = new GLib.Variant('s', file.get_uri());
                         break;
 

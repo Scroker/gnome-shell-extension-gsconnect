@@ -67,7 +67,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
       <default>{}</default>
     </key>
     <key name="menu-actions" type="as">
-      <default>["sms", "ring", "mount", "commands", "share", "keyboard"]</default>
+      <default>["sms", "call", "ring", "mount", "commands", "share", "keyboard"]</default>
     </key>
     <key name="name" type="s">
       <default>""</default>
@@ -91,6 +91,9 @@ SPDX-License-Identifier: GPL-2.0-or-later
       <default>[]</default>
     </key>
     <key name="last-connection" type="s">
+      <default>""</default>
+    </key>
+    <key name="bluetooth-address" type="s">
       <default>""</default>
     </key>
   </schema>
