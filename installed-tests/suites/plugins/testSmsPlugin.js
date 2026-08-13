@@ -435,6 +435,26 @@ describe('The sms plugin', function () {
         });
     });
 
+    it('can send SMS messages to multiple recipients', async function () {
+        spyOn(remoteDevice, 'handlePacket').and.callThrough();
+
+        localPlugin.sendMessage([
+            {address: '555-555-5555'},
+            {address: '555-555-5556'},
+        ], 'message body');
+
+        await remoteDevice.awaitPacket('kdeconnect.sms.request', {
+            sendSms: true,
+            phoneNumber: '555-555-5555',
+            messageBody: 'message body',
+        });
+        await remoteDevice.awaitPacket('kdeconnect.sms.request', {
+            sendSms: true,
+            phoneNumber: '555-555-5556',
+            messageBody: 'message body',
+        });
+    });
+
     it('disables its GActions when disconnected', function () {
         testRig.setConnected(false);
 

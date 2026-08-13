@@ -34,6 +34,28 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     </accessibility>
                   </object>
                 </child>
+                <child type="end">
+                  <object class="GtkLabel" id="selection-label">
+                    <property name="visible">False</property>
+                    <property name="xalign">1</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkButton" id="confirm-button">
+                    <property name="visible">False</property>
+                    <property name="sensitive">False</property>
+                    <property name="icon-name">object-select-symbolic</property>
+                    <property name="has-tooltip">True</property>
+                    <property name="tooltip-text" translatable="yes">Done</property>
+                    <signal name="clicked" handler="_onConfirmSelection" swapped="no"/>
+                    <accessibility>
+                      <property name="label" translatable="yes">Done</property>
+                    </accessibility>
+                  </object>
+                </child>
               </object>
             </child>
             <child>

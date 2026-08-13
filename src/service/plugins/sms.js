@@ -664,16 +664,21 @@ const SMSPlugin = GObject.registerClass({
      * @param {number} [subId] - The SIM card to use
      */
     sendMessage(addresses, messageBody, event = 1, forceSms = false, subId = undefined) {
+        if (!addresses.length)
+            return;
+
         // TODO: waiting on support in kdeconnect-android
         // if (this._version === 1) {
-        this.device.sendPacket({
-            type: 'kdeconnect.sms.request',
-            body: {
-                sendSms: true,
-                phoneNumber: addresses[0].address,
-                messageBody: messageBody,
-            },
-        });
+        for (const address of addresses) {
+            this.device.sendPacket({
+                type: 'kdeconnect.sms.request',
+                body: {
+                    sendSms: true,
+                    phoneNumber: address.address,
+                    messageBody: messageBody,
+                },
+            });
+        }
         // } else if (this._version === 2) {
         //     this.device.sendPacket({
         //         type: 'kdeconnect.sms.request',
