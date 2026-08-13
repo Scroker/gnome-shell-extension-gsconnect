@@ -537,7 +537,8 @@ const NotificationPlugin = GObject.registerClass({
             // Set defaults
             let action = null;
             let buttons = [];
-            let id = packet.body.id;
+            const remoteId = packet.body.id;
+            let id = remoteId;
             let title = packet.body.appName;
             const text = [];
             if (packet.body.title)
@@ -572,7 +573,7 @@ const NotificationPlugin = GObject.registerClass({
                     return {
                         label: action,
                         action: 'activateNotification',
-                        parameter: new GLib.Variant('(ss)', [id, action]),
+                        parameter: new GLib.Variant('(ss)', [remoteId, action]),
                     };
                 });
             }

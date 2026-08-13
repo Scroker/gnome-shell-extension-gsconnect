@@ -1240,6 +1240,11 @@ msgstr "Connetti questo dispositivo almeno una volta con il backend Bluetooth sp
 msgid "Call Failed"
 msgstr "Chiamata non riuscita"
 
+#. TRANSLATORS: An incoming call could not be answered from the PC
+#: src/service/plugins/calls.js:739
+msgid "Could Not Answer Call"
+msgstr "Impossibile rispondere alla chiamata"
+
 #: src/service/plugins/telephony.js:65
 msgid "Bluetooth Call Unavailable"
 msgstr "Chiamata Bluetooth non disponibile"

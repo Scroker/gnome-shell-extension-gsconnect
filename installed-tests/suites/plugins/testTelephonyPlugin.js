@@ -207,6 +207,22 @@ describe('The telephony plugin', function () {
             '555-555-5555', 'talking', null, 'close');
     });
 
+    it('does not show calls as answered when answering fails', async function () {
+        const window = {
+            showCall: jasmine.createSpy('showCall'),
+            call_path: '',
+        };
+
+        spyOn(localCallsPlugin, '_ensureWindow').and.returnValue(window);
+        spyOn(localCallsPlugin._bluetoothTelephony, 'answerIncomingCall')
+            .and.returnValue(Promise.resolve(false));
+
+        const answered = await localCallsPlugin.answerCall('555-555-5555');
+
+        expect(answered).toBeFalse();
+        expect(window.showCall).not.toHaveBeenCalled();
+    });
+
     it('opens incoming call controls from ringing notifications', function () {
         const window = {
             showCall: jasmine.createSpy('showCall'),
