@@ -72,6 +72,8 @@ describe('The calls plugin', function () {
 
         if (localPlugin?._bluetoothTelephony !== undefined)
             localPlugin._bluetoothTelephony.call_info = null;
+        if (localPlugin?._bluetoothTelephony !== undefined)
+            localPlugin._bluetoothTelephony.active_call = true;
     });
 
     it('can be loaded', async function () {
@@ -127,5 +129,30 @@ describe('The calls plugin', function () {
             'answerCall',
             'hangupCall',
         ]);
+    });
+
+    it('finishes the call window when an incoming HFP call ends', async function () {
+        localPlugin._bluetoothTelephony.call_info = {
+            path: '/mock/call',
+            state: 'incoming',
+            phoneNumber: '555-555-5555',
+            name: 'Name',
+        };
+
+        await localPlugin._syncBluetoothCallNotification();
+
+        localPlugin._window = {
+            finishCall: jasmine.createSpy('finishCall'),
+        };
+        localPlugin._bluetoothTelephony.call_info = null;
+        localPlugin._bluetoothTelephony.active_call = false;
+
+        await localPlugin._syncBluetoothCallNotification();
+
+        expect(localPlugin.device.hideNotification)
+            .toHaveBeenCalledWith('ringing|Name');
+        expect(localPlugin._window.finishCall).toHaveBeenCalled();
+
+        localPlugin._window = null;
     });
 });

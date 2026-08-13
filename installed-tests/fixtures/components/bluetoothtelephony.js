@@ -18,6 +18,7 @@ const MockBluetoothTelephony = GObject.registerClass({
         super._init();
 
         this.call_info = null;
+        this.active_call = true;
     }
 
     canControl(device) {
@@ -43,7 +44,7 @@ const MockBluetoothTelephony = GObject.registerClass({
     }
 
     hasActiveCall() {
-        return Promise.resolve(true);
+        return Promise.resolve(this.active_call);
     }
 
     findCallInfo() {

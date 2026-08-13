@@ -151,6 +151,8 @@ const CallsPlugin = GObject.registerClass({
         this._bluetoothCallsChangedId = 0;
         this._bluetoothCallSyncing = false;
         this._incomingSender = null;
+        this._incomingCallNumber = null;
+        this._incomingCallPath = null;
     }
 
     get telephony_settings() {
@@ -180,6 +182,8 @@ const CallsPlugin = GObject.registerClass({
         }
 
         this._incomingSender = null;
+        this._incomingCallNumber = null;
+        this._incomingCallPath = null;
     }
 
     handlePacket(packet) {
@@ -279,8 +283,10 @@ const CallsPlugin = GObject.registerClass({
         }
     }
 
-    _notifyIncomingCall({id, sender, phoneNumber, hfp = true}) {
+    _notifyIncomingCall({id, sender, phoneNumber, callPath = null, hfp = true}) {
         this._incomingSender = sender;
+        this._incomingCallNumber = phoneNumber ?? '';
+        this._incomingCallPath = callPath;
         this._setMediaState('ringing', hfp);
 
         const parameter = new GLib.Variant('s', phoneNumber ?? '');
@@ -343,12 +349,42 @@ const CallsPlugin = GObject.registerClass({
                     id: `ringing|${sender}`,
                     sender,
                     phoneNumber: call.phoneNumber,
+                    callPath: call.path,
                     hfp: true,
                 });
             } else if (this._incomingSender !== null) {
                 this.device.hideNotification(`ringing|${this._incomingSender}`);
+                const active = await this._bluetoothTelephony?.hasActiveCall(
+                    this.device,
+                    this._incomingCallNumber,
+                    this._incomingCallPath
+                );
+
+                if (active) {
+                    if (this._window !== null) {
+                        this._window.showCall(
+                            this._incomingCallNumber,
+                            'talking',
+                            this._incomingCallPath,
+                            'close'
+                        );
+                    }
+
+                    this._setMediaState('talking', true);
+                    this._watchBluetoothCall(
+                        this._incomingCallNumber,
+                        this._incomingCallPath
+                    );
+                } else if (this._window !== null) {
+                    this._window.finishCall();
+                    this._restoreMediaState();
+                } else {
+                    this._restoreMediaState();
+                }
+
                 this._incomingSender = null;
-                this._restoreMediaState();
+                this._incomingCallNumber = null;
+                this._incomingCallPath = null;
             }
         } catch (e) {
             debug(e, this.device.name);
@@ -399,6 +435,7 @@ const CallsPlugin = GObject.registerClass({
 
     _finishBluetoothCall() {
         this._clearCallWatch();
+        this._restoreMediaState();
 
         if (this._window !== null)
             this._window.finishCall();
@@ -487,6 +524,7 @@ const CallsPlugin = GObject.registerClass({
                         : callPath;
 
                     window.showCall(phoneNumber, 'talking', path, 'close');
+                    this._watchBluetoothCall(phoneNumber, path);
                 }
 
                 return answeredPath;
@@ -499,7 +537,7 @@ const CallsPlugin = GObject.registerClass({
 
     showIncomingCall(phoneNumber = null) {
         const window = this._ensureWindow();
-        window.showCall(phoneNumber, 'incoming', null, 'close');
+        window.showCall(phoneNumber, 'incoming', this._incomingCallPath, 'close');
     }
 
     hangupCall(phoneNumber = null, callPath = null) {
@@ -547,6 +585,10 @@ const CallsPlugin = GObject.registerClass({
             this._bluetoothTelephony.disconnect(this._bluetoothCallsChangedId);
             this._bluetoothCallsChangedId = 0;
         }
+
+        this._incomingSender = null;
+        this._incomingCallNumber = null;
+        this._incomingCallPath = null;
 
         if (this._bluetoothTelephony !== undefined)
             this._bluetoothTelephony = Components.release('bluetoothtelephony');
