@@ -152,6 +152,8 @@ describe('The telephony plugin', function () {
         const notification = localPlugin.device.showNotification
             .calls.mostRecent().args[0];
 
+        expect(notification.action.name).toBe('showIncomingCall');
+        expect(notification.action.parameter.deepUnpack()).toBe('555-555-5555');
         expect(notification.buttons.map(button => button.action)).toEqual([
             'answerCall',
             'muteCall',
@@ -182,6 +184,19 @@ describe('The telephony plugin', function () {
                 null);
         expect(window.showCall).toHaveBeenCalledWith(
             '555-555-5555', 'talking', null, 'close');
+    });
+
+    it('opens incoming call controls from ringing notifications', function () {
+        const window = {
+            showCall: jasmine.createSpy('showCall'),
+        };
+
+        spyOn(localCallsPlugin, '_ensureWindow').and.returnValue(window);
+
+        localCallsPlugin.showIncomingCall('555-555-5555');
+
+        expect(window.showCall).toHaveBeenCalledWith(
+            '555-555-5555', 'incoming', null, 'close');
     });
 
     it('can place outgoing calls', async function () {
@@ -437,7 +452,11 @@ describe('The telephony plugin', function () {
         beforeEach(function () {
             localPlugin.device.settings.set_string(
                 'last-connection',
-                'bluetooth://00:11:22:33:44:55'
+                'tcp://127.0.0.1'
+            );
+            localPlugin.device.settings.set_string(
+                'bluetooth-address',
+                '00:11:22:33:44:55'
             );
             localPlugin.settings.set_string('talking-volume', 'nothing');
             localPlugin.settings.set_boolean('talking-microphone', false);
@@ -448,6 +467,28 @@ describe('The telephony plugin', function () {
             spyOn(localMixer, 'lowerVolume');
             spyOn(localMixer, 'muteVolume');
             spyOn(localMixer, 'muteMicrophone');
+        });
+
+        it('when lowering volume while ringing', async function () {
+            localPlugin.settings.set_string('ringing-volume', 'lower');
+
+            remotePlugin.device.sendPacket(Packets.ringing);
+            await localPlugin.awaitPacket('kdeconnect.telephony',
+                Packets.ringing.body);
+
+            expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
+            expect(localMixer.lowerVolume).not.toHaveBeenCalled();
+        });
+
+        it('when muting volume while ringing', async function () {
+            localPlugin.settings.set_string('ringing-volume', 'mute');
+
+            remotePlugin.device.sendPacket(Packets.ringing);
+            await localPlugin.awaitPacket('kdeconnect.telephony',
+                Packets.ringing.body);
+
+            expect(localMixer.muteApplicationVolumes).toHaveBeenCalled();
+            expect(localMixer.muteVolume).not.toHaveBeenCalled();
         });
 
         it('when lowering volume during a call', async function () {

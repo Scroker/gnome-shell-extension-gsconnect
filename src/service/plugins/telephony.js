@@ -73,7 +73,7 @@ const TelephonyPlugin = GObject.registerClass({
         // Mixer Volume
         if (this._mixer !== undefined) {
             const useApplicationStreams =
-                this._bluetoothTelephony?.canControl(this.device) === true;
+                this._bluetoothTelephony?.hasBluetoothAddress(this.device) === true;
 
             switch (this.settings.get_string(`${eventType}-volume`)) {
                 case 'restore':
@@ -183,6 +183,7 @@ const TelephonyPlugin = GObject.registerClass({
     }
 
     _notifyEvent(packet) {
+        let action = null;
         let body;
         let buttons = [];
         let icon = null;
@@ -218,6 +219,11 @@ const TelephonyPlugin = GObject.registerClass({
             }];
 
             if (this.device._plugins.has('calls')) {
+                action = {
+                    name: 'showIncomingCall',
+                    parameter: new GLib.Variant('s',
+                        packet.body.phoneNumber ?? ''),
+                };
                 buttons.unshift({
                     action: 'answerCall',
                     // TRANSLATORS: Answer the actively ringing call
@@ -252,6 +258,7 @@ const TelephonyPlugin = GObject.registerClass({
             body: body,
             icon: icon,
             priority: priority,
+            action: action,
             buttons: buttons,
         });
     }

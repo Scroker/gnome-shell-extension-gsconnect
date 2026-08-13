@@ -99,6 +99,15 @@ export const Metadata = {
             incoming: [],
             outgoing: [],
         },
+        showIncomingCall: {
+            // TRANSLATORS: Show the incoming call controls
+            label: _('Show Incoming Call'),
+            icon_name: 'call-start-symbolic',
+
+            parameter_type: new GLib.VariantType('s'),
+            incoming: [],
+            outgoing: [],
+        },
         hangupCall: {
             // TRANSLATORS: Decline or hang up the active call
             label: _('Hang Up'),
@@ -260,6 +269,11 @@ const CallsPlugin = GObject.registerClass({
                 return answeredPath;
             })
             .catch(e => debug(e, this.device.name));
+    }
+
+    showIncomingCall(phoneNumber = null) {
+        const window = this._ensureWindow();
+        window.showCall(phoneNumber, 'incoming', null, 'close');
     }
 
     hangupCall(phoneNumber = null, callPath = null) {

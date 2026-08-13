@@ -1206,6 +1206,11 @@ msgstr "Rispondi"
 msgid "Answer Call"
 msgstr "Rispondi alla chiamata"
 
+#. TRANSLATORS: Show the incoming call controls
+#: src/service/plugins/calls.js:104
+msgid "Show Incoming Call"
+msgstr "Mostra chiamata in arrivo"
+
 #: data/ui/telephony-call-status-page.ui:93
 #: data/ui/telephony-call-status-page.ui:101
 #. TRANSLATORS: Decline or hang up the active call
