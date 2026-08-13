@@ -77,12 +77,13 @@ SPDX-License-Identifier: GPL-2.0-or-later
                       <object class="GtkButton" id="answer-button">
                         <property name="visible">False</property>
                         <property name="icon-name">call-start-symbolic</property>
-                        <property name="label" translatable="yes">Answer</property>
                         <property name="has-tooltip">True</property>
                         <property name="tooltip-text" translatable="yes">Answer Call</property>
                         <signal name="clicked" handler="_onAnswerClicked" swapped="no"/>
                         <style>
+                          <class name="circular"/>
                           <class name="suggested-action"/>
+                          <class name="call-control-button"/>
                         </style>
                         <accessibility>
                           <property name="label" translatable="yes">Answer Call</property>
