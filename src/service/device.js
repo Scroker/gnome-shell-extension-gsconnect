@@ -12,6 +12,24 @@ import * as Core from './core.js';
 import plugins from './plugins/index.js';
 
 const ALLOWED_TIMESTAMP_TIME_DIFFERENCE_SECONDS = 1800; // 30 min
+const BLUETOOTH_MOUSEPAD_REQUEST_INTERVAL = 16;
+
+/**
+ * Check if a packet is a mousepad pointer delta request.
+ *
+ * @param {object} packet - A KDE Connect packet
+ * @returns {boolean} %true if the packet carries pointer deltas
+ */
+export function _isPointerMousepadRequest(packet) {
+    if (packet.type !== 'kdeconnect.mousepad.request')
+        return false;
+
+    if (packet.body === null || typeof packet.body !== 'object')
+        return false;
+
+    return packet.body.hasOwnProperty('dx') &&
+        packet.body.hasOwnProperty('dy');
+}
 
 /**
  * An object representing a remote device.
@@ -463,6 +481,9 @@ const Device = GObject.registerClass({
             if (!this.paired && packet.type !== 'kdeconnect.pair')
                 return;
 
+            if (this._shouldDropBluetoothPointerRequest(packet))
+                return;
+
             this._outputQueue.push(new Core.Packet(packet));
 
             if (this._outputLock)
@@ -483,6 +504,26 @@ const Device = GObject.registerClass({
 
             this._outputLock = false;
         }
+    }
+
+    _shouldDropBluetoothPointerRequest(packet) {
+        if (this.connection_type !== 'bluetooth')
+            return false;
+
+        if (!_isPointerMousepadRequest(packet))
+            return false;
+
+        if (packet.body.dx === 0 && packet.body.dy === 0)
+            return true;
+
+        const now = Date.now();
+
+        if (this._bluetoothPointerRequestTime !== undefined &&
+            now - this._bluetoothPointerRequestTime < BLUETOOTH_MOUSEPAD_REQUEST_INTERVAL)
+            return true;
+
+        this._bluetoothPointerRequestTime = now;
+        return false;
     }
 
     /**
