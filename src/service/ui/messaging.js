@@ -1060,7 +1060,7 @@ export const MessagingWindow = GObject.registerClass({
         // Contacts
         this.contact_chooser = new Contacts.ContactChooser({
             device: this.device,
-            'selection-mode': 'multiple',
+            'show-selection-mode-button': true,
         });
 
         // Make sure we're using the correct contacts store
@@ -1084,6 +1084,10 @@ export const MessagingWindow = GObject.registerClass({
 
         this._selectionConfirmedId = this.contact_chooser.connect(
             'selection-confirmed',
+            this._onSelectionConfirmed.bind(this)
+        );
+        this._numberSelectedId = this.contact_chooser.connect(
+            'number-selected',
             this._onSelectionConfirmed.bind(this)
         );
 
@@ -1123,6 +1127,7 @@ export const MessagingWindow = GObject.registerClass({
         this.device.disconnect(this._deviceConnectedId);
         this.search_entry.disconnect(this._searchEntryId);
         this.contact_chooser.disconnect(this._selectionConfirmedId);
+        this.contact_chooser.disconnect(this._numberSelectedId);
         this.plugin.disconnect(this._threadsChangedId);
         this._searchBinding.unbind();
 
@@ -1206,6 +1211,8 @@ export const MessagingWindow = GObject.registerClass({
     _onNewConversation() {
         this._finalizeDraftRows();
         this._sync();
+        this.contact_chooser.clearSelection();
+        this.contact_chooser.selection_mode = 'single';
         this.search_entry.set_key_capture_widget(null);
         this.button_search.active = false;
         this.split_view.set_content(this.contact_chooser);

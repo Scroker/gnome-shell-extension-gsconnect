@@ -155,6 +155,13 @@ export const ContactChooser = GObject.registerClass({
             GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT,
             'single'
         ),
+        'show-selection-mode-button': GObject.ParamSpec.boolean(
+            'show-selection-mode-button',
+            'Show Selection Mode Button',
+            'Whether to show the multiple selection toggle',
+            GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT,
+            false
+        ),
     },
     Signals: {
         'number-selected': {
@@ -169,7 +176,8 @@ export const ContactChooser = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/contact-chooser.ui',
     Children: [
         'button-search', 'search-bar', 'search-entry',
-        'confirm-button', 'selection-label', 'scrolled', 'list', 'header-bar',
+        'confirm-button', 'selection-label', 'selection-mode-button',
+        'scrolled', 'list', 'header-bar',
 
     ],
 }, class ContactChooser extends Adw.NavigationPage {
@@ -296,7 +304,28 @@ export const ContactChooser = GObject.registerClass({
     }
 
     set selection_mode(selection_mode) {
-        this._selection_mode = selection_mode ?? 'single';
+        const mode = selection_mode === 'multiple' ? 'multiple' : 'single';
+
+        if (this.selection_mode === mode)
+            return;
+
+        this._selection_mode = mode;
+
+        if (this.selection_mode_button !== undefined)
+            this.selection_mode_button.active = mode === 'multiple';
+
+        if (mode === 'single')
+            this.clearSelection();
+
+        this._updateSelectionState();
+    }
+
+    get show_selection_mode_button() {
+        return this._show_selection_mode_button ?? false;
+    }
+
+    set show_selection_mode_button(show) {
+        this._show_selection_mode_button = show;
         this._updateSelectionState();
     }
 
@@ -419,6 +448,10 @@ export const ContactChooser = GObject.registerClass({
             this.emit('selection-confirmed');
     }
 
+    _onSelectionModeToggled(button) {
+        this.selection_mode = button.active ? 'multiple' : 'single';
+    }
+
     clearSelection() {
         this.selected_rows = {};
 
@@ -435,6 +468,8 @@ export const ContactChooser = GObject.registerClass({
 
         const count = Object.keys(this.selected_rows ?? {}).length;
 
+        this.selection_mode_button.visible = this.show_selection_mode_button;
+        this.selection_mode_button.active = this.selection_mode === 'multiple';
         this.confirm_button.visible = this.selection_mode === 'multiple';
         this.confirm_button.sensitive = count > 0;
         this.confirm_button.tooltip_text = ngettext(
