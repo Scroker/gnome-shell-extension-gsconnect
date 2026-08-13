@@ -152,13 +152,34 @@ describe('The telephony plugin', function () {
         const notification = localPlugin.device.showNotification
             .calls.mostRecent().args[0];
 
-        expect(notification.action.name).toBe('showIncomingCall');
+        expect(notification.action.name).toBe('showCallControls');
         expect(notification.action.parameter.deepUnpack()).toBe('555-555-5555');
         expect(notification.buttons.map(button => button.action)).toEqual([
             'answerCall',
             'muteCall',
             'hangupCall',
         ]);
+    });
+
+    it('only shows a decline control when calls are disabled', async function () {
+        const callsPlugin = localPlugin.device._plugins.get('calls');
+        localPlugin.device._plugins.delete('calls');
+
+        try {
+            remotePlugin.device.sendPacket(Packets.ringing);
+            await localPlugin.awaitPacket('kdeconnect.telephony',
+                Packets.ringing.body);
+
+            const notification = localPlugin.device.showNotification
+                .calls.mostRecent().args[0];
+
+            expect(notification.action).toBeNull();
+            expect(notification.buttons.map(button => button.action)).toEqual([
+                'declineCall',
+            ]);
+        } finally {
+            localPlugin.device._plugins.set('calls', callsPlugin);
+        }
     });
 
     it('can answer and hang up Bluetooth calls', async function () {
@@ -193,10 +214,20 @@ describe('The telephony plugin', function () {
 
         spyOn(localCallsPlugin, '_ensureWindow').and.returnValue(window);
 
-        localCallsPlugin.showIncomingCall('555-555-5555');
+        localPlugin.showCallControls('555-555-5555');
 
         expect(window.showCall).toHaveBeenCalledWith(
             '555-555-5555', 'incoming', null, 'close');
+    });
+
+    it('can decline Bluetooth calls without the calls plugin', async function () {
+        spyOn(localPlugin._bluetoothTelephony, 'hangupCall')
+            .and.callThrough();
+
+        await localPlugin.declineCall('555-555-5555');
+
+        expect(localPlugin._bluetoothTelephony.hangupCall)
+            .toHaveBeenCalledWith(localPlugin.device, '555-555-5555', null);
     });
 
     it('can place outgoing calls', async function () {
@@ -573,5 +604,8 @@ describe('The telephony plugin', function () {
         testRig.setConnected(false);
 
         expect(localPlugin.device.get_action_enabled('muteCall')).toBeFalse();
+        expect(localPlugin.device.get_action_enabled('showCallControls'))
+            .toBeFalse();
+        expect(localPlugin.device.get_action_enabled('declineCall')).toBeFalse();
     });
 });

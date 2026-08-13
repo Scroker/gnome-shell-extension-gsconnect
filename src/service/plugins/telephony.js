@@ -33,6 +33,24 @@ export const Metadata = {
             incoming: ['kdeconnect.telephony'],
             outgoing: ['kdeconnect.telephony.request_mute'],
         },
+        showCallControls: {
+            // TRANSLATORS: Show the incoming call controls
+            label: _('Show Incoming Call'),
+            icon_name: 'call-start-symbolic',
+
+            parameter_type: new GLib.VariantType('s'),
+            incoming: ['kdeconnect.telephony'],
+            outgoing: [],
+        },
+        declineCall: {
+            // TRANSLATORS: Decline the actively ringing call
+            label: _('Decline Call'),
+            icon_name: 'call-stop-symbolic',
+
+            parameter_type: new GLib.VariantType('s'),
+            incoming: ['kdeconnect.telephony'],
+            outgoing: ['kdeconnect.telephony.request'],
+        },
     },
 };
 
@@ -211,33 +229,39 @@ const TelephonyPlugin = GObject.registerClass({
 
             // TRANSLATORS: The phone is ringing
             body = _('Incoming call');
-            buttons = [{
-                action: 'muteCall',
-                // TRANSLATORS: Silence the actively ringing call
-                label: _('Mute'),
-                parameter: null,
-            }];
 
             if (this.device._plugins.has('calls')) {
                 action = {
-                    name: 'showIncomingCall',
+                    name: 'showCallControls',
                     parameter: new GLib.Variant('s',
                         packet.body.phoneNumber ?? ''),
                 };
-                buttons.unshift({
+                buttons = [{
                     action: 'answerCall',
                     // TRANSLATORS: Answer the actively ringing call
                     label: _('Answer'),
                     parameter: new GLib.Variant('s',
                         packet.body.phoneNumber ?? ''),
-                });
-                buttons.push({
+                }, {
+                    action: 'muteCall',
+                    // TRANSLATORS: Silence the actively ringing call
+                    label: _('Mute'),
+                    parameter: null,
+                }, {
                     action: 'hangupCall',
                     // TRANSLATORS: Decline the actively ringing call
                     label: _('Decline'),
                     parameter: new GLib.Variant('s',
                         packet.body.phoneNumber ?? ''),
-                });
+                }];
+            } else {
+                buttons = [{
+                    action: 'declineCall',
+                    // TRANSLATORS: Decline the actively ringing call
+                    label: _('Decline'),
+                    parameter: new GLib.Variant('s',
+                        packet.body.phoneNumber ?? ''),
+                }];
             }
 
             priority = Gio.NotificationPriority.URGENT;
@@ -274,6 +298,29 @@ const TelephonyPlugin = GObject.registerClass({
         });
 
         this._restoreMediaState();
+    }
+
+    /**
+     * Open the incoming call controls, when the calls plugin is enabled.
+     *
+     * @param {string} phoneNumber - The phone number for the ringing call
+     */
+    showCallControls(phoneNumber = null) {
+        this.device._plugins.get('calls')?.showIncomingCall(phoneNumber);
+    }
+
+    /**
+     * Decline an incoming Bluetooth call without requiring the calls plugin UI.
+     *
+     * @param {string} phoneNumber - The phone number for the ringing call
+     * @returns {Promise<boolean|undefined>} A promise that resolves when done
+     */
+    declineCall(phoneNumber = null) {
+        this._restoreMediaState();
+
+        return Promise.resolve(this._bluetoothTelephony?.hangupCall(
+            this.device, phoneNumber, null))
+            .catch(e => debug(e, this.device.name));
     }
 
     destroy() {
