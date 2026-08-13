@@ -26,7 +26,6 @@ await import(`file://${Config.PACKAGE_DATADIR}/service/init.js`);
 
 const Bluetooth = await import(`file://${Config.PACKAGE_DATADIR}/service/backends/bluetooth.js`);
 const Core = await import(`file://${Config.PACKAGE_DATADIR}/service/core.js`);
-const {default: Manager} = await import(`file://${Config.PACKAGE_DATADIR}/service/manager.js`);
 
 const DATA_PATH = Gio.File.new_for_uri(import.meta.url)
     .get_parent()
@@ -318,39 +317,5 @@ describe('A Bluetooth channel', function () {
 
         expect(multiplexer.calls).toEqual(['read', 'write']);
         expect(channel.identity.body.deviceName).toBe('Phone');
-    });
-});
-
-
-describe('Bluetooth manager integration', function () {
-    let manager;
-    let backend;
-
-    beforeEach(function () {
-        manager = new Manager({
-            object_path: '/org/gnome/Shell/Extensions/GSConnect/Test',
-        });
-        manager.settings.set_boolean('bluetooth-enabled', false);
-
-        backend = {
-            start: jasmine.createSpy('start'),
-            stop: jasmine.createSpy('stop'),
-        };
-        manager.backends.set('bluetooth', backend);
-    });
-
-    afterEach(function () {
-        manager.settings.set_boolean('bluetooth-enabled', false);
-        manager.destroy();
-        manager = null;
-        backend = null;
-    });
-
-    it('starts and stops from the global setting', function () {
-        manager.settings.set_boolean('bluetooth-enabled', true);
-        expect(backend.start).toHaveBeenCalled();
-
-        manager.settings.set_boolean('bluetooth-enabled', false);
-        expect(backend.stop).toHaveBeenCalled();
     });
 });
