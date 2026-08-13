@@ -51,6 +51,11 @@
   padding: 0px;
 }
 
+.selection-confirm-button {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
 
 /**
  * GSConnectConversationWidget

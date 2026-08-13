@@ -129,6 +129,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <style>
                   <class name="suggested-action"/>
                   <class name="circular"/>
+                  <class name="selection-confirm-button"/>
                 </style>
               </object>
             </child>
