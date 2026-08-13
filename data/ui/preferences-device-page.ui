@@ -816,7 +816,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
                       </object>
                     </child>
                     <child>
-                      <object class="AdwPreferencesGroup">
+                      <object class="AdwPreferencesGroup" id="experimental-list">
                         <property name="visible">True</property>
                         <property name="title" translatable="yes">Experimental</property>
                         <child>

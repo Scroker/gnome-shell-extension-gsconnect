@@ -273,6 +273,7 @@ export const DeviceNavigationPage = GObject.registerClass({
         'notification-apps',
         'receive-directory',
         'plugin-list',
+        'experimental-list',
         'disable_all_plugins',
         'device-cache',
         'command-list',
@@ -975,7 +976,11 @@ export const DeviceNavigationPage = GObject.registerClass({
         row.connect('notify::active', this._togglePlugin.bind(this));
         row.set_name(name);
 
-        this.plugin_list.add(row);
+        if (name === 'calls')
+            this.experimental_list.add(row);
+        else
+            this.plugin_list.add(row);
+
         this.plugin_list_rows.push(row);
     }
 

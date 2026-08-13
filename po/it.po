@@ -1159,6 +1159,14 @@ msgstr "Ricevere notifiche sulle telefonate e livellare il volume durante le tel
 msgid "Mute Call"
 msgstr "Silenzia la chiamata in arrivo"
 
+#: src/service/plugins/calls.js:70
+msgid "Calls"
+msgstr "Chiamate"
+
+#: src/service/plugins/calls.js:71
+msgid "Place and control Bluetooth calls from the PC"
+msgstr "Effettuare e controllare chiamate Bluetooth dal PC"
+
 #: data/ui/telephony-call-status-page.ui:14
 #: data/ui/telephony-call-status-page.ui:24
 #. TRANSLATORS: Place an outgoing call from the paired phone

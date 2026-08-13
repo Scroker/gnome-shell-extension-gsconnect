@@ -286,6 +286,9 @@ const Device = GObject.registerClass({
             .get_strv('supported-plugins')
             .filter(name => !deprecated.includes(name));
 
+        if (supported.includes('telephony') && !supported.includes('calls'))
+            supported.push('calls');
+
         this.settings.set_strv('supported-plugins', supported);
     }
 
@@ -341,6 +344,9 @@ const Device = GObject.registerClass({
                 meta.outgoingCapabilities.some(t => incoming.includes(t)))
                 supported.push(name);
         }
+
+        if (supported.includes('telephony') && !supported.includes('calls'))
+            supported.push('calls');
 
         // Only write GSettings if something has changed
         const currentSupported = this.settings.get_strv('supported-plugins');
