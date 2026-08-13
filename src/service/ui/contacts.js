@@ -170,7 +170,7 @@ export const ContactChooser = GObject.registerClass({
     Children: [
         'button-search', 'search-bar', 'search-entry',
         'confirm-button', 'selection-label', 'selection-mode-button',
-        'scrolled', 'list', 'header-bar',
+        'selection-bar', 'scrolled', 'list', 'header-bar',
 
     ],
 }, class ContactChooser extends Adw.NavigationPage {
@@ -452,7 +452,7 @@ export const ContactChooser = GObject.registerClass({
 
         this.selection_mode_button.visible = this.show_selection_mode_button;
         this.selection_mode_button.active = this.selection_mode === 'multiple';
-        this.confirm_button.visible = this.selection_mode === 'multiple';
+        this.selection_bar.visible = this.selection_mode === 'multiple';
         this.confirm_button.sensitive = count > 0;
         this.confirm_button.tooltip_text = ngettext(
             'Start conversation with %d recipient',
