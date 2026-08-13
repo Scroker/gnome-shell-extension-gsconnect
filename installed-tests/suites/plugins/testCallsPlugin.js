@@ -14,6 +14,26 @@ const Packets = {
             event: 'ringing',
         },
     },
+    missedCall: {
+        type: 'kdeconnect.telephony',
+        body: {
+            contactName: 'Name',
+            phoneNumber: '555-555-5555',
+            event: 'missedCall',
+        },
+    },
+    missedCallNotification: {
+        type: 'kdeconnect.notification',
+        body: {
+            appName: 'Phone',
+            id: '0|com.google.android.dialer|MissedCall_content://call_log/calls/1',
+            title: 'Name',
+            text: 'Missed call',
+            ticker: 'Name: Missed call',
+            actions: ['Call Back', 'Remind me', 'Message'],
+            isClearable: true,
+        },
+    },
 };
 
 
@@ -74,6 +94,7 @@ describe('The calls plugin', function () {
             localPlugin._bluetoothTelephony.call_info = null;
         if (localPlugin?._bluetoothTelephony !== undefined)
             localPlugin._bluetoothTelephony.active_call = true;
+        localPlugin?._missedCallNumbers.clear();
     });
 
     it('can be loaded', async function () {
@@ -176,6 +197,26 @@ describe('The calls plugin', function () {
 
         expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
+    });
+
+    it('handles missed call notifications with only a call back action', async function () {
+        remoteTelephonyPlugin.device.sendPacket(Packets.missedCall);
+        await localPlugin.awaitPacket('kdeconnect.telephony',
+            Packets.missedCall.body);
+
+        expect(localPlugin.handleNotification(Packets.missedCallNotification))
+            .toBeTrue();
+        expect(localPlugin.device.showNotification).toHaveBeenCalled();
+
+        const notification = localPlugin.device.showNotification
+            .calls.mostRecent().args[0];
+
+        expect(notification.title).toBe('Name');
+        expect(notification.body).toBe('Missed call');
+        expect(notification.buttons.length).toBe(1);
+        expect(notification.buttons[0].action).toBe('uriCall');
+        expect(notification.buttons[0].label).toBe('Call Back');
+        expect(notification.buttons[0].parameter.deepUnpack()).toBe('555-555-5555');
     });
 
     it('finishes the call window when an incoming HFP call ends', async function () {

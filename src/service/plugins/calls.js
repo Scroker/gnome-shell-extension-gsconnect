@@ -35,6 +35,26 @@ function _dialNumberFromUri(uri) {
 }
 
 /**
+ * Check whether an Android notification represents a missed call.
+ *
+ * @param {object} packet - A `kdeconnect.notification` packet
+ * @returns {boolean} %true if the notification is for a missed call
+ */
+function _isMissedCallNotification(packet) {
+    return packet.body.id?.includes('MissedCall') ?? false;
+}
+
+/**
+ * Check whether a string looks like a phone number.
+ *
+ * @param {string} value - A potential phone number
+ * @returns {boolean} %true if the string looks dialable
+ */
+function _looksDialable(value) {
+    return /^[+\d][\d\s().-]{2,}$/.test(value ?? '');
+}
+
+/**
  * Return the UI error shown when a device has not been associated with its
  * Bluetooth Hands-Free gateway yet.
  *
@@ -155,6 +175,7 @@ const CallsPlugin = GObject.registerClass({
         this._incomingSender = null;
         this._incomingCallNumber = null;
         this._incomingCallPath = null;
+        this._missedCallNumbers = new Map();
     }
 
     get telephony_settings() {
@@ -202,8 +223,13 @@ const CallsPlugin = GObject.registerClass({
         if (packet.type !== 'kdeconnect.telephony')
             return;
 
-        if (!['ringing', 'talking'].includes(packet.body.event))
+        if (!['ringing', 'talking', 'missedCall'].includes(packet.body.event))
             return;
+
+        if (packet.body.event === 'missedCall') {
+            this._cacheMissedCall(packet);
+            return;
+        }
 
         if (packet.body.isCancel) {
             this._cancelTelephonyEvent(packet);
@@ -223,6 +249,75 @@ const CallsPlugin = GObject.registerClass({
             sender = packet.body.phoneNumber;
 
         return sender;
+    }
+
+    _cacheMissedCall(packet) {
+        const number = packet.body.phoneNumber;
+
+        if (!number)
+            return;
+
+        this._missedCallNumbers.set(this._getSender(packet), number);
+    }
+
+    _getMissedCallNumber(packet) {
+        if (packet.body.phoneNumber)
+            return packet.body.phoneNumber;
+
+        for (const value of [packet.body.title, packet.body.text]) {
+            const number = this._missedCallNumbers.get(value);
+
+            if (number)
+                return number;
+        }
+
+        for (const value of [
+            packet.body.title,
+            packet.body.text,
+            packet.body.ticker,
+        ]) {
+            if (_looksDialable(value))
+                return value;
+        }
+
+        return '';
+    }
+
+    handleNotification(packet) {
+        if (!_isMissedCallNotification(packet))
+            return false;
+
+        const id = `missedCall|${packet.body.id}`;
+
+        if (packet.body.isCancel) {
+            this.device.hideNotification(id);
+            return true;
+        }
+
+        const title = packet.body.title || _('Missed Call');
+        const body = packet.body.text || _('Missed Call');
+        const number = this._getMissedCallNumber(packet);
+        const buttons = [];
+
+        if (number) {
+            buttons.push({
+                action: 'uriCall',
+                // TRANSLATORS: Call back a missed call
+                label: _('Call Back'),
+                parameter: new GLib.Variant('s', number),
+            });
+        }
+
+        this.device.showNotification({
+            id,
+            title,
+            body,
+            icon: new Gio.ThemedIcon({name: 'call-missed-symbolic'}),
+            priority: Gio.NotificationPriority.NORMAL,
+            buttons,
+        });
+
+        return true;
     }
 
     _setMediaState(eventType, hfp = false) {

@@ -301,6 +301,12 @@ const NotificationPlugin = GObject.registerClass({
      * @param {Core.Packet} packet - A `kdeconnect.notification`
      */
     _handleNotification(packet) {
+        const calls = this.device._plugins.get('calls');
+
+        if (calls?.handleNotification instanceof Function &&
+            calls.handleNotification(packet))
+            return;
+
         // A report that a remote notification has been dismissed
         if (packet.body.hasOwnProperty('isCancel'))
             this.device.hideNotification(packet.body.id);
