@@ -403,7 +403,7 @@ const MessagingConversation = GObject.registerClass({
             'notify::connected',
             this._onConnected.bind(this)
         );
-        this._ids = new Set();
+        this._message_rows = new Map();
 
         // Pending messages
         this.pending.message = {
@@ -415,6 +415,8 @@ const MessagingConversation = GObject.registerClass({
 
         // Auto-scrolling
         this._vadj = this.scrolled.get_vadjustment();
+        this._scrollSourceId = 0;
+        this._scrollToLatest = true;
         this._scrolledId = this._vadj.connect(
             'value-changed',
             this._holdPosition.bind(this)
@@ -424,6 +426,10 @@ const MessagingConversation = GObject.registerClass({
         this.internal_message_list = [];
         this.list.set_header_func(this._headerMessages);
         this.list.set_sort_func(this._sortMessages);
+        this._threadsChangedId = this.plugin.connect(
+            'notify::threads',
+            this._syncMessages.bind(this)
+        );
         this._populateMessages();
     }
 
@@ -628,6 +634,29 @@ const MessagingConversation = GObject.registerClass({
         return animation;
     }
 
+    _scrollBottom() {
+        if (this._scrollSourceId)
+            GLib.Source.remove(this._scrollSourceId);
+
+        let attempts = 0;
+        this._scrollSourceId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+            const adjustment = this.scrolled.get_vadjustment();
+            const value = Math.max(
+                adjustment.get_lower(),
+                adjustment.get_upper() - adjustment.get_page_size()
+            );
+
+            adjustment.set_value(value);
+            this._releasePosition();
+
+            if (++attempts < 10)
+                return GLib.SOURCE_CONTINUE;
+
+            this._scrollSourceId = 0;
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
     /**
      * Create a message row, ensuring a contact object has been retrieved or
      * generated for the message.
@@ -651,26 +680,51 @@ const MessagingConversation = GObject.registerClass({
     _populateMessages() {
         this.earliest = Number.MAX_SAFE_INTEGER;
         this.latest = -1;
-        this._ids.clear();
+        this._message_rows.clear();
         this.__pos = 0;
-        this._hide_spinner();
 
         // Try and find a thread_id for this number
         if (this.thread_id === null && this.addresses.length)
             this._thread_id = this.plugin.getThreadIdForAddresses(this.addresses);
 
-        // Fill the window with messages from the thread
-        if (this.thread_id !== null && this.plugin.threads[this.thread_id]) {
-            const messages = this.plugin.threads[this.thread_id].slice(0);
-
-            for (const message of messages)
-                this.addMessage(message);
-        }
+        this._syncMessages();
     }
 
-    _hide_spinner() {
-        this.spinner_anim.active = false;
-        this.spinner.visible = false;
+    _getMessageKey(message) {
+        if (message._id !== undefined && message._id !== null)
+            return `${message.thread_id}:${message._id}`;
+
+        const addresses = (message.addresses ?? [])
+            .map(address => address.address || '')
+            .join(',');
+
+        return `${message.thread_id}:${message.date}:${message.type}:${addresses}`;
+    }
+
+    _syncMessages() {
+        if (this.thread_id === null && this.addresses.length)
+            this._thread_id = this.plugin.getThreadIdForAddresses(this.addresses);
+
+        const thread_id = this.thread_id;
+        const loading = thread_id !== null && this.plugin.isThreadLoading(thread_id);
+
+        this.spinner.visible = loading;
+
+        if (thread_id === null)
+            return;
+
+        const thread = this.plugin.threads[thread_id];
+
+        if (thread === undefined)
+            return;
+
+        for (const message of thread)
+            this.addMessage(message);
+
+        if (this._scrollToLatest && !loading) {
+            this._scrollToLatest = false;
+            this._scrollBottom();
+        }
     }
 
     _headerMessages(row, before) {
@@ -704,8 +758,12 @@ const MessagingConversation = GObject.registerClass({
     }
 
     _sortMessages(row1, row2) {
-        if (row1.message === undefined)
+        if (row1.message === undefined && row2.message === undefined)
+            return 0;
+        else if (row1.message === undefined)
             return -1;
+        else if (row2.message === undefined)
+            return 1;
         else
             return (row1.message.date > row2.message.date) ? 1 : -1;
     }
@@ -722,16 +780,23 @@ const MessagingConversation = GObject.registerClass({
                 message.type !== Sms.MessageBox.SENT)
                 throw TypeError(`invalid message box ${message.type}`);
 
-            // Skip already-shown messages
-            if (this._ids.has(message._id))
+            const message_key = this._getMessageKey(message);
+            const existing_row = this._message_rows.get(message_key);
+
+            // Update already-shown messages
+            if (existing_row !== undefined) {
+                existing_row.message = message;
+                this.list.invalidate_sort();
+                this.list.invalidate_headers();
                 return;
-            this._ids.add(message._id);
+            }
 
             const row = this._createMessageRow(message);
 
             // Insert the message in its sorted location
             this.list.append(row);
             this.internal_message_list.push(row);
+            this._message_rows.set(message_key, row);
 
             if (message.read === Sms.MessageStatus.UNREAD)
                 this.inbox_counter += 1;
@@ -754,6 +819,7 @@ const MessagingConversation = GObject.registerClass({
                 this.earliest = message.date;
 
 
+            this.list.invalidate_sort();
             this.list.invalidate_headers();
         } catch (e) {
             debug(e);
@@ -769,12 +835,21 @@ const MessagingConversation = GObject.registerClass({
         this.message_bar.text = text;
     }
 
+    scrollToLatest() {
+        this._scrollToLatest = true;
+        this._scrollBottom();
+    }
+
     destroy() {
+        if (this._scrollSourceId)
+            GLib.Source.remove(this._scrollSourceId);
+
         this.list.set_header_func(null);
         this.message_bar.disconnect(this._sendmessageId);
         this.message_bar.disconnect(this._textChangedId);
         this.participants_button.disconnect(this._participantsId);
         this.device.disconnect(this._connectedId);
+        this.plugin.disconnect(this._threadsChangedId);
         this._vadj.disconnect(this._scrolledId);
         this._deviceBinding.unbind();
     }
@@ -1112,13 +1187,18 @@ export const MessagingWindow = GObject.registerClass({
             this._pendingShare = null;
         }
 
+        this.plugin.requestConversation(thread_id);
+        conversation.scrollToLatest();
+
         this._thread_id = thread_id;
         this.notify('thread_id');
     }
 
     _sync() {
         this.device.contacts.fetch();
-        this.plugin.connected();
+
+        if (this.device.connected && Object.keys(this.plugin.threads).length === 0)
+            this.plugin.connected();
     }
 
     _onNewConversation() {

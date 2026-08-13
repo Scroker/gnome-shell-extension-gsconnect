@@ -251,18 +251,21 @@ export const ContactChooser = GObject.registerClass({
     }
 
     _onContactRemoved(store, id) {
-        let removed_row = null;
+        const removed_rows = [];
         const new_row_list = [];
+
         this.row_list.forEach(row => {
             if (row.contact.id === id)
-                removed_row = row;
+                removed_rows.push(row);
             else
                 new_row_list.push(row);
 
         });
 
-        if (removed_row !== null) {
-            this.list.remove(removed_row);
+        if (removed_rows.length > 0) {
+            for (const row of removed_rows)
+                this.list.remove(row);
+
             this.row_list = new_row_list;
         }
     }
@@ -395,11 +398,17 @@ export const ContactChooser = GObject.registerClass({
             if (contact.name === undefined)
                 contact.name = _('Unknown Contact');
 
-            if (contact.numbers.length === 1)
-                return this._addContactNumber(contact, 0);
+            const numbers = new Set();
 
-            for (let i = 0, len = contact.numbers.length; i < len; i++)
+            for (let i = 0, len = contact.numbers.length; i < len; i++) {
+                const number = contact.numbers[i].value.toPhoneNumber();
+
+                if (numbers.has(number))
+                    continue;
+
+                numbers.add(number);
                 this._addContactNumber(contact, i);
+            }
         } catch (e) {
             logError(e);
         }
