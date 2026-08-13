@@ -486,10 +486,6 @@ const MessagingConversation = GObject.registerClass({
             this.contacts[address] = contact;
         }
 
-        // TODO: Mark the entry as insensitive for group messages
-        if (this.addresses.length > 1)
-            this.message_bar.sensitive = false;
-
     }
 
     get contacts() {
@@ -1064,6 +1060,7 @@ export const MessagingWindow = GObject.registerClass({
         // Contacts
         this.contact_chooser = new Contacts.ContactChooser({
             device: this.device,
+            'selection-mode': 'multiple',
         });
 
         // Make sure we're using the correct contacts store
@@ -1085,9 +1082,9 @@ export const MessagingWindow = GObject.registerClass({
         });
         this.search_entry.add_controller(search_esc_controller);
 
-        this._numberSelectedId = this.contact_chooser.connect(
-            'number-selected',
-            this._onNumberSelected.bind(this)
+        this._selectionConfirmedId = this.contact_chooser.connect(
+            'selection-confirmed',
+            this._onSelectionConfirmed.bind(this)
         );
 
         // Threads
@@ -1125,7 +1122,7 @@ export const MessagingWindow = GObject.registerClass({
         GLib.Source.remove(this._timestampThreadsId);
         this.device.disconnect(this._deviceConnectedId);
         this.search_entry.disconnect(this._searchEntryId);
-        this.contact_chooser.disconnect(this._numberSelectedId);
+        this.contact_chooser.disconnect(this._selectionConfirmedId);
         this.plugin.disconnect(this._threadsChangedId);
         this._searchBinding.unbind();
 
@@ -1216,9 +1213,11 @@ export const MessagingWindow = GObject.registerClass({
         this.thread_list.select_row(null);
     }
 
-    _onNumberSelected(chooser, number) {
+    _onSelectionConfirmed(chooser) {
         const contacts = chooser.getSelected();
         const row = this._getRowForContacts(contacts);
+
+        chooser.clearSelection();
 
         if (row)
             this._selectExistingContactRow(row);
