@@ -100,6 +100,9 @@ describe('The telephony plugin', function () {
 
     afterEach(function () {
         localCallsPlugin?._clearCallWatch();
+        localPlugin?.device.settings.set_string('bluetooth-address', '');
+        localPlugin?.device.settings.set_string('last-connection',
+            'tcp://127.0.0.1');
     });
 
     it('can be loaded', async function () {
