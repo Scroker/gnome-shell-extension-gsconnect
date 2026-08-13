@@ -49,6 +49,24 @@ describe('Manager', function () {
         expect(manager._loadBackends).toHaveBeenCalled();
     });
 
+    it('starts and stops the Bluetooth backend from the global setting', function () {
+        const backend = {
+            start: jasmine.createSpy('start'),
+            stop: jasmine.createSpy('stop'),
+        };
+
+        manager.settings.set_boolean('bluetooth-enabled', false);
+        manager.backends.set('bluetooth', backend);
+
+        manager.settings.set_boolean('bluetooth-enabled', true);
+        expect(backend.start).toHaveBeenCalled();
+
+        manager.settings.set_boolean('bluetooth-enabled', false);
+        expect(backend.stop).toHaveBeenCalled();
+
+        manager.backends.delete('bluetooth');
+    });
+
     it('can create devices for channels', function (done) {
         const {localService, remoteService} = testRig;
 
@@ -97,4 +115,3 @@ describe('Manager', function () {
         manager.stop();
     });
 });
-

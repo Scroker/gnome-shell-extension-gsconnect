@@ -5,16 +5,36 @@
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 
-const configPath = GLib.getenv('GSCONNECT_TEST')
-    ? `${GLib.getenv('GJS_PATH')}/config.js`
-    : GLib.build_filenamev([
-        Gio.File.new_for_uri(import.meta.url)
-            .get_parent()
-            .get_parent()
-            .get_parent()
-            .get_path(),
-        'config.js',
-    ]);
+/**
+ * Resolve the test installation/source root.
+ *
+ * @returns {Gio.File} The root directory containing config.js and data
+ */
+function getTestRoot() {
+    const testDir = Gio.File.new_for_uri(import.meta.url).get_parent();
+    const installedRoot = testDir.get_parent();
+
+    if (installedRoot.get_child('config.js').query_exists(null))
+        return installedRoot;
+
+    return installedRoot.get_parent();
+}
+
+/**
+ * Resolve the generated test configuration path.
+ *
+ * @returns {string} The path to config.js
+ */
+function getConfigPath() {
+    if (GLib.getenv('GSCONNECT_TEST'))
+        return `${GLib.getenv('GJS_PATH')}/config.js`;
+
+    return getTestRoot()
+        .get_child('config.js')
+        .get_path();
+}
+
+const configPath = getConfigPath();
 const {default: Config} = await import(`file://${configPath}`);
 
 if (GLib.getenv('GSCONNECT_TEST')) {
@@ -26,12 +46,8 @@ await import(`file://${Config.PACKAGE_DATADIR}/service/init.js`);
 
 const Bluetooth = await import(`file://${Config.PACKAGE_DATADIR}/service/backends/bluetooth.js`);
 const Core = await import(`file://${Config.PACKAGE_DATADIR}/service/core.js`);
-const {default: Manager} = await import(`file://${Config.PACKAGE_DATADIR}/service/manager.js`);
 
-const DATA_PATH = Gio.File.new_for_uri(import.meta.url)
-    .get_parent()
-    .get_parent()
-    .get_parent()
+const DATA_PATH = getTestRoot()
     .get_child('data')
     .get_path();
 
@@ -318,39 +334,5 @@ describe('A Bluetooth channel', function () {
 
         expect(multiplexer.calls).toEqual(['read', 'write']);
         expect(channel.identity.body.deviceName).toBe('Phone');
-    });
-});
-
-
-describe('Bluetooth manager integration', function () {
-    let manager;
-    let backend;
-
-    beforeEach(function () {
-        manager = new Manager({
-            object_path: '/org/gnome/Shell/Extensions/GSConnect/Test',
-        });
-        manager.settings.set_boolean('bluetooth-enabled', false);
-
-        backend = {
-            start: jasmine.createSpy('start'),
-            stop: jasmine.createSpy('stop'),
-        };
-        manager.backends.set('bluetooth', backend);
-    });
-
-    afterEach(function () {
-        manager.settings.set_boolean('bluetooth-enabled', false);
-        manager.destroy();
-        manager = null;
-        backend = null;
-    });
-
-    it('starts and stops from the global setting', function () {
-        manager.settings.set_boolean('bluetooth-enabled', true);
-        expect(backend.start).toHaveBeenCalled();
-
-        manager.settings.set_boolean('bluetooth-enabled', false);
-        expect(backend.stop).toHaveBeenCalled();
     });
 });
