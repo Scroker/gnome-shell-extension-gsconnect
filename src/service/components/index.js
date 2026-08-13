@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import * as atspi from './atspi.js';
+import * as bluetoothtelephony from './bluetoothtelephony.js';
 import * as clipboard from './clipboard.js';
 import * as contacts from './contacts.js';
 import * as input from './input.js';
@@ -18,6 +19,7 @@ export const functionOverrides = {};
 
 const components = {
     atspi,
+    bluetoothtelephony,
     clipboard,
     contacts,
     input,

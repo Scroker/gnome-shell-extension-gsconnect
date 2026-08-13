@@ -36,6 +36,8 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <file compressed="true" preprocess="xml-stripblanks">ui/service-device-chooser.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/service-error-dialog.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">ui/share-dialog.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/telephony-call-dialer-page.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/telephony-call-status-page.ui</file>
 
     <!-- DBus Service Files -->
     <file compressed="true">org.gnome.Shell.Extensions.GSConnect.desktop</file>
@@ -63,6 +65,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <file compressed="true" preprocess="xml-stripblanks" alias="phonelink-lock-symbolic.svg">icons/phonelink-lock-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="phonelink-off-symbolic.svg">icons/phonelink-off-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="phone-vibrate-symbolic.svg">icons/phone-vibrate-symbolic.svg</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="call-outgoing-unsuccessful-symbolic.svg">icons/call-outgoing-unsuccessful-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="sad-computer-symbolic.svg">icons/sad-computer-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="phonelink-setup-symbolic.svg">icons/phonelink-setup-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="paper-plane-symbolic.svg">icons/paper-plane-symbolic.svg</file>
@@ -83,6 +86,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <file compressed="true" preprocess="xml-stripblanks" alias="tv-symbolic.svg">icons/tv-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="phone-symbolic.svg">icons/phone-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="phone-vibrate-symbolic.svg">icons/phone-vibrate-symbolic.svg</file>
+    <file compressed="true" preprocess="xml-stripblanks" alias="call-outgoing-unsuccessful-symbolic.svg">icons/call-outgoing-unsuccessful-symbolic.svg</file>
     <file compressed="true" preprocess="xml-stripblanks" alias="chat-bubbles-text-symbolic.svg">icons/chat-bubbles-text-symbolic.svg</file>
   </gresource>
 </gresources>

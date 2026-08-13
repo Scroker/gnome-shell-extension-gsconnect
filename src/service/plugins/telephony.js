@@ -50,6 +50,7 @@ const TelephonyPlugin = GObject.registerClass({
         super._init(device, 'telephony');
 
         // Neither of these are crucial for the plugin to work
+        this._bluetoothTelephony = Components.acquire('bluetoothtelephony');
         this._mpris = Components.acquire('mpris');
         this._mixer = Components.acquire('pulseaudio');
     }
@@ -71,22 +72,35 @@ const TelephonyPlugin = GObject.registerClass({
     _setMediaState(eventType) {
         // Mixer Volume
         if (this._mixer !== undefined) {
+            const useApplicationStreams =
+                this._bluetoothTelephony?.canControl(this.device) === true;
+
             switch (this.settings.get_string(`${eventType}-volume`)) {
                 case 'restore':
                     this._mixer.restore();
                     break;
 
                 case 'lower':
-                    this._mixer.lowerVolume();
+                    if (useApplicationStreams)
+                        this._mixer.lowerApplicationVolumes();
+                    else
+                        this._mixer.lowerVolume();
                     break;
 
                 case 'mute':
-                    this._mixer.muteVolume();
+                    if (useApplicationStreams)
+                        this._mixer.muteApplicationVolumes();
+                    else
+                        this._mixer.muteVolume();
                     break;
             }
 
-            if (eventType === 'talking' && this.settings.get_boolean('talking-microphone'))
-                this._mixer.muteMicrophone();
+            if (eventType === 'talking' && this.settings.get_boolean('talking-microphone')) {
+                if (useApplicationStreams)
+                    this._mixer.muteApplicationMicrophones();
+                else
+                    this._mixer.muteMicrophone();
+            }
         }
 
         // Media Playback
@@ -138,16 +152,19 @@ const TelephonyPlugin = GObject.registerClass({
      * @param {Core.Packet} packet - A `kdeconnect.telephony`
      */
     _handleEvent(packet) {
+        // This is the end of a telephony event. Android may use event names
+        // other than 'ringing' or 'talking' for failed outgoing calls.
+        if (packet.body.isCancel) {
+            this._cancelEvent(packet);
+            return;
+        }
+
         // Only handle 'ringing' or 'talking' events; leave the notification
         // plugin to handle 'missedCall' since they're often repliable
         if (!['ringing', 'talking'].includes(packet.body.event))
             return;
 
-        // This is the end of a telephony event
-        if (packet.body.isCancel)
-            this._cancelEvent(packet);
-        else
-            this._notifyEvent(packet);
+        this._notifyEvent(packet);
     }
 
     _cancelEvent(packet) {
@@ -161,6 +178,7 @@ const TelephonyPlugin = GObject.registerClass({
             sender = packet.body.phoneNumber;
 
         this.device.hideNotification(`${packet.body.event}|${sender}`);
+
         this._restoreMediaState();
     }
 
@@ -198,6 +216,24 @@ const TelephonyPlugin = GObject.registerClass({
                 label: _('Mute'),
                 parameter: null,
             }];
+
+            if (this.device._plugins.has('calls')) {
+                buttons.unshift({
+                    action: 'answerCall',
+                    // TRANSLATORS: Answer the actively ringing call
+                    label: _('Answer'),
+                    parameter: new GLib.Variant('s',
+                        packet.body.phoneNumber ?? ''),
+                });
+                buttons.push({
+                    action: 'hangupCall',
+                    // TRANSLATORS: Decline the actively ringing call
+                    label: _('Decline'),
+                    parameter: new GLib.Variant('s',
+                        packet.body.phoneNumber ?? ''),
+                });
+            }
+
             priority = Gio.NotificationPriority.URGENT;
         }
 
@@ -207,6 +243,7 @@ const TelephonyPlugin = GObject.registerClass({
 
             // TRANSLATORS: A phone call is active
             body = _('Ongoing call');
+
         }
 
         this.device.showNotification({
@@ -233,6 +270,9 @@ const TelephonyPlugin = GObject.registerClass({
     }
 
     destroy() {
+        if (this._bluetoothTelephony !== undefined)
+            this._bluetoothTelephony = Components.release('bluetoothtelephony');
+
         if (this._mixer !== undefined)
             this._mixer = Components.release('pulseaudio');
 
@@ -242,5 +282,6 @@ const TelephonyPlugin = GObject.registerClass({
         super.destroy();
     }
 });
+
 
 export default TelephonyPlugin;

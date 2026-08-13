@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import * as battery from './battery.js';
+import * as calls from './calls.js';
 import * as clipboard from './clipboard.js';
 import * as connectivity_report from './connectivity_report.js';
 import * as contacts from './contacts.js';
@@ -21,6 +22,7 @@ import * as telephony from './telephony.js';
 
 export default {
     battery,
+    calls,
     clipboard,
     connectivity_report,
     contacts,

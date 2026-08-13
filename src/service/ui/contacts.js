@@ -124,6 +124,13 @@ export const ContactChooser = GObject.registerClass({
             GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT,
             GObject.Object
         ),
+        'number-label': GObject.ParamSpec.string(
+            'number-label',
+            'Number Label',
+            'The format string for manually entered phone numbers',
+            GObject.ParamFlags.READWRITE,
+            null
+        ),
     },
     Signals: {
         'number-selected': {
@@ -229,6 +236,18 @@ export const ContactChooser = GObject.registerClass({
         }
     }
 
+    get number_label() {
+        if (this._number_label === undefined)
+            // TRANSLATORS: A phone number (eg. "Send to 555-5555")
+            this._number_label = _('Send to %s');
+
+        return this._number_label;
+    }
+
+    set number_label(label) {
+        this._number_label = label;
+    }
+
     /**
      * Getter and Setter for the back button visibility.
      *
@@ -288,8 +307,7 @@ export const ContactChooser = GObject.registerClass({
             // ...ensure we have a dynamic contact for it
             if (!dynamic || !dynamic.__tmp) {
                 dynamic = new AddressRow({
-                    // TRANSLATORS: A phone number (eg. "Send to 555-5555")
-                    name: _('Send to %s').format(entry.text),
+                    name: this.number_label.format(entry.text),
                     numbers: [{type: 'unknown', value: entry.text}],
                 });
                 dynamic.connect('activated', this._onNumberSelected.bind(this));
@@ -306,7 +324,7 @@ export const ContactChooser = GObject.registerClass({
                 dynamic.contact.numbers[0].value = address;
 
                 // Update UI
-                dynamic.title = _('Send to %s').format(address);
+                dynamic.title = this.number_label.format(address);
                 dynamic.subtitle = address;
             }
 

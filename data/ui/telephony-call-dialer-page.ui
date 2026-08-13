@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+SPDX-FileCopyrightText: GSConnect Developers https://github.com/GSConnect
+
+SPDX-License-Identifier: GPL-2.0-or-later
+-->
+
+<interface domain="org.gnome.Shell.Extensions.GSConnect">
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="Adw" version="1.0"/>
+
+  <template class="GSConnectTelephonyCallDialerPage" parent="AdwNavigationPage">
+    <property name="title" translatable="yes">Call</property>
+    <property name="tag">call-dialer</property>
+    <property name="child">
+      <object class="AdwToolbarView">
+        <property name="visible">True</property>
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="visible">True</property>
+            <property name="show-back-button">False</property>
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title" translatable="yes">Call</property>
+              </object>
+            </property>
+            <child type="end">
+              <object class="GtkButton" id="contacts-button">
+                <property name="visible">True</property>
+                <property name="icon-name">people-symbolic</property>
+                <property name="has-tooltip">True</property>
+                <property name="tooltip-text" translatable="yes">Contacts</property>
+                <signal name="clicked" handler="_onContactsClicked" swapped="no"/>
+                <accessibility>
+                  <property name="label" translatable="yes">Contacts</property>
+                </accessibility>
+              </object>
+            </child>
+          </object>
+        </child>
+        <property name="content">
+          <object class="AdwClamp">
+            <property name="visible">True</property>
+            <property name="maximum-size">272</property>
+            <property name="margin-top">24</property>
+            <property name="margin-bottom">24</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">18</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">6</property>
+                    <property name="height-request">58</property>
+                    <property name="valign">center</property>
+                    <child>
+                      <object class="GtkLabel" id="number-label">
+                        <property name="visible">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="halign">center</property>
+                        <property name="ellipsize">start</property>
+                        <property name="xalign">0.5</property>
+                        <attributes>
+                          <attribute name="scale" value="1.8"/>
+                        </attributes>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="backspace-button">
+                        <property name="visible">False</property>
+                        <property name="valign">center</property>
+                        <property name="icon-name">edit-clear-symbolic</property>
+                        <property name="has-tooltip">True</property>
+                        <property name="tooltip-text" translatable="yes">Delete Digit</property>
+                        <signal name="clicked" handler="_onBackspaceClicked" swapped="no"/>
+                        <style>
+                          <class name="flat"/>
+                          <class name="circular"/>
+                        </style>
+                        <accessibility>
+                          <property name="label" translatable="yes">Delete Digit</property>
+                        </accessibility>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="halign">center</property>
+                    <property name="column-spacing">6</property>
+                    <property name="row-spacing">8</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">1</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">2</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">3</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">2</property>
+                          <property name="row">0</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">4</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">5</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">6</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">2</property>
+                          <property name="row">1</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">7</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">8</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">9</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">2</property>
+                          <property name="row">2</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">*</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">0</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">1</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label">#</property>
+                        <property name="width-request">64</property>
+                        <property name="height-request">64</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="_onDigitClicked" swapped="no"/>
+                        <style><class name="circular"/><class name="dialpad-button"/></style>
+                        <layout>
+                          <property name="column">2</property>
+                          <property name="row">3</property>
+                        </layout>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="call-button">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="halign">center</property>
+                    <property name="icon-name">call-start-symbolic</property>
+                    <property name="has-tooltip">True</property>
+                    <property name="tooltip-text" translatable="yes">Call</property>
+                    <signal name="clicked" handler="_onCallClicked" swapped="no"/>
+                    <style>
+                      <class name="suggested-action"/>
+                      <class name="circular"/>
+                      <class name="call-control-button"/>
+                    </style>
+                    <accessibility>
+                      <property name="label" translatable="yes">Call</property>
+                    </accessibility>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </property>
+  </template>
+</interface>

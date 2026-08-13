@@ -1159,6 +1159,107 @@ msgstr "Ricevere notifiche sulle telefonate e livellare il volume durante le tel
 msgid "Mute Call"
 msgstr "Silenzia la chiamata in arrivo"
 
+#: src/service/plugins/calls.js:70
+msgid "Calls"
+msgstr "Chiamate"
+
+#: src/service/plugins/calls.js:71
+msgid "Place and control Bluetooth calls from the PC"
+msgstr "Effettuare e controllare chiamate Bluetooth dal PC"
+
+#: data/ui/telephony-call-status-page.ui:14
+#: data/ui/telephony-call-status-page.ui:24
+#. TRANSLATORS: Place an outgoing call from the paired phone
+#: src/service/plugins/telephony.js:60
+msgid "Call"
+msgstr "Chiama"
+
+#. TRANSLATORS: Place an outgoing call from a tel: URI
+#: src/service/plugins/telephony.js:69
+msgid "Call Number"
+msgstr "Chiama numero"
+
+#: data/ui/telephony-call-dialer-page.ui:79
+#: data/ui/telephony-call-dialer-page.ui:86
+msgid "Delete Digit"
+msgstr "Elimina cifra"
+
+#: data/ui/telephony-call-status-page.ui:75
+#. TRANSLATORS: Answer the actively ringing call
+#: src/service/plugins/telephony.js:282
+msgid "Answer"
+msgstr "Rispondi"
+
+#: data/ui/telephony-call-status-page.ui:77
+#: data/ui/telephony-call-status-page.ui:83
+#. TRANSLATORS: Answer the actively ringing call
+#: src/service/plugins/telephony.js:78
+msgid "Answer Call"
+msgstr "Rispondi alla chiamata"
+
+#: data/ui/telephony-call-status-page.ui:93
+#: data/ui/telephony-call-status-page.ui:101
+#. TRANSLATORS: Decline or hang up the active call
+#: src/service/plugins/telephony.js:87
+msgid "Hang Up"
+msgstr "Termina chiamata"
+
+#. TRANSLATORS: Decline the actively ringing call
+#: src/service/plugins/telephony.js:289
+msgid "Decline"
+msgstr "Rifiuta"
+
+#: src/service/plugins/telephony.js:383
+msgid "Bluetooth Association Required"
+msgstr "Associazione Bluetooth richiesta"
+
+#: src/service/plugins/telephony.js:384
+msgid "Connect this device once with GSConnect's experimental Bluetooth backend to place calls from the PC."
+msgstr "Connetti questo dispositivo almeno una volta con il backend Bluetooth sperimentale di GSConnect per effettuare chiamate dal PC."
+
+#: src/service/plugins/telephony.js:566
+msgid "Call Failed"
+msgstr "Chiamata non riuscita"
+
+#: src/service/plugins/telephony.js:65
+msgid "Bluetooth Call Unavailable"
+msgstr "Chiamata Bluetooth non disponibile"
+
+#: src/service/plugins/telephony.js:66
+msgid "The phone is paired with GSConnect, but the Bluetooth call profile is not available. Disconnect and reconnect the phone over Bluetooth, or restart Bluetooth on the PC."
+msgstr "Il telefono è associato a GSConnect, ma il profilo chiamate Bluetooth non è disponibile. Scollega e ricollega il telefono tramite Bluetooth, oppure riavvia il Bluetooth del PC."
+
+#. TRANSLATORS: A phone number (eg. "Call 555-5555")
+#: src/service/plugins/telephony.js:466
+#, javascript-format
+msgid "Call %s"
+msgstr "Chiama %s"
+
+#. TRANSLATORS: A phone call is ringing
+#: src/service/plugins/telephony.js:615
+msgid "Incoming Call"
+msgstr "Chiamata in arrivo"
+
+#. TRANSLATORS: A call was opened on the paired phone
+#: src/service/plugins/telephony.js:621
+msgid "Opened on Phone"
+msgstr "Aperta sul telefono"
+
+#. TRANSLATORS: A phone call is ending
+#: src/service/plugins/telephony.js:627
+msgid "Ending Call"
+msgstr "Chiamata in chiusura"
+
+#. TRANSLATORS: A phone call is active
+#: src/service/plugins/telephony.js:633
+msgid "Ongoing Call"
+msgstr "Chiamata in corso"
+
+#: data/ui/telephony-call-status-page.ui:53
+#: src/service/plugins/telephony.js:640
+msgid "Calling"
+msgstr "Chiamata in uscita"
+
 #. TRANSLATORS: The phone is ringing
 #: src/service/plugins/telephony.js:194
 msgid "Incoming call"

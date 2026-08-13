@@ -123,6 +123,9 @@ const Component = GObject.registerClass({
         ]);
 
         this._previousVolume = undefined;
+        this._previousApplicationVolumes = new Map();
+        this._applicationVolumeMuted = new Set();
+        this._applicationMicrophoneMuted = new Set();
         this._volumeMuted = false;
         this._microphoneMuted = false;
     }
@@ -162,6 +165,14 @@ const Component = GObject.registerClass({
         return Array.from(this._sinks.values());
     }
 
+    get_sink_inputs() {
+        return Array.from(this._sinks.values());
+    }
+
+    get_source_outputs() {
+        return Array.from(this._sources.values());
+    }
+
     get_vol_max_norm() {
         return 65536;
     }
@@ -183,6 +194,21 @@ const Component = GObject.registerClass({
         }
     }
 
+    lowerApplicationVolumes(duration = 1) {
+        try {
+            for (const stream of this.get_sink_inputs()) {
+                if (stream.volume <= 0.15)
+                    continue;
+
+                this._previousApplicationVolumes.set(stream.id,
+                    Number(stream.volume));
+                stream.fade(0.15, duration);
+            }
+        } catch (e) {
+            logError(e);
+        }
+    }
+
     muteVolume() {
         try {
             if (this.output.muted)
@@ -195,6 +221,20 @@ const Component = GObject.registerClass({
         }
     }
 
+    muteApplicationVolumes() {
+        try {
+            for (const stream of this.get_sink_inputs()) {
+                if (stream.muted)
+                    continue;
+
+                stream.muted = true;
+                this._applicationVolumeMuted.add(stream.id);
+            }
+        } catch (e) {
+            logError(e);
+        }
+    }
+
     muteMicrophone() {
         try {
             if (this.input.muted)
@@ -202,6 +242,20 @@ const Component = GObject.registerClass({
 
             this.input.muted = true;
             this._microphoneMuted = true;
+        } catch (e) {
+            logError(e);
+        }
+    }
+
+    muteApplicationMicrophones() {
+        try {
+            for (const stream of this.get_source_outputs()) {
+                if (stream.muted)
+                    continue;
+
+                stream.muted = true;
+                this._applicationMicrophoneMuted.add(stream.id);
+            }
         } catch (e) {
             logError(e);
         }
@@ -223,6 +277,23 @@ const Component = GObject.registerClass({
                 this.output.fade(this._previousVolume);
                 this._previousVolume = undefined;
             }
+
+            for (const stream of this.get_sink_inputs()) {
+                if (this._applicationVolumeMuted.has(stream.id))
+                    stream.muted = false;
+
+                if (this._previousApplicationVolumes.has(stream.id))
+                    stream.fade(this._previousApplicationVolumes.get(stream.id));
+            }
+
+            for (const stream of this.get_source_outputs()) {
+                if (this._applicationMicrophoneMuted.has(stream.id))
+                    stream.muted = false;
+            }
+
+            this._applicationVolumeMuted.clear();
+            this._applicationMicrophoneMuted.clear();
+            this._previousApplicationVolumes.clear();
         } catch (e) {
             logError(e);
         }
@@ -230,4 +301,3 @@ const Component = GObject.registerClass({
 });
 
 export default Component;
-
