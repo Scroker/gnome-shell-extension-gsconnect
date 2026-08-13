@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import Gdk from 'gi://Gdk?version=4.0';
+import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import * as Components from '../components/index.js';
@@ -112,6 +113,8 @@ const KeyMapCodes = new Map([
     [32, 88],
 ]);
 
+const BLUETOOTH_POINTER_INTERVAL = 33;
+
 /**
  * Mousepad Plugin
  * https://github.com/KDE/kdeconnect-kde/tree/master/plugins/mousepad
@@ -142,6 +145,10 @@ const MousepadPlugin = GObject.registerClass({
             'changed::share-control',
             this._sendState.bind(this)
         );
+
+        this._bluetoothPointerSource = 0;
+        this._bluetoothPointerDx = 0;
+        this._bluetoothPointerDy = 0;
     }
 
     get state() {
@@ -160,6 +167,7 @@ const MousepadPlugin = GObject.registerClass({
     disconnected() {
         super.disconnected();
 
+        this._resetBluetoothPointer();
         this._state = false;
         this.notify('state');
     }
@@ -201,7 +209,7 @@ const MousepadPlugin = GObject.registerClass({
                 break;
 
             case (input.hasOwnProperty('dx') && input.hasOwnProperty('dy')):
-                this._input.movePointer(input.dx, input.dy);
+                this._movePointer(input.dx, input.dy);
                 break;
 
             case (input.hasOwnProperty('key') || input.hasOwnProperty('specialKey')):
@@ -283,6 +291,58 @@ const MousepadPlugin = GObject.registerClass({
     }
 
     /**
+     * Move the pointer, coalescing high-frequency Bluetooth motion events.
+     *
+     * @param {number} dx - The horizontal delta
+     * @param {number} dy - The vertical delta
+     */
+    _movePointer(dx, dy) {
+        if (!this._isBluetoothConnection()) {
+            this._input.movePointer(dx, dy);
+            return;
+        }
+
+        if (dx === 0 && dy === 0)
+            return;
+
+        this._bluetoothPointerDx += dx;
+        this._bluetoothPointerDy += dy;
+
+        if (this._bluetoothPointerSource > 0)
+            return;
+
+        this._bluetoothPointerSource = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT,
+            BLUETOOTH_POINTER_INTERVAL,
+            this._flushBluetoothPointer.bind(this)
+        );
+    }
+
+    _flushBluetoothPointer() {
+        this._bluetoothPointerSource = 0;
+
+        const dx = this._bluetoothPointerDx;
+        const dy = this._bluetoothPointerDy;
+        this._bluetoothPointerDx = 0;
+        this._bluetoothPointerDy = 0;
+
+        if (this._input !== undefined && (dx !== 0 || dy !== 0))
+            this._input.movePointer(dx, dy);
+
+        return GLib.SOURCE_REMOVE;
+    }
+
+    _resetBluetoothPointer() {
+        if (this._bluetoothPointerSource > 0) {
+            GLib.Source.remove(this._bluetoothPointerSource);
+            this._bluetoothPointerSource = 0;
+        }
+
+        this._bluetoothPointerDx = 0;
+        this._bluetoothPointerDy = 0;
+    }
+
+    /**
      * Handle an echo/ACK of a event we sent, displaying it the dialog entry.
      *
      * @param {object} input - The body of a `kdeconnect.mousepad.echo`
@@ -346,6 +406,15 @@ const MousepadPlugin = GObject.registerClass({
     }
 
     /**
+     * Check whether the active transport is the experimental Bluetooth backend.
+     *
+     * @returns {boolean} %true if this device is connected over Bluetooth
+     */
+    _isBluetoothConnection() {
+        return this.device.connection_type === 'bluetooth';
+    }
+
+    /**
      * Open the Keyboard Input dialog
      */
     keyboard() {
@@ -360,6 +429,8 @@ const MousepadPlugin = GObject.registerClass({
     }
 
     destroy() {
+        this._resetBluetoothPointer();
+
         if (this._input !== undefined) {
             if (!globalThis.HAVE_GNOME)
                 this._input = Components.release('ydotool');
