@@ -66,6 +66,11 @@
   border-radius: 50%;
 }
 
+.selection-confirm-button {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
 
 /**
  * GSConnectConversationWidget
