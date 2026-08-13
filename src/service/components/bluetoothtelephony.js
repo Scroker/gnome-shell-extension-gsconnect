@@ -106,7 +106,50 @@ function _wait(interval) {
  */
 const BluetoothTelephony = GObject.registerClass({
     GTypeName: 'GSConnectBluetoothTelephony',
+    Signals: {
+        'calls-changed': {
+            flags: GObject.SignalFlags.RUN_FIRST,
+        },
+    },
 }, class BluetoothTelephony extends GObject.Object {
+
+    _init() {
+        super._init();
+
+        this._subscriptions = [
+            Gio.DBus.session.signal_subscribe(
+                BUS_NAME,
+                OBJECT_MANAGER_IFACE,
+                'InterfacesAdded',
+                MANAGER_PATH,
+                null,
+                Gio.DBusSignalFlags.NONE,
+                this._onCallsChanged.bind(this)
+            ),
+            Gio.DBus.session.signal_subscribe(
+                BUS_NAME,
+                OBJECT_MANAGER_IFACE,
+                'InterfacesRemoved',
+                MANAGER_PATH,
+                null,
+                Gio.DBusSignalFlags.NONE,
+                this._onCallsChanged.bind(this)
+            ),
+            Gio.DBus.session.signal_subscribe(
+                BUS_NAME,
+                PROPERTIES_IFACE,
+                'PropertiesChanged',
+                null,
+                null,
+                Gio.DBusSignalFlags.NONE,
+                this._onCallsChanged.bind(this)
+            ),
+        ];
+    }
+
+    _onCallsChanged() {
+        this.emit('calls-changed');
+    }
 
     async _call(path, iface, method, parameters = null, replyType = null) {
         return await Gio.DBus.session.call(
@@ -191,31 +234,45 @@ const BluetoothTelephony = GObject.registerClass({
         return _getDeviceBluetoothAddress(device) !== null;
     }
 
-    async _findCall(device, phoneNumber, states = null) {
+    _callInfoFromProperties(path, properties) {
+        return {
+            path,
+            state: _unpack(properties.State)?.toLowerCase() ?? '',
+            phoneNumber: _unpack(properties.LineIdentification) ??
+                _unpack(properties.IncomingLine) ??
+                _unpack(properties.PhoneNumber) ??
+                '',
+            name: _unpack(properties.Name) ?? '',
+        };
+    }
+
+    async findCallInfo(device, phoneNumber = null, states = null) {
         const gatewayPaths = await this._findGatewayPaths(device);
 
         for (const gatewayPath of gatewayPaths) {
             const calls = await this._getCalls(gatewayPath);
 
             for (const [path, properties] of Object.entries(calls)) {
-                const state = _unpack(properties.State)?.toLowerCase();
-                const line = _unpack(properties.LineIdentification);
-                const incomingLine = _unpack(properties.IncomingLine);
-                const callPhoneNumber = _unpack(properties.PhoneNumber);
-                const name = _unpack(properties.Name);
+                const info = this._callInfoFromProperties(path, properties);
 
-                if (states !== null && !states.includes(state))
+                if (states !== null && !states.includes(info.state))
                     continue;
 
                 if (!_numbersMatch(phoneNumber,
-                    line || incomingLine || callPhoneNumber || name))
+                    info.phoneNumber || info.name))
                     continue;
 
-                return path;
+                return info;
             }
         }
 
         return null;
+    }
+
+    async _findCall(device, phoneNumber, states = null) {
+        const info = await this.findCallInfo(device, phoneNumber, states);
+
+        return info?.path ?? null;
     }
 
     async _getCallState(callPath, iface) {
@@ -423,7 +480,12 @@ const BluetoothTelephony = GObject.registerClass({
         return false;
     }
 
-    destroy() {}
+    destroy() {
+        for (const id of this._subscriptions)
+            Gio.DBus.session.signal_unsubscribe(id);
+
+        this._subscriptions = [];
+    }
 });
 
 export default BluetoothTelephony;

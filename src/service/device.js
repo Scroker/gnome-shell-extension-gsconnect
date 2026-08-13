@@ -285,11 +285,17 @@ const Device = GObject.registerClass({
         const supported = this.settings
             .get_strv('supported-plugins')
             .filter(name => !deprecated.includes(name));
+        const disabled = this.settings.get_strv('disabled-plugins');
 
-        if (supported.includes('telephony') && !supported.includes('calls'))
+        if (supported.includes('telephony') && !supported.includes('calls')) {
             supported.push('calls');
 
+            if (!disabled.includes('calls'))
+                disabled.push('calls');
+        }
+
         this.settings.set_strv('supported-plugins', supported);
+        this.settings.set_strv('disabled-plugins', disabled);
     }
 
     _handleIdentity(packet) {
@@ -350,6 +356,15 @@ const Device = GObject.registerClass({
 
         // Only write GSettings if something has changed
         const currentSupported = this.settings.get_strv('supported-plugins');
+
+        if (supported.includes('calls') && !currentSupported.includes('calls')) {
+            const disabled = this.settings.get_strv('disabled-plugins');
+
+            if (!disabled.includes('calls')) {
+                disabled.push('calls');
+                this.settings.set_strv('disabled-plugins', disabled);
+            }
+        }
 
         if (currentSupported.join('') !== supported.sort().join(''))
             this.settings.set_strv('supported-plugins', supported);
@@ -1111,8 +1126,14 @@ const Device = GObject.registerClass({
                 plugin = new handler.default(this);
 
                 // Register packet handlers
-                for (const packetType of handler.Metadata.incomingCapabilities)
+                for (const packetType of handler.Metadata.incomingCapabilities) {
+                    if (name === 'telephony' &&
+                        packetType === 'kdeconnect.telephony' &&
+                        this._plugins.has('calls'))
+                        continue;
+
                     this._handlers.set(packetType, plugin);
+                }
 
                 // Register plugin
                 this._plugins.set(name, plugin);
@@ -1153,6 +1174,13 @@ const Device = GObject.registerClass({
 
                 for (const type of handler.Metadata.incomingCapabilities)
                     this._handlers.delete(type);
+
+                if (name === 'calls' && this._plugins.has('telephony')) {
+                    plugin = this._plugins.get('telephony');
+
+                    for (const type of plugins.telephony.Metadata.incomingCapabilities)
+                        this._handlers.set(type, plugin);
+                }
 
                 // Unregister plugin
                 plugin = this._plugins.get(name);
