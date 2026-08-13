@@ -42,6 +42,15 @@ export const Metadata = {
             incoming: ['kdeconnect.telephony'],
             outgoing: [],
         },
+        answerCallControl: {
+            // TRANSLATORS: Answer the actively ringing call
+            label: _('Answer Call'),
+            icon_name: 'call-start-symbolic',
+
+            parameter_type: new GLib.VariantType('s'),
+            incoming: ['kdeconnect.telephony'],
+            outgoing: [],
+        },
         declineCall: {
             // TRANSLATORS: Decline the actively ringing call
             label: _('Decline Call'),
@@ -237,7 +246,7 @@ const TelephonyPlugin = GObject.registerClass({
                         packet.body.phoneNumber ?? ''),
                 };
                 buttons = [{
-                    action: 'answerCall',
+                    action: 'answerCallControl',
                     // TRANSLATORS: Answer the actively ringing call
                     label: _('Answer'),
                     parameter: new GLib.Variant('s',
@@ -248,7 +257,7 @@ const TelephonyPlugin = GObject.registerClass({
                     label: _('Mute'),
                     parameter: null,
                 }, {
-                    action: 'hangupCall',
+                    action: 'declineCall',
                     // TRANSLATORS: Decline the actively ringing call
                     label: _('Decline'),
                     parameter: new GLib.Variant('s',
@@ -307,6 +316,27 @@ const TelephonyPlugin = GObject.registerClass({
      */
     showCallControls(phoneNumber = null) {
         this.device._plugins.get('calls')?.showIncomingCall(phoneNumber);
+    }
+
+    /**
+     * Answer an incoming Bluetooth call from the notification.
+     *
+     * @param {string} phoneNumber - The phone number for the ringing call
+     * @returns {Promise<boolean|string|undefined>} A promise that resolves
+     * when done
+     */
+    answerCallControl(phoneNumber = null) {
+        const calls = this.device._plugins.get('calls');
+
+        if (calls !== undefined)
+            return calls.answerCall(phoneNumber);
+
+        return Promise.resolve(this._bluetoothTelephony?.answerIncomingCall(
+            this.device, phoneNumber, null))
+            .catch(e => {
+                debug(e, this.device.name);
+                return false;
+            });
     }
 
     /**

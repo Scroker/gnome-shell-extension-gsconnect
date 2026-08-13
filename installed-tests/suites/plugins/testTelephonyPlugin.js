@@ -155,9 +155,9 @@ describe('The telephony plugin', function () {
         expect(notification.action.name).toBe('showCallControls');
         expect(notification.action.parameter.deepUnpack()).toBe('555-555-5555');
         expect(notification.buttons.map(button => button.action)).toEqual([
-            'answerCall',
+            'answerCallControl',
             'muteCall',
-            'hangupCall',
+            'declineCall',
         ]);
     });
 
@@ -244,6 +244,16 @@ describe('The telephony plugin', function () {
 
         expect(localPlugin._bluetoothTelephony.hangupCall)
             .toHaveBeenCalledWith(localPlugin.device, '555-555-5555', null);
+    });
+
+    it('can answer Bluetooth calls from notifications', async function () {
+        spyOn(localCallsPlugin, 'answerCall')
+            .and.returnValue(Promise.resolve(true));
+
+        await localPlugin.answerCallControl('555-555-5555');
+
+        expect(localCallsPlugin.answerCall)
+            .toHaveBeenCalledWith('555-555-5555');
     });
 
     it('can place outgoing calls', async function () {
@@ -621,6 +631,8 @@ describe('The telephony plugin', function () {
 
         expect(localPlugin.device.get_action_enabled('muteCall')).toBeFalse();
         expect(localPlugin.device.get_action_enabled('showCallControls'))
+            .toBeFalse();
+        expect(localPlugin.device.get_action_enabled('answerCallControl'))
             .toBeFalse();
         expect(localPlugin.device.get_action_enabled('declineCall')).toBeFalse();
     });

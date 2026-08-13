@@ -68,38 +68,44 @@ SPDX-License-Identifier: GPL-2.0-or-later
                   </object>
                 </child>
                 <child>
-                  <object class="GtkButton" id="answer-button">
-                    <property name="visible">False</property>
-                    <property name="halign">center</property>
-                    <property name="icon-name">call-start-symbolic</property>
-                    <property name="label" translatable="yes">Answer</property>
-                    <property name="has-tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Answer Call</property>
-                    <signal name="clicked" handler="_onAnswerClicked" swapped="no"/>
-                    <style>
-                      <class name="suggested-action"/>
-                    </style>
-                    <accessibility>
-                      <property name="label" translatable="yes">Answer Call</property>
-                    </accessibility>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton" id="hangup-button">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="halign">center</property>
-                    <property name="icon-name">call-stop-symbolic</property>
-                    <property name="has-tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Hang Up</property>
-                    <signal name="clicked" handler="_onHangupClicked" swapped="no"/>
-                    <style>
-                      <class name="circular"/>
-                      <class name="destructive-action"/>
-                      <class name="call-control-button"/>
-                    </style>
-                    <accessibility>
-                      <property name="label" translatable="yes">Hang Up</property>
-                    </accessibility>
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">18</property>
+                    <child>
+                      <object class="GtkButton" id="answer-button">
+                        <property name="visible">False</property>
+                        <property name="icon-name">call-start-symbolic</property>
+                        <property name="label" translatable="yes">Answer</property>
+                        <property name="has-tooltip">True</property>
+                        <property name="tooltip-text" translatable="yes">Answer Call</property>
+                        <signal name="clicked" handler="_onAnswerClicked" swapped="no"/>
+                        <style>
+                          <class name="suggested-action"/>
+                        </style>
+                        <accessibility>
+                          <property name="label" translatable="yes">Answer Call</property>
+                        </accessibility>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="hangup-button">
+                        <property name="visible">True</property>
+                        <property name="icon-name">call-stop-symbolic</property>
+                        <property name="has-tooltip">True</property>
+                        <property name="tooltip-text" translatable="yes">Hang Up</property>
+                        <signal name="clicked" handler="_onHangupClicked" swapped="no"/>
+                        <style>
+                          <class name="circular"/>
+                          <class name="destructive-action"/>
+                          <class name="call-control-button"/>
+                        </style>
+                        <accessibility>
+                          <property name="label" translatable="yes">Hang Up</property>
+                        </accessibility>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
