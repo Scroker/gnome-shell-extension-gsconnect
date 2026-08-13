@@ -1159,6 +1159,11 @@ msgstr "Ricevere notifiche sulle telefonate e livellare il volume durante le tel
 msgid "Mute Call"
 msgstr "Silenzia la chiamata in arrivo"
 
+#. TRANSLATORS: Decline the actively ringing call
+#: src/service/plugins/telephony.js:42
+msgid "Decline Call"
+msgstr "Rifiuta chiamata"
+
 #: src/service/plugins/calls.js:70
 msgid "Calls"
 msgstr "Chiamate"
