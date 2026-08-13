@@ -297,6 +297,14 @@ const ConversationParticipants = GObject.registerClass({
  */
 const MessagingConversation = GObject.registerClass({
     GTypeName: 'GSConnectMessagingConversation',
+    Signals: {
+        'draft-changed': {
+            param_types: [GObject.TYPE_STRING],
+        },
+        'message-sent': {
+            param_types: [GObject.TYPE_STRING],
+        },
+    },
     Properties: {
         'device': GObject.ParamSpec.object(
             'device',
@@ -345,6 +353,9 @@ const MessagingConversation = GObject.registerClass({
             'message-send',
             this._onSendMessage.bind(this)
         );
+        this._textChangedId = this.message_bar.connect('text-changed', (entry, text) => {
+            this.emit('draft-changed', text);
+        });
 
         this._deviceBinding = this.device.bind_property(
             'connected',
@@ -568,17 +579,20 @@ const MessagingConversation = GObject.registerClass({
         return false;
     }
 
-    _onSendMessage() {
+    _onSendMessage(entry, text) {
+        const body = (text !== undefined) ? text : this.message_bar.text;
+
         // Don't send empty texts
-        if (!this.message_bar.text.trim())
+        if (!body.trim())
             return;
 
         // Send the message
-        this.plugin.sendMessage(this.addresses, this.message_bar.text);
+        this.plugin.sendMessage(this.addresses, body);
+        this.emit('message-sent', body);
 
         // Add a phony message in the pending box
         const message = new Gtk.Label({
-            label: URI.linkify(this.message_bar.text),
+            label: URI.linkify(body),
             halign: Gtk.Align.END,
             selectable: true,
             use_markup: true,
@@ -859,6 +873,10 @@ const ConversationSummary = GObject.registerClass({
         return this._message.date;
     }
 
+    get sort_date() {
+        return this._sort_date ?? this.date;
+    }
+
     get thread_id() {
         return this._message.thread_id;
     }
@@ -889,6 +907,7 @@ const ConversationSummary = GObject.registerClass({
 
     set message(message) {
         this._message = message;
+        delete this._sort_date;
 
         const addresses = message.addresses
             .map(item => item.address)
@@ -963,6 +982,16 @@ const ConversationSummary = GObject.registerClass({
         this.time_label.set_label(`<small>${getShortTime(message.date)}</small>`);
     }
 
+    setDraft(text, date = Date.now()) {
+        const body = GLib.markup_escape_text(text.split(/\r|\n/)[0], -1);
+        const sent = _('You: %s').format(body);
+
+        this.set_subtitle(`<small>${sent}</small>`);
+        this.time_label.set_visible(true);
+        this.time_label.set_label(`<small>${getShortTime(date)}</small>`);
+        this._sort_date = date;
+    }
+
     /**
      * Update the relative time label.
      */
@@ -1010,6 +1039,7 @@ export const MessagingWindow = GObject.registerClass({
     _init(params) {
         super._init(params);
         this.stack = new Map();
+        this._draftRows = new Map();
         this.sidebar_title.set_subtitle(this.device.name);
         this.insert_action_group('device', this.device);
 
@@ -1171,6 +1201,7 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _onNewConversation() {
+        this._finalizeDraftRows();
         this._sync();
         this.search_entry.set_key_capture_widget(null);
         this.button_search.active = false;
@@ -1183,12 +1214,10 @@ export const MessagingWindow = GObject.registerClass({
         const contacts = chooser.getSelected();
         const row = this._getRowForContacts(contacts);
 
-        if (row) {
-            row.emit('activated');
-            this._onThreadSelected(null, row);
-        } else {
+        if (row)
+            this._selectExistingContactRow(row);
+        else
             this.setContacts(contacts);
-        }
     }
 
     /**
@@ -1214,9 +1243,17 @@ export const MessagingWindow = GObject.registerClass({
         // Update existing summaries and remove old ones
         for (const row of [...this.internal_thread_list]) {
             const message = messages[row.thread_id];
+            const draft = this._draftRows.get(row);
+
+            if (message && draft && !draft.committed) {
+                delete messages[row.thread_id];
+                continue;
+            }
 
             // If it's an existing conversation, update it
             if (message) {
+                this._untrackDraftRow(row);
+
                 // Ensure there's a contact mapping
                 const sender = message.addresses[0].address || 'unknown';
 
@@ -1231,7 +1268,7 @@ export const MessagingWindow = GObject.registerClass({
                 delete messages[row.thread_id];
 
             // Otherwise remove it
-            } else {
+            } else if (!this._draftRows.has(row)) {
                 // Destroy the conversation widget
                 const conversation = this.stack.get(`${row.thread_id}`);
 
@@ -1249,6 +1286,27 @@ export const MessagingWindow = GObject.registerClass({
 
         // What's left in the dictionary is new summaries
         for (const message of Object.values(messages)) {
+            const draftRow = this._getDraftRowForMessage(message);
+
+            if (draftRow) {
+                const oldThreadId = `${draftRow.thread_id}`;
+                const draft = this._draftRows.get(draftRow);
+                const conversation = draft?.conversation;
+
+                this._untrackDraftRow(draftRow);
+                this.stack.delete(oldThreadId);
+
+                if (conversation) {
+                    conversation._thread_id = `${message.thread_id}`;
+                    this.stack.set(`${message.thread_id}`, conversation);
+                }
+
+                draftRow.contacts = this.device.contacts.lookupAddresses(message.addresses);
+                draftRow.unread_count = unread_counts[message.thread_id];
+                draftRow.message = message;
+                continue;
+            }
+
             const contacts = this.device.contacts.lookupAddresses(message.addresses);
             const conversation = new ConversationSummary({
                 contacts: contacts,
@@ -1265,6 +1323,7 @@ export const MessagingWindow = GObject.registerClass({
 
     // GtkListBox::row-activated
     _onThreadSelected(box, row) {
+        this._finalizeDraftRows(row);
         this.search_entry.set_key_capture_widget(null);
         this.button_search.active = false;
         // Show the conversation for this number (if applicable)
@@ -1289,7 +1348,123 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _sortThreads(row1, row2) {
-        return (row1.date > row2.date) ? -1 : 1;
+        return (row1.sort_date > row2.sort_date) ? -1 : 1;
+    }
+
+    _createDraftMessage(thread_id, contacts, body = undefined) {
+        const addresses = [];
+
+        for (const address of Object.keys(contacts))
+            addresses.push({address: address});
+
+        return {
+            _id: `draft-${thread_id}`,
+            addresses: addresses,
+            body: body,
+            date: Date.now(),
+            read: Sms.MessageStatus.READ,
+            thread_id: thread_id,
+            type: Sms.MessageBox.SENT,
+        };
+    }
+
+    _trackDraftRow(row, conversation, isNew) {
+        if (this._draftRows.has(row))
+            return;
+
+        const draft = {
+            conversation: conversation,
+            isNew: isNew,
+            text: '',
+            committed: false,
+            draftChangedId: conversation.connect('draft-changed', (conv, text) => {
+                draft.text = text;
+            }),
+            messageSentId: conversation.connect('message-sent', (conv, text) => {
+                draft.text = text;
+                draft.committed = true;
+                row.setDraft(text);
+                this.thread_list.invalidate_sort();
+            }),
+        };
+
+        this._draftRows.set(row, draft);
+        row._sort_date = Number.MAX_SAFE_INTEGER;
+        this.thread_list.invalidate_sort();
+    }
+
+    _getDraftRowForMessage(message) {
+        for (const [row, draft] of this._draftRows) {
+            if (!draft.isNew)
+                continue;
+
+            const rowAddresses = row.message.addresses;
+
+            if (rowAddresses.length !== message.addresses.length)
+                continue;
+
+            if (message.addresses.every(address => {
+                return this._includesAddress(rowAddresses, address);
+            }))
+                return row;
+        }
+
+        return null;
+    }
+
+    _untrackDraftRow(row) {
+        const draft = this._draftRows.get(row);
+
+        if (!draft)
+            return;
+
+        draft.conversation.disconnect(draft.draftChangedId);
+        draft.conversation.disconnect(draft.messageSentId);
+        this._draftRows.delete(row);
+    }
+
+    _removeDraftRow(row, draft) {
+        this._untrackDraftRow(row);
+        this.stack.delete(`${row.thread_id}`);
+        draft.conversation.destroy();
+        this.thread_list.remove(row);
+        this.internal_thread_list = this.internal_thread_list
+            .filter(item => item !== row);
+    }
+
+    _finalizeDraftRows(activeRow = null) {
+        for (const [row, draft] of [...this._draftRows]) {
+            if (row === activeRow)
+                continue;
+
+            const text = draft.text.trim();
+
+            if (text || draft.committed) {
+                if (text)
+                    row.setDraft(draft.text);
+                this.thread_list.invalidate_sort();
+                continue;
+            }
+
+            if (draft.isNew) {
+                this._removeDraftRow(row, draft);
+            } else {
+                delete row._sort_date;
+                this._untrackDraftRow(row);
+                this.thread_list.invalidate_sort();
+            }
+        }
+    }
+
+    _selectExistingContactRow(row) {
+        this._finalizeDraftRows(row);
+        this.thread_list.select_row(row);
+        this.thread_id = row.thread_id;
+
+        const conversation = this.stack.get(`${row.thread_id}`);
+
+        if (conversation)
+            this._trackDraftRow(row, conversation, false);
     }
 
     _timestampThreads() {
@@ -1326,6 +1501,8 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     setContacts(contacts) {
+        this._finalizeDraftRows();
+
         // Group the addresses
         const addresses = [];
 
@@ -1344,7 +1521,7 @@ export const MessagingWindow = GObject.registerClass({
         const row = this._getRowForContacts(contacts);
 
         if (row !== null) {
-            this.thread_list.select_row(row);
+            this._selectExistingContactRow(row);
             return;
         }
 
@@ -1354,9 +1531,19 @@ export const MessagingWindow = GObject.registerClass({
             plugin: this.plugin,
             addresses: addresses,
         });
+        conversation._thread_id = thread_id;
+
+        const summary = new ConversationSummary({
+            contacts: contacts,
+            message: this._createDraftMessage(thread_id, contacts),
+        });
 
         // Select the conversation and entry active
         this.stack.set(thread_id, conversation);
+        this.internal_thread_list.push(summary);
+        this.thread_list.append(summary);
+        this.thread_list.select_row(summary);
+        this._trackDraftRow(summary, conversation, true);
 
         this.split_view.set_content(conversation);
         this.split_view.set_show_content(true);
