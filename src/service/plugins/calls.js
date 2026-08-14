@@ -285,6 +285,10 @@ const CallsPlugin = GObject.registerClass({
         return null;
     }
 
+    getCallIcon(phoneNumber) {
+        return this._getContactIcon(this._getContactForNumber(phoneNumber));
+    }
+
     _incomingMetadata({sender = '', phoneNumber = ''} = {}) {
         const contact = this._getContactForNumber(phoneNumber);
 
@@ -915,6 +919,7 @@ const CallWindow = GObject.registerClass({
     showCall(number, state = 'talking', callPath = null, hangupAction = null) {
         this._statusPage.number = number ?? '';
         this._statusPage.call_path = callPath ?? this._statusPage.call_path;
+        this._statusPage.contact_icon = this.plugin.getCallIcon(number);
         this._statusPage.state = state;
 
         if (hangupAction !== null)
@@ -1145,6 +1150,17 @@ const CallStatusPage = GObject.registerClass({
         this._call_path = callPath ?? '';
     }
 
+    get contact_icon() {
+        return this._contact_icon ?? null;
+    }
+
+    set contact_icon(icon) {
+        this._contact_icon = icon ?? null;
+
+        if (this.status_image !== undefined)
+            this._updateStatusImage();
+    }
+
     get state() {
         return this._state ?? 'dialing';
     }
@@ -1156,7 +1172,7 @@ const CallStatusPage = GObject.registerClass({
             return;
 
         this.number_label.label = this.number;
-        this.status_image.icon_name = 'call-start-symbolic';
+        this._updateStatusImage();
         this.hangup_button.visible = true;
 
         switch (state) {
@@ -1203,9 +1219,17 @@ const CallStatusPage = GObject.registerClass({
         this._state = 'error';
         this.title_label.label = title;
         this.number_label.label = message;
+        this._contact_icon = null;
         this.status_image.icon_name = 'call-outgoing-unsuccessful-symbolic';
         this.answer_button.visible = false;
         this.hangup_button.visible = false;
+    }
+
+    _updateStatusImage() {
+        if (this.contact_icon !== null)
+            this.status_image.set_from_gicon(this.contact_icon);
+        else
+            this.status_image.icon_name = 'call-start-symbolic';
     }
 
     _onAnswerClicked() {
