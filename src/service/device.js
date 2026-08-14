@@ -1132,6 +1132,11 @@ const Device = GObject.registerClass({
                         this._plugins.has('calls'))
                         continue;
 
+                    if (name === 'calls' &&
+                        packetType === 'kdeconnect.telephony' &&
+                        this._plugins.has('telephony'))
+                        this._handlers.delete(packetType);
+
                     this._handlers.set(packetType, plugin);
                 }
 

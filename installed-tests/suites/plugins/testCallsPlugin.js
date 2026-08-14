@@ -90,6 +90,19 @@ describe('The calls plugin', function () {
         expect(remoteTelephonyPlugin).toBeDefined();
     });
 
+    it('takes over Telephony packets when loaded after Telephony', function () {
+        testRig.localDevice._unloadPlugin('calls');
+
+        expect(testRig.localDevice._handlers.get('kdeconnect.telephony'))
+            .toBe(localTelephonyPlugin);
+
+        testRig.localDevice._loadPlugin('calls');
+        localPlugin = testRig.localDevice._plugins.get('calls');
+
+        expect(testRig.localDevice._handlers.get('kdeconnect.telephony'))
+            .toBe(localPlugin);
+    });
+
     it('handles telephony notifications when active', async function () {
         remoteTelephonyPlugin.device.sendPacket(Packets.ringing);
         await localPlugin.awaitPacket('kdeconnect.telephony',
