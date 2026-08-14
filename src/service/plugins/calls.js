@@ -285,8 +285,33 @@ const CallsPlugin = GObject.registerClass({
         return null;
     }
 
+    _getContactPaintable(contact) {
+        if (!contact?.avatar)
+            return null;
+
+        try {
+            const file = Gio.File.new_for_path(contact.avatar);
+
+            if (file.query_exists(null))
+                return Gdk.Texture.new_from_file(file);
+        } catch (e) {
+            debug(e, this.device.name);
+        }
+
+        return null;
+    }
+
     getCallIcon(phoneNumber) {
         return this._getContactIcon(this._getContactForNumber(phoneNumber));
+    }
+
+    getCallAvatar(phoneNumber) {
+        const contact = this._getContactForNumber(phoneNumber);
+
+        return {
+            image: this._getContactPaintable(contact),
+            text: contact?.name || phoneNumber || _('Unknown Contact'),
+        };
     }
 
     _incomingMetadata({sender = '', phoneNumber = ''} = {}) {
@@ -919,7 +944,7 @@ const CallWindow = GObject.registerClass({
     showCall(number, state = 'talking', callPath = null, hangupAction = null) {
         this._statusPage.number = number ?? '';
         this._statusPage.call_path = callPath ?? this._statusPage.call_path;
-        this._statusPage.contact_icon = this.plugin.getCallIcon(number);
+        this._statusPage.call_avatar = this.plugin.getCallAvatar(number);
         this._statusPage.state = state;
 
         if (hangupAction !== null)
@@ -1118,7 +1143,7 @@ const CallStatusPage = GObject.registerClass({
         'answer-button',
         'hangup-button',
         'number-label',
-        'status-image',
+        'status-avatar',
         'title-label',
     ],
 }, class CallStatusPage extends Adw.NavigationPage {
@@ -1150,15 +1175,15 @@ const CallStatusPage = GObject.registerClass({
         this._call_path = callPath ?? '';
     }
 
-    get contact_icon() {
-        return this._contact_icon ?? null;
+    get call_avatar() {
+        return this._call_avatar ?? null;
     }
 
-    set contact_icon(icon) {
-        this._contact_icon = icon ?? null;
+    set call_avatar(avatar) {
+        this._call_avatar = avatar ?? null;
 
-        if (this.status_image !== undefined)
-            this._updateStatusImage();
+        if (this.status_avatar !== undefined)
+            this._updateStatusAvatar();
     }
 
     get state() {
@@ -1172,14 +1197,13 @@ const CallStatusPage = GObject.registerClass({
             return;
 
         this.number_label.label = this.number;
-        this._updateStatusImage();
+        this._updateStatusAvatar();
         this.hangup_button.visible = true;
 
         switch (state) {
             case 'error':
                 this.answer_button.visible = false;
                 this.hangup_button.visible = false;
-                this.status_image.icon_name = 'call-outgoing-unsuccessful-symbolic';
                 break;
 
             case 'incoming':
@@ -1219,17 +1243,23 @@ const CallStatusPage = GObject.registerClass({
         this._state = 'error';
         this.title_label.label = title;
         this.number_label.label = message;
-        this._contact_icon = null;
-        this.status_image.icon_name = 'call-outgoing-unsuccessful-symbolic';
+        this._call_avatar = {
+            image: null,
+            text: this.number || _('Unknown Contact'),
+        };
+        this._updateStatusAvatar();
         this.answer_button.visible = false;
         this.hangup_button.visible = false;
     }
 
-    _updateStatusImage() {
-        if (this.contact_icon !== null)
-            this.status_image.set_from_gicon(this.contact_icon);
-        else
-            this.status_image.icon_name = 'call-start-symbolic';
+    _updateStatusAvatar() {
+        const avatar = this.call_avatar ?? {
+            image: null,
+            text: this.number || _('Unknown Contact'),
+        };
+
+        this.status_avatar.text = avatar.text;
+        this.status_avatar.set_custom_image(avatar.image);
     }
 
     _onAnswerClicked() {
@@ -1251,7 +1281,7 @@ const CallStatusPage = GObject.registerClass({
     showAnswerError() {
         // TRANSLATORS: An incoming call could not be answered from the PC
         this.title_label.label = _('Could Not Answer Call');
-        this.status_image.icon_name = 'call-outgoing-unsuccessful-symbolic';
+        this._updateStatusAvatar();
         this.answer_button.sensitive = true;
         this.answer_button.visible = true;
         this.hangup_button.visible = true;

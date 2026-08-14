@@ -41,10 +41,10 @@ SPDX-License-Identifier: GPL-2.0-or-later
                 <property name="spacing">18</property>
                 <property name="valign">center</property>
                 <child>
-                  <object class="GtkImage" id="status-image">
+                  <object class="AdwAvatar" id="status-avatar">
                     <property name="visible">True</property>
-                    <property name="icon-name">call-start-symbolic</property>
-                    <property name="pixel-size">64</property>
+                    <property name="size">96</property>
+                    <property name="show-initials">True</property>
                   </object>
                 </child>
                 <child>
