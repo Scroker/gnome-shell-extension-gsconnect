@@ -341,7 +341,6 @@ const BluetoothTelephony = GObject.registerClass({
             path = await this._findCall(device, phoneNumber, [
                 'incoming',
                 'waiting',
-                'alerting',
             ]);
         } catch (e) {
             debug(e, 'Bluetooth find incoming call');

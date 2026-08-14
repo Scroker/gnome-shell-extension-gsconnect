@@ -359,6 +359,9 @@ const CallsPlugin = GObject.registerClass({
         if (settings === null)
             return;
 
+        if (hfp)
+            this._mixer?.unmuteCallOutputStreams?.();
+
         if (!hfp && this._mixer !== undefined) {
             switch (settings.get_string(`${eventType}-volume`)) {
                 case 'restore':
@@ -519,7 +522,7 @@ const CallsPlugin = GObject.registerClass({
             const call = await this._bluetoothTelephony?.findCallInfo(
                 this.device,
                 null,
-                ['incoming', 'waiting', 'alerting']
+                ['incoming', 'waiting']
             );
 
             if (call !== null && call !== undefined) {
@@ -670,6 +673,7 @@ const CallsPlugin = GObject.registerClass({
 
                         if (active) {
                             seenCall = true;
+                            this._mixer?.unmuteCallOutputStreams?.();
                             return;
                         }
 

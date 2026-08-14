@@ -47,7 +47,10 @@ const MockBluetoothTelephony = GObject.registerClass({
         return Promise.resolve(this.active_call);
     }
 
-    findCallInfo() {
+    findCallInfo(device, phoneNumber = null, states = null) {
+        if (states !== null && !states.includes(this.call_info?.state))
+            return Promise.resolve(null);
+
         return Promise.resolve(this.call_info);
     }
 

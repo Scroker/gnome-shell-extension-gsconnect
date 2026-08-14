@@ -173,6 +173,10 @@ const Component = GObject.registerClass({
         return Array.from(this._sources.values());
     }
 
+    unmuteCallOutputStreams() {
+        this._callOutputStreamsUnmuted = true;
+    }
+
     get_vol_max_norm() {
         return 65536;
     }

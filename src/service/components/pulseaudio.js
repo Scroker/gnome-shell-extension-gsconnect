@@ -203,15 +203,27 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     }
 
     _isCallStream(stream) {
-        const streamId = `${stream.get_application_id?.() ??
-            stream.application_id ?? ''} ${stream.name ?? ''} ${
-            stream.description ?? ''}`.toLowerCase();
+        const streamId = [
+            stream.get_application_id?.(),
+            stream.get_application_name?.(),
+            stream.get_name?.(),
+            stream.get_description?.(),
+            stream.application_id,
+            stream.name,
+            stream.description,
+        ].filter(value => value !== undefined && value !== null)
+            .join(' ')
+            .toLowerCase();
 
         return streamId.includes('bluez') ||
             streamId.includes('bluetooth') ||
+            streamId.includes('hfp') ||
+            streamId.includes('hsp') ||
             streamId.includes('handsfree') ||
+            streamId.includes('hands-free') ||
             streamId.includes('headset') ||
             streamId.includes('ofono') ||
+            streamId.includes('phone') ||
             streamId.includes('telephony');
     }
 
@@ -232,6 +244,30 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         return this.get_source_outputs()
             .filter(stream => this._isApplicationStream(stream))
             .map(stream => new Stream(this, stream));
+    }
+
+    _getCallOutputStreams() {
+        return (this.get_sink_inputs?.() ?? [])
+            .filter(stream => this._isCallStream(stream))
+            .map(stream => new Stream(this, stream));
+    }
+
+    /**
+     * Restore audible playback on Bluetooth call streams without changing
+     * global devices, microphones or unrelated application streams.
+     */
+    unmuteCallOutputStreams() {
+        try {
+            for (const stream of this._getCallOutputStreams()) {
+                if (stream.muted)
+                    stream.muted = false;
+
+                if (stream.volume < 0.75)
+                    stream.volume = 1.0;
+            }
+        } catch (e) {
+            logError(e);
+        }
     }
 
     /**

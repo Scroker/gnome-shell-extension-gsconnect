@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+import GLib from 'gi://GLib';
+
 import * as Utils from '../fixtures/utils.js';
 
 
@@ -147,6 +149,19 @@ describe('The calls plugin', function () {
         ]);
     });
 
+    it('does not show outgoing alerting HFP calls as incoming', async function () {
+        localPlugin._bluetoothTelephony.call_info = {
+            path: '/mock/call',
+            state: 'alerting',
+            phoneNumber: '555-555-5555',
+            name: 'Name',
+        };
+
+        await localPlugin._syncBluetoothCallNotification();
+
+        expect(localPlugin.device.showNotification).not.toHaveBeenCalled();
+    });
+
     it('enriches HFP ringing notifications from delayed Telephony events', async function () {
         localPlugin._bluetoothTelephony.call_info = {
             path: '/mock/call',
@@ -180,6 +195,7 @@ describe('The calls plugin', function () {
 
         spyOn(localMixer, 'lowerApplicationVolumes');
         spyOn(localMixer, 'lowerVolume');
+        spyOn(localMixer, 'unmuteCallOutputStreams');
         localTelephonyPlugin.settings.set_string('ringing-volume', 'lower');
         localPlugin._bluetoothTelephony.call_info = {
             path: '/mock/call',
@@ -191,6 +207,7 @@ describe('The calls plugin', function () {
         await localPlugin._syncBluetoothCallNotification();
         await localPlugin._syncBluetoothCallNotification();
 
+        expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalledTimes(1);
         expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
     });
@@ -204,10 +221,12 @@ describe('The calls plugin', function () {
         spyOn(localMixer, 'lowerVolume');
         spyOn(localMixer, 'muteVolume');
         spyOn(localMixer, 'muteMicrophone');
+        spyOn(localMixer, 'unmuteCallOutputStreams');
 
         localTelephonyPlugin.settings.set_string('ringing-volume', 'lower');
         localPlugin._setMediaState('ringing', true);
 
+        expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalledTimes(1);
         expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
 
@@ -215,6 +234,7 @@ describe('The calls plugin', function () {
         localTelephonyPlugin.settings.set_boolean('talking-microphone', true);
         localPlugin._setMediaState('talking', true);
 
+        expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalledTimes(2);
         expect(localMixer.muteApplicationVolumes).not.toHaveBeenCalled();
         expect(localMixer.muteApplicationMicrophones).not.toHaveBeenCalled();
         expect(localMixer.muteVolume).not.toHaveBeenCalled();
@@ -227,6 +247,7 @@ describe('The calls plugin', function () {
 
         spyOn(localMixer, 'lowerApplicationVolumes');
         spyOn(localMixer, 'lowerVolume');
+        spyOn(localMixer, 'unmuteCallOutputStreams');
 
         localPlugin._telephonySettings = null;
         localPlugin.device._plugins.delete('telephony');
@@ -238,8 +259,25 @@ describe('The calls plugin', function () {
             localPlugin.device._plugins.set('telephony', telephonyPlugin);
         }
 
+        expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalled();
         expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
+    });
+
+    it('restores HFP call output while watching an active call', async function () {
+        const localMixer = localPlugin._mixer;
+
+        spyOn(localMixer, 'unmuteCallOutputStreams');
+        localPlugin._watchBluetoothCall('555-555-5555', '/mock/call');
+
+        await new Promise(resolve => {
+            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 2, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+
+        expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalled();
     });
 
     it('finishes the call window when an incoming HFP call ends', async function () {
