@@ -35,6 +35,33 @@ function _dialNumberFromUri(uri) {
 }
 
 /**
+ * Normalize a phone number for loose comparisons.
+ *
+ * @param {string} number - A phone number
+ * @returns {string} The normalized number
+ */
+function _normalizeNumber(number) {
+    return number?.replace(/[^\d+]/g, '') ?? '';
+}
+
+/**
+ * Check whether two phone numbers probably refer to the same caller.
+ *
+ * @param {string} left - A phone number
+ * @param {string} right - A phone number
+ * @returns {boolean} %true if the numbers are compatible
+ */
+function _numbersMatch(left, right) {
+    left = _normalizeNumber(left);
+    right = _normalizeNumber(right);
+
+    if (!left || !right)
+        return false;
+
+    return left.endsWith(right) || right.endsWith(left);
+}
+
+/**
  * Return the UI error shown when a device has not been associated with its
  * Bluetooth Hands-Free gateway yet.
  *
@@ -155,6 +182,7 @@ const CallsPlugin = GObject.registerClass({
         this._incomingSender = null;
         this._incomingCallNumber = null;
         this._incomingCallPath = null;
+        this._currentCall = null;
     }
 
     get telephony_settings() {
@@ -196,6 +224,7 @@ const CallsPlugin = GObject.registerClass({
         this._incomingSender = null;
         this._incomingCallNumber = null;
         this._incomingCallPath = null;
+        this._currentCall = null;
     }
 
     handlePacket(packet) {
@@ -217,12 +246,82 @@ const CallsPlugin = GObject.registerClass({
         // TRANSLATORS: No name or phone number
         let sender = _('Unknown Contact');
 
-        if (packet.body.contactName)
+        if (packet.body.contactName) {
             sender = packet.body.contactName;
-        else if (packet.body.phoneNumber)
-            sender = packet.body.phoneNumber;
+        } else if (packet.body.phoneNumber) {
+            const contact = this._getContactForNumber(packet.body.phoneNumber);
+
+            sender = contact?.name || packet.body.phoneNumber;
+        }
 
         return sender;
+    }
+
+    _getContactForNumber(phoneNumber) {
+        if (!phoneNumber)
+            return null;
+
+        try {
+            return this.device.contacts.query({number: phoneNumber});
+        } catch (e) {
+            debug(e, this.device.name);
+            return null;
+        }
+    }
+
+    _getContactIcon(contact) {
+        if (!contact?.avatar)
+            return null;
+
+        try {
+            const file = Gio.File.new_for_path(contact.avatar);
+
+            if (file.query_exists(null))
+                return new Gio.FileIcon({file});
+        } catch (e) {
+            debug(e, this.device.name);
+        }
+
+        return null;
+    }
+
+    _incomingMetadata({sender = '', phoneNumber = ''} = {}) {
+        const contact = this._getContactForNumber(phoneNumber);
+
+        return {
+            sender: sender || contact?.name || phoneNumber ||
+                _('Unknown Contact'),
+            phoneNumber: phoneNumber ?? '',
+            icon: this._getContactIcon(contact) ??
+                new Gio.ThemedIcon({name: 'call-start-symbolic'}),
+        };
+    }
+
+    _callMatchesPacket(call, packet) {
+        if (call === null)
+            return false;
+
+        const phoneNumber = packet.body.phoneNumber ?? '';
+
+        if (phoneNumber && _numbersMatch(call.phoneNumber, phoneNumber))
+            return true;
+
+        return call.sender === this._getSender(packet);
+    }
+
+    _callMatchesHfp(call) {
+        if (this._currentCall === null || !this._currentCall.hfp)
+            return false;
+
+        if (call.path && this._currentCall.callPath === call.path)
+            return true;
+
+        return _numbersMatch(this._currentCall.phoneNumber, call.phoneNumber);
+    }
+
+    _hideCurrentCallNotification() {
+        if (this._currentCall?.notificationId)
+            this.device.hideNotification(this._currentCall.notificationId);
     }
 
     _setMediaState(eventType, hfp = false) {
@@ -274,6 +373,10 @@ const CallsPlugin = GObject.registerClass({
     }
 
     _cancelTelephonyEvent(packet) {
+        if (this._currentCall?.hfp && this._callMatchesPacket(
+            this._currentCall, packet))
+            return;
+
         this.device.hideNotification(`${packet.body.event}|${this._getSender(packet)}`);
         this._restoreMediaState();
     }
@@ -282,16 +385,31 @@ const CallsPlugin = GObject.registerClass({
         const sender = this._getSender(packet);
 
         if (packet.body.event === 'ringing') {
-            this._notifyIncomingCall({
-                id: `ringing|${sender}`,
-                sender,
-                phoneNumber: packet.body.phoneNumber ?? '',
-                hfp: false,
-            });
+            if (this._currentCall?.hfp &&
+                this._currentCall.state === 'incoming') {
+                this._notifyIncomingCall({
+                    ...this._currentCall,
+                    sender,
+                    phoneNumber: packet.body.phoneNumber ||
+                        this._currentCall.phoneNumber,
+                    applyMedia: false,
+                });
+            } else {
+                this._notifyIncomingCall({
+                    id: `ringing|${sender}`,
+                    sender,
+                    phoneNumber: packet.body.phoneNumber ?? '',
+                    hfp: false,
+                });
+            }
             return;
         }
 
         if (packet.body.event === 'talking') {
+            if (this._currentCall?.hfp && this._callMatchesPacket(
+                this._currentCall, packet))
+                return;
+
             this.device.hideNotification(`ringing|${sender}`);
             this._setMediaState('talking');
             this.device.showNotification({
@@ -305,13 +423,35 @@ const CallsPlugin = GObject.registerClass({
         }
     }
 
-    _notifyIncomingCall({id, sender, phoneNumber, callPath = null, hfp = true}) {
-        this._incomingSender = sender;
-        this._incomingCallNumber = phoneNumber ?? '';
-        this._incomingCallPath = callPath;
-        this._setMediaState('ringing', hfp);
+    _notifyIncomingCall({
+        id,
+        sender,
+        phoneNumber,
+        callPath = null,
+        hfp = true,
+        applyMedia = true,
+    }) {
+        const metadata = this._incomingMetadata({sender, phoneNumber});
+        const notificationId = id ?? this._currentCall?.notificationId ??
+            `ringing|${callPath || metadata.phoneNumber || metadata.sender}`;
 
-        const parameter = new GLib.Variant('s', phoneNumber ?? '');
+        this._incomingSender = metadata.sender;
+        this._incomingCallNumber = metadata.phoneNumber;
+        this._incomingCallPath = callPath;
+        this._currentCall = {
+            source: hfp ? 'hfp' : 'kdeconnect',
+            state: 'incoming',
+            notificationId,
+            sender: metadata.sender,
+            phoneNumber: metadata.phoneNumber,
+            callPath,
+            hfp,
+        };
+
+        if (applyMedia)
+            this._setMediaState('ringing', hfp);
+
+        const parameter = new GLib.Variant('s', metadata.phoneNumber);
         const buttons = [{
             action: 'answerCall',
             // TRANSLATORS: Answer the actively ringing call
@@ -336,11 +476,11 @@ const CallsPlugin = GObject.registerClass({
         });
 
         this.device.showNotification({
-            id,
-            title: sender,
+            id: notificationId,
+            title: metadata.sender,
             // TRANSLATORS: The phone is ringing
             body: _('Incoming call'),
-            icon: new Gio.ThemedIcon({name: 'call-start-symbolic'}),
+            icon: metadata.icon,
             priority: Gio.NotificationPriority.URGENT,
             action: {
                 name: 'showIncomingCall',
@@ -364,44 +504,52 @@ const CallsPlugin = GObject.registerClass({
             );
 
             if (call !== null && call !== undefined) {
-                const sender = call.name || call.phoneNumber ||
-                    _('Unknown Contact');
+                const applyMedia = !this._callMatchesHfp(call);
+                const metadata = this._incomingMetadata({
+                    sender: call.name,
+                    phoneNumber: call.phoneNumber,
+                });
 
                 this._notifyIncomingCall({
-                    id: `ringing|${sender}`,
-                    sender,
-                    phoneNumber: call.phoneNumber,
+                    id: `ringing|${call.path || metadata.phoneNumber}`,
+                    sender: metadata.sender,
+                    phoneNumber: metadata.phoneNumber,
                     callPath: call.path,
                     hfp: true,
+                    applyMedia,
                 });
-            } else if (this._incomingSender !== null) {
-                this.device.hideNotification(`ringing|${this._incomingSender}`);
+            } else if (this._currentCall?.hfp &&
+                this._currentCall.state === 'incoming') {
+                this._hideCurrentCallNotification();
                 const active = await this._bluetoothTelephony?.hasActiveCall(
                     this.device,
-                    this._incomingCallNumber,
-                    this._incomingCallPath
+                    this._currentCall.phoneNumber,
+                    this._currentCall.callPath
                 );
 
                 if (active) {
                     if (this._window !== null) {
                         this._window.showCall(
-                            this._incomingCallNumber,
+                            this._currentCall.phoneNumber,
                             'talking',
-                            this._incomingCallPath,
+                            this._currentCall.callPath,
                             'close'
                         );
                     }
 
+                    this._currentCall.state = 'talking';
                     this._setMediaState('talking', true);
                     this._watchBluetoothCall(
-                        this._incomingCallNumber,
-                        this._incomingCallPath
+                        this._currentCall.phoneNumber,
+                        this._currentCall.callPath
                     );
                 } else if (this._window !== null) {
                     this._window.finishCall();
                     this._restoreMediaState();
+                    this._currentCall = null;
                 } else {
                     this._restoreMediaState();
+                    this._currentCall = null;
                 }
 
                 this._incomingSender = null;
@@ -431,6 +579,17 @@ const CallsPlugin = GObject.registerClass({
                     this.device, dialNumber);
 
                 if (callPath) {
+                    this._currentCall = {
+                        source: 'hfp',
+                        state: 'dialing',
+                        notificationId: null,
+                        sender: dialNumber,
+                        phoneNumber: dialNumber,
+                        callPath: typeof callPath === 'string'
+                            ? callPath
+                            : null,
+                        hfp: true,
+                    };
                     this._setMediaState('talking', true);
                     this._watchBluetoothCall(dialNumber,
                         typeof callPath === 'string' ? callPath : null);
@@ -459,6 +618,8 @@ const CallsPlugin = GObject.registerClass({
     _finishBluetoothCall() {
         this._clearCallWatch();
         this._restoreMediaState();
+        this._hideCurrentCallNotification();
+        this._currentCall = null;
 
         if (this._window !== null)
             this._window.finishCall();
@@ -546,6 +707,17 @@ const CallsPlugin = GObject.registerClass({
                         ? answeredPath
                         : callPath;
 
+                    this._currentCall = {
+                        ...(this._currentCall ?? {}),
+                        source: 'hfp',
+                        state: 'talking',
+                        notificationId: this._currentCall?.notificationId ?? null,
+                        sender: this._currentCall?.sender ?? phoneNumber,
+                        phoneNumber: phoneNumber ??
+                            this._currentCall?.phoneNumber ?? '',
+                        callPath: path,
+                        hfp: true,
+                    };
                     this._setMediaState('talking', true);
                     window.showCall(phoneNumber, 'talking', path, 'close');
                     this._watchBluetoothCall(phoneNumber, path);
@@ -567,6 +739,8 @@ const CallsPlugin = GObject.registerClass({
     hangupCall(phoneNumber = null, callPath = null) {
         this._clearCallWatch();
         this._restoreMediaState();
+        this._hideCurrentCallNotification();
+        this._currentCall = null;
 
         return Promise.resolve(this._bluetoothTelephony?.hangupCall(
             this.device, phoneNumber, callPath))
@@ -613,6 +787,7 @@ const CallsPlugin = GObject.registerClass({
         this._incomingSender = null;
         this._incomingCallNumber = null;
         this._incomingCallPath = null;
+        this._currentCall = null;
 
         if (this._bluetoothTelephony !== undefined)
             this._bluetoothTelephony = Components.release('bluetoothtelephony');

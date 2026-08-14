@@ -74,6 +74,8 @@ describe('The calls plugin', function () {
             localPlugin._bluetoothTelephony.call_info = null;
         if (localPlugin?._bluetoothTelephony !== undefined)
             localPlugin._bluetoothTelephony.active_call = true;
+        if (localPlugin)
+            localPlugin._currentCall = null;
     });
 
     it('can be loaded', async function () {
@@ -125,10 +127,57 @@ describe('The calls plugin', function () {
 
         expect(notification.title).toBe('Name');
         expect(notification.body).toBe('Incoming call');
+        expect(notification.id).toBe('ringing|/mock/call');
         expect(notification.buttons.map(button => button.action)).toEqual([
             'answerCall',
             'hangupCall',
         ]);
+    });
+
+    it('enriches HFP ringing notifications from delayed Telephony events', async function () {
+        localPlugin._bluetoothTelephony.call_info = {
+            path: '/mock/call',
+            state: 'incoming',
+            phoneNumber: '555-555-5555',
+            name: '',
+        };
+
+        await localPlugin._syncBluetoothCallNotification();
+        localPlugin.device.showNotification.calls.reset();
+
+        remoteTelephonyPlugin.device.sendPacket(Packets.ringing);
+        await localPlugin.awaitPacket('kdeconnect.telephony',
+            Packets.ringing.body);
+
+        expect(localPlugin.device.showNotification).toHaveBeenCalled();
+
+        const notification = localPlugin.device.showNotification
+            .calls.mostRecent().args[0];
+
+        expect(notification.id).toBe('ringing|/mock/call');
+        expect(notification.title).toBe('Name');
+        expect(notification.buttons.map(button => button.action)).toEqual([
+            'answerCall',
+            'hangupCall',
+        ]);
+    });
+
+    it('does not reapply media state for repeated HFP ringing syncs', async function () {
+        const localMixer = localPlugin._mixer;
+
+        spyOn(localMixer, 'lowerApplicationVolumes');
+        localTelephonyPlugin.settings.set_string('ringing-volume', 'lower');
+        localPlugin._bluetoothTelephony.call_info = {
+            path: '/mock/call',
+            state: 'incoming',
+            phoneNumber: '555-555-5555',
+            name: 'Name',
+        };
+
+        await localPlugin._syncBluetoothCallNotification();
+        await localPlugin._syncBluetoothCallNotification();
+
+        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalledTimes(1);
     });
 
     it('uses application audio controls for HFP calls', function () {
@@ -197,7 +246,7 @@ describe('The calls plugin', function () {
         await localPlugin._syncBluetoothCallNotification();
 
         expect(localPlugin.device.hideNotification)
-            .toHaveBeenCalledWith('ringing|Name');
+            .toHaveBeenCalledWith('ringing|/mock/call');
         expect(localPlugin._window.finishCall).toHaveBeenCalled();
 
         localPlugin._window = null;
