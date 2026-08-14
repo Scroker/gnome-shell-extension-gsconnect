@@ -359,34 +359,24 @@ const CallsPlugin = GObject.registerClass({
         if (settings === null)
             return;
 
-        if (this._mixer !== undefined) {
+        if (!hfp && this._mixer !== undefined) {
             switch (settings.get_string(`${eventType}-volume`)) {
                 case 'restore':
                     this._mixer.restore();
                     break;
 
                 case 'lower':
-                    if (hfp)
-                        this._mixer.lowerApplicationVolumes();
-                    else
-                        this._mixer.lowerVolume();
+                    this._mixer.lowerVolume();
                     break;
 
                 case 'mute':
-                    if (hfp)
-                        this._mixer.muteApplicationVolumes();
-                    else
-                        this._mixer.muteVolume();
+                    this._mixer.muteVolume();
                     break;
             }
 
             if (eventType === 'talking' &&
-                settings.get_boolean('talking-microphone')) {
-                if (hfp)
-                    this._mixer.muteApplicationMicrophones();
-                else
-                    this._mixer.muteMicrophone();
-            }
+                settings.get_boolean('talking-microphone'))
+                this._mixer.muteMicrophone();
         }
 
         if (this._mpris && settings.get_boolean(`${eventType}-pause`))

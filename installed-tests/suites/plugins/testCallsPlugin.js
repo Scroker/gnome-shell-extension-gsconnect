@@ -175,10 +175,11 @@ describe('The calls plugin', function () {
         ]);
     });
 
-    it('does not reapply media state for repeated HFP ringing syncs', async function () {
+    it('does not adjust mixer state for HFP ringing syncs', async function () {
         const localMixer = localPlugin._mixer;
 
         spyOn(localMixer, 'lowerApplicationVolumes');
+        spyOn(localMixer, 'lowerVolume');
         localTelephonyPlugin.settings.set_string('ringing-volume', 'lower');
         localPlugin._bluetoothTelephony.call_info = {
             path: '/mock/call',
@@ -190,10 +191,11 @@ describe('The calls plugin', function () {
         await localPlugin._syncBluetoothCallNotification();
         await localPlugin._syncBluetoothCallNotification();
 
-        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalledTimes(1);
+        expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
+        expect(localMixer.lowerVolume).not.toHaveBeenCalled();
     });
 
-    it('uses application audio controls for HFP calls', function () {
+    it('does not use mixer audio controls for HFP calls', function () {
         const localMixer = localPlugin._mixer;
 
         spyOn(localMixer, 'lowerApplicationVolumes');
@@ -206,20 +208,20 @@ describe('The calls plugin', function () {
         localTelephonyPlugin.settings.set_string('ringing-volume', 'lower');
         localPlugin._setMediaState('ringing', true);
 
-        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
+        expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
 
         localTelephonyPlugin.settings.set_string('talking-volume', 'mute');
         localTelephonyPlugin.settings.set_boolean('talking-microphone', true);
         localPlugin._setMediaState('talking', true);
 
-        expect(localMixer.muteApplicationVolumes).toHaveBeenCalled();
-        expect(localMixer.muteApplicationMicrophones).toHaveBeenCalled();
+        expect(localMixer.muteApplicationVolumes).not.toHaveBeenCalled();
+        expect(localMixer.muteApplicationMicrophones).not.toHaveBeenCalled();
         expect(localMixer.muteVolume).not.toHaveBeenCalled();
         expect(localMixer.muteMicrophone).not.toHaveBeenCalled();
     });
 
-    it('uses Telephony settings when the Telephony plugin is unavailable', function () {
+    it('does not adjust HFP mixer state when Telephony is unavailable', function () {
         const localMixer = localPlugin._mixer;
         const telephonyPlugin = localPlugin.device._plugins.get('telephony');
 
@@ -236,7 +238,7 @@ describe('The calls plugin', function () {
             localPlugin.device._plugins.set('telephony', telephonyPlugin);
         }
 
-        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalled();
+        expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
     });
 
