@@ -3,12 +3,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import GIRepository from 'gi://GIRepository';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import Config from '../../config.js';
 
 const Tweener = imports.tweener.tweener;
+
+const PACTL_FLAGS = Gio.SubprocessFlags.STDOUT_PIPE |
+    Gio.SubprocessFlags.STDERR_SILENCE;
 
 
 let Gvc = null;
@@ -252,6 +256,60 @@ const Mixer = !Gvc ? null : GObject.registerClass({
             .map(stream => new Stream(this, stream));
     }
 
+    _pactl(argv) {
+        const proc = Gio.Subprocess.new(argv, PACTL_FLAGS);
+        const [, stdout] = proc.communicate_utf8(null, null);
+
+        if (proc.get_successful())
+            return stdout;
+
+        return '';
+    }
+
+    _isCallOutputInfo(info) {
+        const properties = info?.properties ?? {};
+        const streamId = [
+            properties['node.name'],
+            properties['media.name'],
+            properties['media.role'],
+            properties['media.class'],
+            properties['factory.name'],
+            properties['api.bluez5.profile'],
+            properties['api.bluez5.address'],
+        ].filter(value => value !== undefined && value !== null)
+            .join(' ')
+            .toLowerCase();
+
+        return streamId.includes('bluez_input') ||
+            (streamId.includes('phone') &&
+                streamId.includes('stream/output/audio')) ||
+            (streamId.includes('headset-audio-gateway') &&
+                streamId.includes('stream/output/audio'));
+    }
+
+    _unmuteCallOutputStreamsWithPactl() {
+        try {
+            const json = this._pactl([
+                'pactl',
+                '--format=json',
+                'list',
+                'sink-inputs',
+            ]);
+            const streams = JSON.parse(json || '[]');
+
+            for (const stream of streams) {
+                if (!this._isCallOutputInfo(stream))
+                    continue;
+
+                const index = `${stream.index}`;
+                this._pactl(['pactl', 'set-sink-input-mute', index, '0']);
+                this._pactl(['pactl', 'set-sink-input-volume', index, '100%']);
+            }
+        } catch (e) {
+            debug(e, 'pactl Bluetooth call output');
+        }
+    }
+
     /**
      * Restore audible playback on Bluetooth call streams without changing
      * global devices, microphones or unrelated application streams.
@@ -265,6 +323,8 @@ const Mixer = !Gvc ? null : GObject.registerClass({
                 if (stream.volume < 0.75)
                     stream.volume = 1.0;
             }
+
+            this._unmuteCallOutputStreamsWithPactl();
         } catch (e) {
             logError(e);
         }
