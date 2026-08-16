@@ -17,7 +17,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
       <object class="AdwToolbarView">
         <property name="visible">True</property>
         <child type="top">
-          <object class="AdwHeaderBar">
+          <object class="AdwHeaderBar" id="header-bar">
             <property name="visible">True</property>
             <property name="show-back-button">False</property>
             <property name="title-widget">

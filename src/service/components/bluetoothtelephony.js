@@ -234,6 +234,47 @@ const BluetoothTelephony = GObject.registerClass({
         return _getDeviceBluetoothAddress(device) !== null;
     }
 
+    async getBluetoothAlias(device) {
+        const address = _getDeviceBluetoothAddress(device);
+        console.log(`[getBluetoothAlias] starting for address: ${address}`);
+        if (!address) return null;
+
+        try {
+            const reply = await Gio.DBus.system.call(
+                'org.bluez',
+                '/',
+                'org.freedesktop.DBus.ObjectManager',
+                'GetManagedObjects',
+                null,
+                new GLib.VariantType('(a{oa{sa{sv}}})'),
+                Gio.DBusCallFlags.NONE,
+                -1,
+                null
+            );
+
+            const objects = reply.recursiveUnpack()[0];
+            console.log(`[getBluetoothAlias] Objects retrieved: ${Object.keys(objects).length}`);
+
+            for (const interfaces of Object.values(objects)) {
+                const bluezDevice = interfaces['org.bluez.Device1'];
+                if (!bluezDevice) continue;
+
+                const devAddress = _unpack(bluezDevice.Address)?.toUpperCase();
+                console.log(`[getBluetoothAlias] found devAddress: ${devAddress}`);
+                if (devAddress === address) {
+                    const alias = _unpack(bluezDevice.Alias);
+                    console.log(`[getBluetoothAlias] MATCH! returning alias: ${alias}`);
+                    return alias ?? null;
+                }
+            }
+            console.log(`[getBluetoothAlias] No match found.`);
+        } catch (e) {
+            console.error(`[getBluetoothAlias] Error: ${e}`);
+        }
+
+        return null;
+    }
+
     _callInfoFromProperties(path, properties) {
         return {
             path,
@@ -341,7 +382,6 @@ const BluetoothTelephony = GObject.registerClass({
             path = await this._findCall(device, phoneNumber, [
                 'incoming',
                 'waiting',
-                'alerting',
             ]);
         } catch (e) {
             debug(e, 'Bluetooth find incoming call');

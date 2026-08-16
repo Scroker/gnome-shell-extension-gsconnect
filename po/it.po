@@ -1448,3 +1448,6 @@ msgstr "non accopiato"
 
 msgid "Pair Device"
 msgstr "Accoppia il dispositivo"
+
+msgid "Outgoing Calls"
+msgstr "Chiamate in uscita"

@@ -3,12 +3,16 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import GIRepository from 'gi://GIRepository';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import Config from '../../config.js';
 
 const Tweener = imports.tweener.tweener;
+
+const PACTL_FLAGS = Gio.SubprocessFlags.STDOUT_PIPE |
+    Gio.SubprocessFlags.STDERR_SILENCE;
 
 
 let Gvc = null;
@@ -28,7 +32,7 @@ try {
     }
 
     Gvc = (await import('gi://Gvc')).default;
-} catch {}
+} catch { }
 
 
 /**
@@ -130,7 +134,7 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     GTypeName: 'GSConnectAudioMixer',
 }, class Mixer extends Gvc.MixerControl {
     _init(params) {
-        super._init({name: 'GSConnect'});
+        super._init({ name: 'GSConnect' });
 
         this._previousVolume = undefined;
         this._previousApplicationVolumes = new Map();
@@ -202,36 +206,87 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         }
     }
 
-    _isCallStream(stream) {
-        const streamId = `${stream.get_application_id?.() ??
-            stream.application_id ?? ''} ${stream.name ?? ''} ${
-            stream.description ?? ''}`.toLowerCase();
-
-        return streamId.includes('bluez') ||
-            streamId.includes('bluetooth') ||
-            streamId.includes('handsfree') ||
-            streamId.includes('headset') ||
-            streamId.includes('ofono') ||
-            streamId.includes('telephony');
+    _streamIdentifier(stream) {
+        return [
+            stream.get_application_id?.(),
+            stream.get_application_name?.(),
+            stream.get_name?.(),
+            stream.get_description?.(),
+            stream.application_id,
+            stream.name,
+            stream.description,
+        ].filter(value => value !== undefined && value !== null)
+            .join(' ')
+            .toLowerCase();
     }
 
-    _isApplicationStream(stream) {
+    _isCallStream(stream, btIdentifier = null) {
+        const streamId = this._streamIdentifier(stream);
+        console.log(`Stream identifier: ${streamId}`);
+        console.log(`BT identifier: ${btIdentifier}`);
+
+        if (!btIdentifier) return false;
+        if (streamId.includes(btIdentifier.toLowerCase())) return true;
+        return false;
+    }
+
+    _isApplicationStream(stream, btIdentifier = null) {
         return stream !== null &&
             !stream.is_event_stream &&
             !stream.is_virtual &&
-            !this._isCallStream(stream);
+            !this._isCallStream(stream, btIdentifier);
     }
 
-    _getSinkInputs() {
-        return this.get_sink_inputs()
-            .filter(stream => this._isApplicationStream(stream))
+    _getSinkInputs(btIdentifier = null) {
+        const allStreams = this.get_sink_inputs();
+        return allStreams
+            .filter(stream => this._isApplicationStream(stream, btIdentifier))
             .map(stream => new Stream(this, stream));
     }
 
-    _getSourceOutputs() {
+    _getSourceOutputs(btIdentifier = null) {
         return this.get_source_outputs()
-            .filter(stream => this._isApplicationStream(stream))
+            .filter(stream => this._isApplicationStream(stream, btIdentifier))
             .map(stream => new Stream(this, stream));
+    }
+
+    _getCallOutputStreams(btIdentifier = null) {
+        const allSinkInputs = this.get_sink_inputs?.() ?? [];
+        return allSinkInputs
+            .filter(stream => this._isCallStream(stream, btIdentifier))
+            .map(stream => new Stream(this, stream));
+    }
+
+    _pactl(argv) {
+        const proc = Gio.Subprocess.new(argv, PACTL_FLAGS);
+        const [, stdout] = proc.communicate_utf8(null, null);
+
+        if (proc.get_successful())
+            return stdout;
+
+        return '';
+    }
+
+    /**
+     * Restore audible playback on Bluetooth call streams without changing
+     * global devices, microphones or unrelated application streams.
+     * 
+     * @param {string} [btIdentifier] - The name of the Bluetooth device
+     */
+    unmuteCallOutputStreams(btIdentifier = null) {
+        try {
+            const streams = this._getCallOutputStreams(btIdentifier);
+
+            for (const stream of streams) {
+                if (stream.muted)
+                    stream.muted = false;
+
+                if (stream.volume < 0.75)
+                    stream.volume = 1.0;
+            }
+        } catch (e) {
+            logError(e);
+        }
     }
 
     /**
@@ -254,10 +309,11 @@ const Mixer = !Gvc ? null : GObject.registerClass({
      * Store current application output volumes then lower them to %15.
      *
      * @param {number} duration - Duration in seconds to fade
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
      */
-    lowerApplicationVolumes(duration = 1) {
+    lowerApplicationVolumes(duration = 1, btIdentifier = null) {
         try {
-            for (const stream of this._getSinkInputs()) {
+            for (const stream of this._getSinkInputs(btIdentifier)) {
                 if (stream.volume <= 0.15)
                     continue;
 
@@ -286,10 +342,14 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     /**
      * Mute application output streams.
+     * 
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
      */
-    muteApplicationVolumes() {
+    muteApplicationVolumes(btIdentifier = null) {
         try {
-            for (const stream of this._getSinkInputs()) {
+            const streams = this._getSinkInputs(btIdentifier);
+
+            for (const stream of streams) {
                 if (stream.muted)
                     continue;
 
@@ -318,10 +378,12 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     /**
      * Mute application recording streams without muting the input device.
+     * 
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
      */
-    muteApplicationMicrophones() {
+    muteApplicationMicrophones(btIdentifier = null) {
         try {
-            for (const stream of this._getSourceOutputs()) {
+            for (const stream of this._getSourceOutputs(btIdentifier)) {
                 if (stream.muted)
                     continue;
 

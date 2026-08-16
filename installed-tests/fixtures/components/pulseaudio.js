@@ -173,6 +173,10 @@ const Component = GObject.registerClass({
         return Array.from(this._sources.values());
     }
 
+    unmuteCallOutputStreams(btIdentifier = null) {
+        this._callOutputStreamsUnmuted = true;
+    }
+
     get_vol_max_norm() {
         return 65536;
     }
@@ -194,7 +198,7 @@ const Component = GObject.registerClass({
         }
     }
 
-    lowerApplicationVolumes(duration = 1) {
+    lowerApplicationVolumes(duration = 1, btIdentifier = null) {
         try {
             for (const stream of this.get_sink_inputs()) {
                 if (stream.volume <= 0.15)
@@ -221,7 +225,7 @@ const Component = GObject.registerClass({
         }
     }
 
-    muteApplicationVolumes() {
+    muteApplicationVolumes(btIdentifier = null) {
         try {
             for (const stream of this.get_sink_inputs()) {
                 if (stream.muted)
@@ -247,7 +251,7 @@ const Component = GObject.registerClass({
         }
     }
 
-    muteApplicationMicrophones() {
+    muteApplicationMicrophones(btIdentifier = null) {
         try {
             for (const stream of this.get_source_outputs()) {
                 if (stream.muted)
