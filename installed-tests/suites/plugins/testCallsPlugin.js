@@ -212,7 +212,7 @@ describe('The calls plugin', function () {
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
     });
 
-    it('does not use mixer audio controls for HFP calls', function () {
+    it('uses targeted mixer audio controls for HFP calls', function () {
         const localMixer = localPlugin._mixer;
 
         spyOn(localMixer, 'lowerApplicationVolumes');
@@ -227,7 +227,7 @@ describe('The calls plugin', function () {
         localPlugin._setMediaState('ringing', true);
 
         expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalledTimes(1);
-        expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
+        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalledWith(1, jasmine.any(String));
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
 
         localTelephonyPlugin.settings.set_string('talking-volume', 'mute');
@@ -235,8 +235,8 @@ describe('The calls plugin', function () {
         localPlugin._setMediaState('talking', true);
 
         expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalledTimes(2);
-        expect(localMixer.muteApplicationVolumes).not.toHaveBeenCalled();
-        expect(localMixer.muteApplicationMicrophones).not.toHaveBeenCalled();
+        expect(localMixer.muteApplicationVolumes).toHaveBeenCalledWith(jasmine.any(String));
+        expect(localMixer.muteApplicationMicrophones).toHaveBeenCalledWith(jasmine.any(String));
         expect(localMixer.muteVolume).not.toHaveBeenCalled();
         expect(localMixer.muteMicrophone).not.toHaveBeenCalled();
     });

@@ -182,7 +182,9 @@ const CallsPlugin = GObject.registerClass({
         this._incomingSender = null;
         this._incomingCallNumber = null;
         this._incomingCallPath = null;
+        this._incomingCallPath = null;
         this._currentCall = null;
+        this._bluetoothAlias = null;
     }
 
     get telephony_settings() {
@@ -208,6 +210,16 @@ const CallsPlugin = GObject.registerClass({
                 'calls-changed',
                 this._syncBluetoothCallNotification.bind(this)
             );
+        }
+
+        if (this._bluetoothTelephony?.getBluetoothAlias instanceof Function) {
+            console.log(`[calls.js] calling getBluetoothAlias`);
+            this._bluetoothTelephony.getBluetoothAlias(this.device).then(alias => {
+                if (alias) {
+                    this._bluetoothAlias = alias;
+                    console.log(`[calls.js] Resolved Bluetooth alias for ${this.device.name}: ${alias}`);
+                }
+            }).catch(e => console.error(`[calls.js] Error in getBluetoothAlias: ${e}`));
         }
 
         this._syncBluetoothCallNotification();
@@ -307,10 +319,13 @@ const CallsPlugin = GObject.registerClass({
 
     getCallAvatar(phoneNumber) {
         const contact = this._getContactForNumber(phoneNumber);
+        // The contacts store returns a mock object with name=phoneNumber if not found
+        const isKnown = contact && contact.name && contact.name !== phoneNumber;
 
         return {
             image: this._getContactPaintable(contact),
-            text: contact?.name || phoneNumber || _('Unknown Contact'),
+            text: isKnown ? contact.name : '',
+            isKnown: isKnown,
         };
     }
 
@@ -353,14 +368,56 @@ const CallsPlugin = GObject.registerClass({
             this.device.hideNotification(this._currentCall.notificationId);
     }
 
+    _getBluetoothAddress() {
+        try {
+            const connection = this.device.settings.get_string('last-connection');
+            if (connection.startsWith('bluetooth://')) {
+                // Extract and normalize MAC address from bluetooth:// URI
+                return connection.replace(/^bluetooth:\/\//, '').toUpperCase();
+            }
+
+            const address = this.device.settings.get_string('bluetooth-address');
+            return address ? address.toUpperCase() : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     _setMediaState(eventType, hfp = false) {
         const settings = this.telephony_settings;
 
         if (settings === null)
             return;
 
-        if (hfp)
-            this._mixer?.unmuteCallOutputStreams?.();
+
+        if (hfp) {
+            const btIdentifier = this._bluetoothAlias ?? this.device.name;
+            console.log(`[calls.js] hfp is true, using btIdentifier: ${btIdentifier} (_bluetoothAlias was: ${this._bluetoothAlias})`);
+            // Unmute call audio
+            this._mixer?.unmuteCallOutputStreams?.(btIdentifier);
+            
+            // Mute only non-Bluetooth applications
+            if (this._mixer !== undefined) {
+                switch (settings.get_string(`${eventType}-volume`)) {
+                    case 'restore':
+                        this._mixer.restore();
+                        break;
+
+                    case 'lower':
+                        this._mixer.lowerApplicationVolumes?.(1, btIdentifier);
+                        break;
+
+                    case 'mute':
+                        this._mixer.muteApplicationVolumes?.(btIdentifier);
+                        break;
+                }
+
+                if (eventType === 'talking' &&
+                    settings.get_boolean('talking-microphone')) {
+                    this._mixer.muteApplicationMicrophones?.(btIdentifier);
+                }
+            }
+        }
 
         if (!hfp && this._mixer !== undefined) {
             switch (settings.get_string(`${eventType}-volume`)) {
@@ -665,15 +722,28 @@ const CallsPlugin = GObject.registerClass({
                 checking = true;
                 checks++;
 
-                Promise.resolve(this._bluetoothTelephony?.hasActiveCall(
-                    this.device, phoneNumber, callPath))
-                    .then(active => {
+                Promise.resolve(this._bluetoothTelephony?.findCallInfo(this.device, phoneNumber))
+                    .then(info => {
                         if (token !== this._callWatchToken)
                             return;
 
-                        if (active) {
+                        if (info !== null) {
                             seenCall = true;
-                            this._mixer?.unmuteCallOutputStreams?.();
+                            const btIdentifier = this._bluetoothAlias ?? this.device.name;
+                            this._mixer?.unmuteCallOutputStreams?.(btIdentifier);
+                            
+                            // Detect when an outgoing call is answered
+                            if (this._currentCall && this._currentCall.state === 'dialing' && info.state === 'active') {
+                                this._currentCall.state = 'talking';
+                                if (this._window !== null) {
+                                    this._window.showCall(
+                                        phoneNumber,
+                                        'talking',
+                                        info.path || callPath,
+                                        'close'
+                                    );
+                                }
+                            }
                             return;
                         }
 
@@ -865,23 +935,104 @@ const CallWindow = GObject.registerClass({
             // TRANSLATORS: A phone number (eg. "Call 555-5555")
             'number-label': _('Call %s'),
         });
-        this._chooser.show_back_button = true;
+        this._chooser.header_bar.visible = false;
+        this._chooser.button_search.active = true;
+        this._chooser.button_search.connect('notify::active', () => {
+            if (!this._chooser.button_search.active)
+                this._chooser.button_search.active = true;
+        });
+        
         this._numberSelectedId = this._chooser.connect(
             'number-selected',
             this._onNumberSelected.bind(this)
         );
+
         this._dialerPage = new CallDialerPage({
             plugin: this.plugin,
         });
+        this._dialerPage.header_bar.visible = false;
+        this._dialerPage.contacts_button.visible = false;
+
         this._statusPage = new CallStatusPage({
             plugin: this.plugin,
         });
-        this._contactsClickedId = this._dialerPage.connect(
-            'contacts-clicked',
-            this._onContactsClicked.bind(this)
+
+        // Set up the main page with ViewSwitcher
+        this._mainPage = new Adw.NavigationPage({
+            title: _('Call'),
+            tag: 'call-main'
+        });
+
+        const toolbarView = new Adw.ToolbarView();
+        
+        const headerBar = new Adw.HeaderBar();
+        const switcherTitle = new Adw.ViewSwitcherTitle({
+            title: _('Call')
+        });
+        headerBar.set_title_widget(switcherTitle);
+        toolbarView.add_top_bar(headerBar);
+
+        const viewStack = new Adw.ViewStack();
+        switcherTitle.set_stack(viewStack);
+        
+        const dialerPage = viewStack.add_titled_with_icon(
+            this._dialerPage,
+            'dialer',
+            _('Dialer'),
+            'call-start-symbolic'
+        );
+        
+        const contactsPage = viewStack.add_titled_with_icon(
+            this._chooser,
+            'contacts',
+            _('Contacts'),
+            'people-symbolic'
         );
 
-        this.nav_view.push(this._dialerPage);
+        toolbarView.set_content(viewStack);
+
+        const switcherBar = new Adw.ViewSwitcherBar({
+            stack: viewStack
+        });
+        toolbarView.add_bottom_bar(switcherBar);
+        
+        switcherTitle.bind_property(
+            'title-visible',
+            switcherBar,
+            'reveal',
+            GObject.BindingFlags.SYNC_CREATE
+        );
+
+        this._mainPage.set_child(toolbarView);
+
+        this.nav_view.push(this._mainPage);
+
+        // Global key controller for the dialer tab and contacts search
+        const windowKeyController = new Gtk.EventControllerKey();
+        windowKeyController.connect('key-pressed', (controller, keyval, keycode, state) => {
+            const visibleChild = viewStack.get_visible_child();
+            if (visibleChild === this._dialerPage) {
+                return this._dialerPage._onKeyPressed(controller, keyval, keycode, state);
+            } else if (visibleChild === this._chooser) {
+                if (!this._chooser.search_entry.has_focus) {
+                    const unicode = Gdk.keyval_to_unicode(keyval);
+                    if (unicode !== 0 || keyval === Gdk.KEY_BackSpace) {
+                        this._chooser.search_entry.grab_focus();
+                    }
+                }
+            }
+            return Gdk.EVENT_PROPAGATE;
+        });
+        this.add_controller(windowKeyController);
+
+        // Automatically focus search entry when switching to contacts tab
+        viewStack.connect('notify::visible-child', () => {
+            if (viewStack.get_visible_child() === this._chooser) {
+                this._chooser.search_entry.grab_focus();
+            } else {
+                this.grab_focus();
+            }
+        });
     }
 
     get device() {
@@ -905,7 +1056,7 @@ const CallWindow = GObject.registerClass({
     }
 
     _onContactsClicked() {
-        this.nav_view.push(this._chooser);
+        // Contacts are now handled by ViewSwitcher
     }
 
     _dial(number) {
@@ -951,6 +1102,7 @@ const CallWindow = GObject.registerClass({
     }
 
     finishCall() {
+        this._statusPage.state = 'ending';
         if (this._hangupAction === 'dialer')
             this.showDialer();
         else
@@ -963,21 +1115,22 @@ const CallWindow = GObject.registerClass({
         this._dialerPage.number = '';
         this._hangupAction = 'dialer';
 
-        while (this.nav_view.get_visible_page() !== this._dialerPage)
+        while (this.nav_view.get_visible_page() !== this._mainPage)
             this.nav_view.pop();
 
         this.present();
     }
 
     vfunc_close_request() {
-        if (this._numberSelectedId !== 0) {
-            this._chooser.disconnect(this._numberSelectedId);
-            this._numberSelectedId = 0;
+        if (this.nav_view.get_visible_page() === this._statusPage &&
+            this._statusPage.state !== 'ending' &&
+            this._statusPage.state !== 'error') {
+            this._statusPage._onHangupClicked();
         }
 
-        if (this._contactsClickedId !== 0) {
-            this._dialerPage.disconnect(this._contactsClickedId);
-            this._contactsClickedId = 0;
+        if (this._numberSelectedId) {
+            this._chooser.disconnect(this._numberSelectedId);
+            this._numberSelectedId = 0;
         }
 
         return false;
@@ -1009,16 +1162,11 @@ const CallDialerPage = GObject.registerClass({
         },
     },
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/telephony-call-dialer-page.ui',
-    Children: ['backspace-button', 'call-button', 'contacts-button', 'number-label'],
+    Children: ['backspace-button', 'call-button', 'contacts-button', 'number-label', 'header-bar'],
 }, class CallDialerPage extends Adw.NavigationPage {
 
     _init(params) {
         super._init(params);
-
-        const keyController = new Gtk.EventControllerKey();
-        keyController.connect('key-pressed',
-            this._onKeyPressed.bind(this));
-        this.add_controller(keyController);
         this.focusable = true;
     }
 
@@ -1137,10 +1285,67 @@ const CallStatusPage = GObject.registerClass({
         'answer-button',
         'hangup-button',
         'number-label',
+        'duration-label',
         'status-avatar',
         'title-label',
+        'header-bar',
     ],
 }, class CallStatusPage extends Adw.NavigationPage {
+
+    _init(params) {
+        super._init(params);
+        this.connect('hiding', this._onHiding.bind(this));
+        this.connect('destroy', this._onDestroy.bind(this));
+
+        this._durationTimerId = 0;
+        this._durationStartTime = 0;
+    }
+
+    _onDestroy() {
+        this._stopDurationTimer();
+    }
+
+    _startDurationTimer() {
+        if (this._durationTimerId !== 0)
+            return;
+            
+        this._durationStartTime = GLib.get_monotonic_time();
+        this.duration_label.label = '00:00';
+        this.duration_label.visible = true;
+        
+        this._durationTimerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+            const now = GLib.get_monotonic_time();
+            const elapsed = Math.floor((now - this._durationStartTime) / 1000000);
+            
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            const hours = Math.floor(minutes / 60);
+            
+            let labelStr = '';
+            if (hours > 0) {
+                const remMins = minutes % 60;
+                labelStr = `${hours}:${remMins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                labelStr = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            this.duration_label.label = labelStr;
+                
+            return GLib.SOURCE_CONTINUE;
+        });
+    }
+
+    _stopDurationTimer() {
+        if (this._durationTimerId !== 0) {
+            GLib.source_remove(this._durationTimerId);
+            this._durationTimerId = 0;
+        }
+    }
+
+    _onHiding() {
+        if (this.state !== 'ending' && this.state !== 'error') {
+            this._onHangupClicked();
+        }
+    }
 
     get number() {
         return this._number ?? '';
@@ -1194,52 +1399,83 @@ const CallStatusPage = GObject.registerClass({
         this._updateStatusAvatar();
         this.hangup_button.visible = true;
 
+        // Track if this call originated as an incoming call
+        if (state === 'incoming') {
+            this._is_incoming = true;
+        } else if (state === 'dialing') {
+            this._is_incoming = false;
+        }
+
         switch (state) {
             case 'error':
                 this.answer_button.visible = false;
                 this.hangup_button.visible = false;
+                this._stopDurationTimer();
+                this.header_bar.show_back_button = !this._is_incoming;
                 break;
 
             case 'incoming':
                 // TRANSLATORS: A phone call is ringing
-                this.title_label.label = _('Incoming Call');
+                this.title = _('Incoming Call');
                 this.answer_button.visible = true;
+                this._stopDurationTimer();
+                this.duration_label.visible = false;
+                this.header_bar.show_back_button = false;
                 break;
 
             case 'opened':
                 // TRANSLATORS: A call was opened on the paired phone
-                this.title_label.label = _('Opened on Phone');
+                this.title = _('Opened on Phone');
                 this.answer_button.visible = false;
+                this._stopDurationTimer();
+                this.duration_label.visible = false;
+                this.header_bar.show_back_button = !this._is_incoming;
                 break;
 
             case 'ending':
                 // TRANSLATORS: A phone call is ending
-                this.title_label.label = _('Ending Call');
+                this.title = _('Ending Call');
                 this.answer_button.visible = false;
+                this._stopDurationTimer();
+                this.header_bar.show_back_button = !this._is_incoming;
                 break;
 
             case 'talking':
                 // TRANSLATORS: A phone call is active
-                this.title_label.label = _('Ongoing Call');
+                this.title = _('Ongoing Call');
                 this.answer_button.visible = false;
+                this._startDurationTimer();
+                this.header_bar.show_back_button = !this._is_incoming;
                 break;
 
             case 'dialing':
             default:
                 // TRANSLATORS: A phone call is being placed
-                this.title_label.label = _('Calling');
+                this.title = _('Calling');
                 this.answer_button.visible = false;
+                this._stopDurationTimer();
+                this.duration_label.visible = false;
+                this.header_bar.show_back_button = true;
                 break;
+        }
+
+        // Set the title label to the contact's name, falling back to 'Unknown Contact'
+        if (this.call_avatar && this.call_avatar.isKnown) {
+            this.title_label.label = this.call_avatar.text;
+        } else {
+            this.title_label.label = _('Unknown Contact');
         }
     }
 
     showError(title, message) {
         this._state = 'error';
+        this.title = title;
         this.title_label.label = title;
         this.number_label.label = message;
         this._call_avatar = {
             image: null,
-            text: this.number || _('Unknown Contact'),
+            text: '',
+            isKnown: false,
         };
         this._updateStatusAvatar();
         this.answer_button.visible = false;
@@ -1249,10 +1485,11 @@ const CallStatusPage = GObject.registerClass({
     _updateStatusAvatar() {
         const avatar = this.call_avatar ?? {
             image: null,
-            text: this.number || _('Unknown Contact'),
+            text: '',
+            isKnown: false,
         };
 
-        this.status_avatar.text = avatar.text;
+        this.status_avatar.text = avatar.isKnown ? avatar.text : '';
         this.status_avatar.set_custom_image(avatar.image);
     }
 

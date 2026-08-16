@@ -32,7 +32,7 @@ try {
     }
 
     Gvc = (await import('gi://Gvc')).default;
-} catch {}
+} catch { }
 
 
 /**
@@ -134,7 +134,7 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     GTypeName: 'GSConnectAudioMixer',
 }, class Mixer extends Gvc.MixerControl {
     _init(params) {
-        super._init({name: 'GSConnect'});
+        super._init({ name: 'GSConnect' });
 
         this._previousVolume = undefined;
         this._previousApplicationVolumes = new Map();
@@ -206,8 +206,8 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         }
     }
 
-    _isCallStream(stream) {
-        const streamId = [
+    _streamIdentifier(stream) {
+        return [
             stream.get_application_id?.(),
             stream.get_application_name?.(),
             stream.get_name?.(),
@@ -218,41 +218,42 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         ].filter(value => value !== undefined && value !== null)
             .join(' ')
             .toLowerCase();
-
-        return streamId.includes('bluez') ||
-            streamId.includes('bluetooth') ||
-            streamId.includes('hfp') ||
-            streamId.includes('hsp') ||
-            streamId.includes('handsfree') ||
-            streamId.includes('hands-free') ||
-            streamId.includes('headset') ||
-            streamId.includes('ofono') ||
-            streamId.includes('phone') ||
-            streamId.includes('telephony');
     }
 
-    _isApplicationStream(stream) {
+    _isCallStream(stream, btIdentifier = null) {
+        const streamId = this._streamIdentifier(stream);
+        console.log(`Stream identifier: ${streamId}`);
+        console.log(`BT identifier: ${btIdentifier}`);
+
+        if (!btIdentifier) return false;
+        if (streamId.includes(btIdentifier.toLowerCase())) return true;
+        return false;
+    }
+
+    _isApplicationStream(stream, btIdentifier = null) {
         return stream !== null &&
             !stream.is_event_stream &&
             !stream.is_virtual &&
-            !this._isCallStream(stream);
+            !this._isCallStream(stream, btIdentifier);
     }
 
-    _getSinkInputs() {
-        return this.get_sink_inputs()
-            .filter(stream => this._isApplicationStream(stream))
+    _getSinkInputs(btIdentifier = null) {
+        const allStreams = this.get_sink_inputs();
+        return allStreams
+            .filter(stream => this._isApplicationStream(stream, btIdentifier))
             .map(stream => new Stream(this, stream));
     }
 
-    _getSourceOutputs() {
+    _getSourceOutputs(btIdentifier = null) {
         return this.get_source_outputs()
-            .filter(stream => this._isApplicationStream(stream))
+            .filter(stream => this._isApplicationStream(stream, btIdentifier))
             .map(stream => new Stream(this, stream));
     }
 
-    _getCallOutputStreams() {
-        return (this.get_sink_inputs?.() ?? [])
-            .filter(stream => this._isCallStream(stream))
+    _getCallOutputStreams(btIdentifier = null) {
+        const allSinkInputs = this.get_sink_inputs?.() ?? [];
+        return allSinkInputs
+            .filter(stream => this._isCallStream(stream, btIdentifier))
             .map(stream => new Stream(this, stream));
     }
 
@@ -266,65 +267,23 @@ const Mixer = !Gvc ? null : GObject.registerClass({
         return '';
     }
 
-    _isCallOutputInfo(info) {
-        const properties = info?.properties ?? {};
-        const streamId = [
-            properties['node.name'],
-            properties['media.name'],
-            properties['media.role'],
-            properties['media.class'],
-            properties['factory.name'],
-            properties['api.bluez5.profile'],
-            properties['api.bluez5.address'],
-        ].filter(value => value !== undefined && value !== null)
-            .join(' ')
-            .toLowerCase();
-
-        return streamId.includes('bluez_input') ||
-            (streamId.includes('phone') &&
-                streamId.includes('stream/output/audio')) ||
-            (streamId.includes('headset-audio-gateway') &&
-                streamId.includes('stream/output/audio'));
-    }
-
-    _unmuteCallOutputStreamsWithPactl() {
-        try {
-            const json = this._pactl([
-                'pactl',
-                '--format=json',
-                'list',
-                'sink-inputs',
-            ]);
-            const streams = JSON.parse(json || '[]');
-
-            for (const stream of streams) {
-                if (!this._isCallOutputInfo(stream))
-                    continue;
-
-                const index = `${stream.index}`;
-                this._pactl(['pactl', 'set-sink-input-mute', index, '0']);
-                this._pactl(['pactl', 'set-sink-input-volume', index, '100%']);
-            }
-        } catch (e) {
-            debug(e, 'pactl Bluetooth call output');
-        }
-    }
-
     /**
      * Restore audible playback on Bluetooth call streams without changing
      * global devices, microphones or unrelated application streams.
+     * 
+     * @param {string} [btIdentifier] - The name of the Bluetooth device
      */
-    unmuteCallOutputStreams() {
+    unmuteCallOutputStreams(btIdentifier = null) {
         try {
-            for (const stream of this._getCallOutputStreams()) {
+            const streams = this._getCallOutputStreams(btIdentifier);
+
+            for (const stream of streams) {
                 if (stream.muted)
                     stream.muted = false;
 
                 if (stream.volume < 0.75)
                     stream.volume = 1.0;
             }
-
-            this._unmuteCallOutputStreamsWithPactl();
         } catch (e) {
             logError(e);
         }
@@ -350,10 +309,11 @@ const Mixer = !Gvc ? null : GObject.registerClass({
      * Store current application output volumes then lower them to %15.
      *
      * @param {number} duration - Duration in seconds to fade
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
      */
-    lowerApplicationVolumes(duration = 1) {
+    lowerApplicationVolumes(duration = 1, btIdentifier = null) {
         try {
-            for (const stream of this._getSinkInputs()) {
+            for (const stream of this._getSinkInputs(btIdentifier)) {
                 if (stream.volume <= 0.15)
                     continue;
 
@@ -382,10 +342,14 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     /**
      * Mute application output streams.
+     * 
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
      */
-    muteApplicationVolumes() {
+    muteApplicationVolumes(btIdentifier = null) {
         try {
-            for (const stream of this._getSinkInputs()) {
+            const streams = this._getSinkInputs(btIdentifier);
+
+            for (const stream of streams) {
                 if (stream.muted)
                     continue;
 
@@ -414,10 +378,12 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     /**
      * Mute application recording streams without muting the input device.
+     * 
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
      */
-    muteApplicationMicrophones() {
+    muteApplicationMicrophones(btIdentifier = null) {
         try {
-            for (const stream of this._getSourceOutputs()) {
+            for (const stream of this._getSourceOutputs(btIdentifier)) {
                 if (stream.muted)
                     continue;
 
