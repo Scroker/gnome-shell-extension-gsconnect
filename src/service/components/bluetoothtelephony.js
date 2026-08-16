@@ -236,7 +236,6 @@ const BluetoothTelephony = GObject.registerClass({
 
     async getBluetoothAlias(device) {
         const address = _getDeviceBluetoothAddress(device);
-        console.log(`[getBluetoothAlias] starting for address: ${address}`);
         if (!address) return null;
 
         try {
@@ -253,23 +252,19 @@ const BluetoothTelephony = GObject.registerClass({
             );
 
             const objects = reply.recursiveUnpack()[0];
-            console.log(`[getBluetoothAlias] Objects retrieved: ${Object.keys(objects).length}`);
 
             for (const interfaces of Object.values(objects)) {
                 const bluezDevice = interfaces['org.bluez.Device1'];
                 if (!bluezDevice) continue;
 
                 const devAddress = _unpack(bluezDevice.Address)?.toUpperCase();
-                console.log(`[getBluetoothAlias] found devAddress: ${devAddress}`);
                 if (devAddress === address) {
                     const alias = _unpack(bluezDevice.Alias);
-                    console.log(`[getBluetoothAlias] MATCH! returning alias: ${alias}`);
                     return alias ?? null;
                 }
             }
-            console.log(`[getBluetoothAlias] No match found.`);
         } catch (e) {
-            console.error(`[getBluetoothAlias] Error: ${e}`);
+            debug(e, 'getBluetoothAlias');
         }
 
         return null;
