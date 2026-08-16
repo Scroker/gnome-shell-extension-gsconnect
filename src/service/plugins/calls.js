@@ -213,13 +213,11 @@ const CallsPlugin = GObject.registerClass({
         }
 
         if (this._bluetoothTelephony?.getBluetoothAlias instanceof Function) {
-            console.log(`[calls.js] calling getBluetoothAlias`);
             this._bluetoothTelephony.getBluetoothAlias(this.device).then(alias => {
                 if (alias) {
                     this._bluetoothAlias = alias;
-                    console.log(`[calls.js] Resolved Bluetooth alias for ${this.device.name}: ${alias}`);
                 }
-            }).catch(e => console.error(`[calls.js] Error in getBluetoothAlias: ${e}`));
+            }).catch(e => debug(e, this.device.name));
         }
 
         this._syncBluetoothCallNotification();
@@ -392,7 +390,6 @@ const CallsPlugin = GObject.registerClass({
 
         if (hfp) {
             const btIdentifier = this._bluetoothAlias ?? this.device.name;
-            console.log(`[calls.js] hfp is true, using btIdentifier: ${btIdentifier} (_bluetoothAlias was: ${this._bluetoothAlias})`);
             // Unmute call audio
             this._mixer?.unmuteCallOutputStreams?.(btIdentifier);
             

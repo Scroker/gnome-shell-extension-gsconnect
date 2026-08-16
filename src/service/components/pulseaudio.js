@@ -222,8 +222,6 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     _isCallStream(stream, btIdentifier = null) {
         const streamId = this._streamIdentifier(stream);
-        console.log(`Stream identifier: ${streamId}`);
-        console.log(`BT identifier: ${btIdentifier}`);
 
         if (!btIdentifier) return false;
         if (streamId.includes(btIdentifier.toLowerCase())) return true;
