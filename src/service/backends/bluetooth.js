@@ -102,6 +102,8 @@ export function _readUint16(bytes, offset) {
     return (bytes[offset] << 8) | bytes[offset + 1];
 }
 
+const HEX_MAP = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
+
 /**
  * Encode a UUID string as 16 bytes.
  *
@@ -109,8 +111,14 @@ export function _readUint16(bytes, offset) {
  * @returns {number[]} The UUID bytes
  */
 export function _uuidToBytes(uuid) {
-    return uuid.replaceAll('-', '').match(/../g)
-        .map(byte => parseInt(byte, 16));
+    const bytes = new Uint8Array(16);
+    let i = 0;
+    for (let j = 0; j < uuid.length; j++) {
+        if (uuid[j] === '-') continue;
+        bytes[i++] = parseInt(uuid.substring(j, j + 2), 16);
+        j++;
+    }
+    return bytes;
 }
 
 /**
@@ -120,16 +128,11 @@ export function _uuidToBytes(uuid) {
  * @returns {string} A UUID string
  */
 export function _bytesToUuid(bytes) {
-    const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, '0'))
-        .join('');
-
-    return [
-        hex.slice(0, 8),
-        hex.slice(8, 12),
-        hex.slice(12, 16),
-        hex.slice(16, 20),
-        hex.slice(20),
-    ].join('-');
+    return HEX_MAP[bytes[0]] + HEX_MAP[bytes[1]] + HEX_MAP[bytes[2]] + HEX_MAP[bytes[3]] + '-' +
+           HEX_MAP[bytes[4]] + HEX_MAP[bytes[5]] + '-' +
+           HEX_MAP[bytes[6]] + HEX_MAP[bytes[7]] + '-' +
+           HEX_MAP[bytes[8]] + HEX_MAP[bytes[9]] + '-' +
+           HEX_MAP[bytes[10]] + HEX_MAP[bytes[11]] + HEX_MAP[bytes[12]] + HEX_MAP[bytes[13]] + HEX_MAP[bytes[14]] + HEX_MAP[bytes[15]];
 }
 
 /**
@@ -226,17 +229,31 @@ async function _readBytes(stream, size, cancellable = null) {
  * Safely write a Uint8Array to a Gio.OutputStream asynchronously.
  * Workaround for GJS bug where write_all_async corrupts memory.
  */
-function _writeBytesAsync(stream, data, cancellable = null) {
-    return new Promise((resolve, reject) => {
-        const bytes = data instanceof GLib.Bytes ? data : new GLib.Bytes(data);
-        stream.write_bytes_async(bytes, GLib.PRIORITY_DEFAULT, cancellable, (s, res) => {
-            try {
-                resolve(s.write_bytes_finish(res));
-            } catch (e) {
-                reject(e);
-            }
+async function _writeBytesAsync(stream, data, cancellable = null) {
+    let offset = 0;
+    while (offset < data.length) {
+        const chunk = data instanceof Uint8Array ? data.slice(offset) : new Uint8Array(data).slice(offset);
+        const bytes = new GLib.Bytes(chunk);
+        
+        const written = await new Promise((resolve, reject) => {
+            stream.write_bytes_async(bytes, GLib.PRIORITY_DEFAULT, cancellable, (s, res) => {
+                try {
+                    resolve(s.write_bytes_finish(res));
+                } catch (e) {
+                    reject(e);
+                }
+            });
         });
-    });
+
+        if (written === 0) {
+            throw new Gio.IOErrorEnum({
+                code: Gio.IOErrorEnum.CLOSED,
+                message: 'Stream is closed',
+            });
+        }
+        
+        offset += written;
+    }
 }
 
 class MultiplexChannel {
@@ -279,6 +296,21 @@ class MultiplexChannel {
 
     _consumeRead(size) {
         const amount = Math.min(size, this.readLength);
+        if (amount === 0) return new Uint8Array(0);
+
+        const firstChunk = this.readBuffer[this.readBufferIndex];
+        if (firstChunk.length === amount) {
+            this.readBuffer[this.readBufferIndex] = null;
+            this.readBufferIndex++;
+            this.readLength -= amount;
+            if (this.readBufferIndex > 500) {
+                this.readBuffer = this.readBuffer.slice(this.readBufferIndex);
+                this.readBufferIndex = 0;
+            }
+            this._requestRead();
+            return firstChunk;
+        }
+
         const result = new Uint8Array(amount);
         let offset = 0;
 
@@ -309,6 +341,20 @@ class MultiplexChannel {
 
     _consumeWrite(size) {
         const amount = Math.min(size, this.writeLength);
+        if (amount === 0) return new Uint8Array(0);
+
+        const firstChunk = this.writeBuffer[this.writeBufferIndex];
+        if (firstChunk.length === amount) {
+            this.writeBuffer[this.writeBufferIndex] = null;
+            this.writeBufferIndex++;
+            this.writeLength -= amount;
+            if (this.writeBufferIndex > 500) {
+                this.writeBuffer = this.writeBuffer.slice(this.writeBufferIndex);
+                this.writeBufferIndex = 0;
+            }
+            return firstChunk;
+        }
+
         const result = new Uint8Array(amount);
         let offset = 0;
 
@@ -435,6 +481,10 @@ class MultiplexChannel {
             break;
         }
 
+        if (chunks.length === 1) {
+            return new TextDecoder().decode(chunks[0]);
+        }
+
         const result = new Uint8Array(length);
         let offset = 0;
 
@@ -443,8 +493,7 @@ class MultiplexChannel {
             offset += chunk.length;
         }
 
-        const decodedLine = new TextDecoder().decode(result);
-        return decodedLine;
+        return new TextDecoder().decode(result);
     }
 
     async write(data, cancellable = null) {
@@ -539,13 +588,15 @@ class ConnectionMultiplexer {
 
         data = data instanceof Uint8Array ? data : new Uint8Array(data);
 
-        const message = new Uint8Array(19 + data.length);
-        message[0] = type;
-        message.set(_uint16(data.length), 1);
-        message.set(_uuidToBytes(uuid), 3);
-        message.set(data, 19);
+        const header = new Uint8Array(19);
+        header[0] = type;
+        header.set(_uint16(data.length), 1);
+        header.set(_uuidToBytes(uuid), 3);
 
-        this.writeQueue.push(message);
+        this.writeQueue.push(header);
+        if (data.length > 0)
+            this.writeQueue.push(data);
+
         this._flush();
     }
 
@@ -570,17 +621,33 @@ class ConnectionMultiplexer {
                 }
             }
 
+            // 1. Dedicated lane for Default Channel (Mouse/Control)
+            const defaultChannel = this.channels.get(DEFAULT_CHANNEL_UUID);
+            if (defaultChannel && defaultChannel.writeLength > 0 && defaultChannel.freeWriteAmount > 0) {
+                const amount = Math.min(defaultChannel.writeLength, defaultChannel.freeWriteAmount, defaultChannel.bufferSize);
+                const data = defaultChannel._consumeWrite(amount);
+
+                defaultChannel.freeWriteAmount -= amount;
+                this._sendMessage(MESSAGE_WRITE, DEFAULT_CHANNEL_UUID, data);
+                defaultChannel._wakeWriters();
+            }
+
+            // 2. Process ONE Payload Channel (File Transfers) per flush cycle
             for (const [uuid, channel] of this.channels) {
-                while (channel.writeLength > 0 && channel.freeWriteAmount > 0) {
-                    const amount = Math.min(channel.writeLength,
-                        channel.freeWriteAmount, channel.bufferSize);
+                if (uuid === DEFAULT_CHANNEL_UUID) continue;
+                
+                if (channel.writeLength > 0 && channel.freeWriteAmount > 0) {
+                    const amount = Math.min(channel.writeLength, channel.freeWriteAmount, channel.bufferSize);
                     const data = channel._consumeWrite(amount);
 
                     channel.freeWriteAmount -= amount;
                     this._sendMessage(MESSAGE_WRITE, uuid, data);
                     channel._wakeWriters();
+                    break; // Yield to event loop after one packet
                 }
+            }
 
+            for (const [uuid, channel] of this.channels) {
                 if (channel.writeLength === 0 && channel.closeAfterWrite)
                     this._closeChannel(uuid);
             }
