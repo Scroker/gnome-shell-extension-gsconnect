@@ -12,6 +12,9 @@ let _settings = null;
 let _defaultCountry = null;
 
 
+/**
+ *
+ */
 function _getSettings() {
     if (_settings === null) {
         _settings = new Gio.Settings({
@@ -29,6 +32,9 @@ function _getSettings() {
     return _settings;
 }
 
+/**
+ *
+ */
 function _getLocaleCountry() {
     try {
         const locale = Intl.DateTimeFormat().resolvedOptions().locale;
@@ -42,6 +48,9 @@ function _getLocaleCountry() {
     return 'US';
 }
 
+/**
+ *
+ */
 export function getDefaultCountry() {
     if (_defaultCountry !== null)
         return _defaultCountry;
@@ -56,6 +65,11 @@ export function getDefaultCountry() {
     return _defaultCountry;
 }
 
+/**
+ *
+ * @param number
+ * @param country
+ */
 export function normalizePhoneNumber(number, country = getDefaultCountry()) {
     if (!number)
         return '';
@@ -78,6 +92,11 @@ export function normalizePhoneNumber(number, country = getDefaultCountry()) {
     return strippedNumber || number;
 }
 
+/**
+ *
+ * @param number
+ * @param country
+ */
 export function parsePhoneNumber(number, country = getDefaultCountry()) {
     try {
         return parsePhoneNumberFromString(number, country) ?? {
@@ -88,6 +107,12 @@ export function parsePhoneNumber(number, country = getDefaultCountry()) {
     }
 }
 
+/**
+ *
+ * @param number
+ * @param otherNumber
+ * @param country
+ */
 export function phoneNumbersEqual(number, otherNumber, country = getDefaultCountry()) {
     const a = normalizePhoneNumber(number, country);
     const b = normalizePhoneNumber(otherNumber, country);

@@ -236,7 +236,8 @@ const BluetoothTelephony = GObject.registerClass({
 
     async getBluetoothAlias(device) {
         const address = _getDeviceBluetoothAddress(device);
-        if (!address) return null;
+        if (!address)
+            return null;
 
         try {
             const reply = await Gio.DBus.system.call(
@@ -255,7 +256,8 @@ const BluetoothTelephony = GObject.registerClass({
 
             for (const interfaces of Object.values(objects)) {
                 const bluezDevice = interfaces['org.bluez.Device1'];
-                if (!bluezDevice) continue;
+                if (!bluezDevice)
+                    continue;
 
                 const devAddress = _unpack(bluezDevice.Address)?.toUpperCase();
                 if (devAddress === address) {
