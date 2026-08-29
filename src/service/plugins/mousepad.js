@@ -113,7 +113,7 @@ const KeyMapCodes = new Map([
     [32, 88],
 ]);
 
-const BLUETOOTH_POINTER_INTERVAL = 33;
+const BLUETOOTH_POINTER_INTERVAL = 8; // 125 Hz (previously 33ms/30Hz, increased after fixing backend bottleneck)
 
 /**
  * Mousepad Plugin
@@ -167,7 +167,6 @@ const MousepadPlugin = GObject.registerClass({
     disconnected() {
         super.disconnected();
 
-        this._resetBluetoothPointer();
         this._state = false;
         this.notify('state');
     }
@@ -297,49 +296,10 @@ const MousepadPlugin = GObject.registerClass({
      * @param {number} dy - The vertical delta
      */
     _movePointer(dx, dy) {
-        if (!this._isBluetoothConnection()) {
-            this._input.movePointer(dx, dy);
-            return;
-        }
-
         if (dx === 0 && dy === 0)
             return;
 
-        this._bluetoothPointerDx += dx;
-        this._bluetoothPointerDy += dy;
-
-        if (this._bluetoothPointerSource > 0)
-            return;
-
-        this._bluetoothPointerSource = GLib.timeout_add(
-            GLib.PRIORITY_DEFAULT,
-            BLUETOOTH_POINTER_INTERVAL,
-            this._flushBluetoothPointer.bind(this)
-        );
-    }
-
-    _flushBluetoothPointer() {
-        this._bluetoothPointerSource = 0;
-
-        const dx = this._bluetoothPointerDx;
-        const dy = this._bluetoothPointerDy;
-        this._bluetoothPointerDx = 0;
-        this._bluetoothPointerDy = 0;
-
-        if (this._input !== undefined && (dx !== 0 || dy !== 0))
-            this._input.movePointer(dx, dy);
-
-        return GLib.SOURCE_REMOVE;
-    }
-
-    _resetBluetoothPointer() {
-        if (this._bluetoothPointerSource > 0) {
-            GLib.Source.remove(this._bluetoothPointerSource);
-            this._bluetoothPointerSource = 0;
-        }
-
-        this._bluetoothPointerDx = 0;
-        this._bluetoothPointerDy = 0;
+        this._input.movePointer(dx, dy);
     }
 
     /**
@@ -429,7 +389,6 @@ const MousepadPlugin = GObject.registerClass({
     }
 
     destroy() {
-        this._resetBluetoothPointer();
 
         if (this._input !== undefined) {
             if (!globalThis.HAVE_GNOME)

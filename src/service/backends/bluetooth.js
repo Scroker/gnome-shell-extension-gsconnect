@@ -41,8 +41,8 @@ const MESSAGE_CLOSE_CHANNEL = 2;
 const MESSAGE_READ = 3;
 const MESSAGE_WRITE = 4;
 const MULTIPLEX_PROTOCOL_VERSION = 1;
-const BUFFER_SIZE = 4096;
-const CONTROL_BUFFER_SIZE = 1024;
+const BUFFER_SIZE = 65535; // Max for uint16 MESSAGE_READ. Avoids overflow.
+const CONTROL_BUFFER_SIZE = 4096;
 const RECONNECT_COOLDOWN = 30000;
 const OUTBOUND_HANDSHAKE_GRACE = 15000;
 const CONNECT_OUTGOING = GLib.getenv('GSCONNECT_BLUETOOTH_CONNECT') === '1';
@@ -199,35 +199,44 @@ export function _normalizeCertificatePem(pem) {
  * @param {Gio.Cancellable} cancellable - A cancellable
  * @returns {Promise<Uint8Array>} The bytes read
  */
-async function _readBytes(stream, size, cancellable) {
-    const chunks = [];
-    let length = 0;
+async function _readBytes(stream, size, cancellable = null) {
+    const result = new Uint8Array(size);
+    let offset = 0;
 
-    while (length < size) {
-        const bytes = await stream.read_bytes_async(size - length,
+    while (offset < size) {
+        const bytes = await stream.read_bytes_async(size - offset,
             GLib.PRIORITY_DEFAULT, cancellable);
+        const data = bytes.toArray();
 
-        if (bytes.get_size() === 0) {
+        if (data.length === 0) {
             throw new Gio.IOErrorEnum({
-                code: Gio.IOErrorEnum.CONNECTION_CLOSED,
-                message: 'End of stream',
+                code: Gio.IOErrorEnum.CLOSED,
+                message: 'Stream is closed',
             });
         }
 
-        const chunk = bytes.toArray();
-        chunks.push(chunk);
-        length += chunk.length;
-    }
-
-    const result = new Uint8Array(length);
-    let offset = 0;
-
-    for (const chunk of chunks) {
-        result.set(chunk, offset);
-        offset += chunk.length;
+        result.set(data, offset);
+        offset += data.length;
     }
 
     return result;
+}
+
+/**
+ * Safely write a Uint8Array to a Gio.OutputStream asynchronously.
+ * Workaround for GJS bug where write_all_async corrupts memory.
+ */
+function _writeBytesAsync(stream, data, cancellable = null) {
+    return new Promise((resolve, reject) => {
+        const bytes = data instanceof GLib.Bytes ? data : new GLib.Bytes(data);
+        stream.write_bytes_async(bytes, GLib.PRIORITY_DEFAULT, cancellable, (s, res) => {
+            try {
+                resolve(s.write_bytes_finish(res));
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
 }
 
 class MultiplexChannel {
@@ -240,10 +249,12 @@ class MultiplexChannel {
         this.closeAfterWrite = false;
         this.freeWriteAmount = 0;
         this.readBuffer = [];
+        this.readBufferIndex = 0;
         this.readLength = 0;
         this.readWaiters = [];
         this.requestedReadAmount = 0;
         this.writeBuffer = [];
+        this.writeBufferIndex = 0;
         this.writeLength = 0;
         this.writeWaiters = [];
     }
@@ -256,6 +267,7 @@ class MultiplexChannel {
         this.readBuffer.push(data);
         this.readLength += data.length;
         this._wakeReaders();
+
         this._requestRead();
     }
 
@@ -271,19 +283,26 @@ class MultiplexChannel {
         let offset = 0;
 
         while (offset < amount) {
-            const chunk = this.readBuffer[0];
+            const chunk = this.readBuffer[this.readBufferIndex];
             const take = Math.min(chunk.length, amount - offset);
 
             result.set(chunk.slice(0, take), offset);
             offset += take;
 
-            if (take === chunk.length)
-                this.readBuffer.shift();
-            else
-                this.readBuffer[0] = chunk.slice(take);
+            if (take === chunk.length) {
+                this.readBuffer[this.readBufferIndex] = null;
+                this.readBufferIndex++;
+            } else {
+                this.readBuffer[this.readBufferIndex] = chunk.slice(take);
+            }
         }
 
         this.readLength -= amount;
+
+        if (this.readBufferIndex > 500) {
+            this.readBuffer = this.readBuffer.slice(this.readBufferIndex);
+            this.readBufferIndex = 0;
+        }
         this._requestRead();
         return result;
     }
@@ -294,29 +313,43 @@ class MultiplexChannel {
         let offset = 0;
 
         while (offset < amount) {
-            const chunk = this.writeBuffer[0];
+            const chunk = this.writeBuffer[this.writeBufferIndex];
             const take = Math.min(chunk.length, amount - offset);
 
             result.set(chunk.slice(0, take), offset);
             offset += take;
 
-            if (take === chunk.length)
-                this.writeBuffer.shift();
-            else
-                this.writeBuffer[0] = chunk.slice(take);
+            if (take === chunk.length) {
+                this.writeBuffer[this.writeBufferIndex] = null;
+                this.writeBufferIndex++;
+            } else {
+                this.writeBuffer[this.writeBufferIndex] = chunk.slice(take);
+            }
         }
 
         this.writeLength -= amount;
+
+        if (this.writeBufferIndex > 500) {
+            this.writeBuffer = this.writeBuffer.slice(this.writeBufferIndex);
+            this.writeBufferIndex = 0;
+        }
         return result;
     }
 
     _requestRead() {
-        if (!this.connected)
+        if (this.closed)
             return;
 
         const pending = this.readLength + this.requestedReadAmount;
 
-        if (pending >= this.bufferSize)
+        // Optimization: For bulk transfers, wait until half the buffer is consumed.
+        // For the default control channel (mouse), refill the window earlier (at 75%)
+        // to prevent window starvation which causes micro-stutters.
+        const threshold = this.uuid === DEFAULT_CHANNEL_UUID
+            ? this.bufferSize * 0.75
+            : this.bufferSize / 2;
+
+        if (pending > threshold)
             return;
 
         const amount = this.bufferSize - pending;
@@ -342,8 +375,8 @@ class MultiplexChannel {
         while (this.readLength === 0) {
             if (this.closed) {
                 throw new Gio.IOErrorEnum({
-                    code: Gio.IOErrorEnum.CONNECTION_CLOSED,
-                    message: 'End of stream',
+                    code: Gio.IOErrorEnum.CLOSED,
+                    message: 'Channel is closed',
                 });
             }
 
@@ -359,7 +392,13 @@ class MultiplexChannel {
     }
 
     async read(size = BUFFER_SIZE, cancellable = null) {
-        await this._waitForReadable(cancellable);
+        try {
+            await this._waitForReadable(cancellable);
+        } catch (e) {
+            if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CLOSED))
+                return new Uint8Array(0);
+            throw e;
+        }
         return this._consumeRead(size);
     }
 
@@ -373,7 +412,8 @@ class MultiplexChannel {
             let newline = -1;
             let offset = 0;
 
-            for (const chunk of this.readBuffer) {
+            for (let i = this.readBufferIndex; i < this.readBuffer.length; i++) {
+                const chunk = this.readBuffer[i];
                 newline = chunk.indexOf(0x0a);
 
                 if (newline !== -1) {
@@ -403,7 +443,8 @@ class MultiplexChannel {
             offset += chunk.length;
         }
 
-        return new TextDecoder().decode(result);
+        const decodedLine = new TextDecoder().decode(result);
+        return decodedLine;
     }
 
     async write(data, cancellable = null) {
@@ -420,6 +461,13 @@ class MultiplexChannel {
         this._appendWrite(data);
 
         while (this.writeLength > 0) {
+            if (!this.connected) {
+                throw new Gio.IOErrorEnum({
+                    code: Gio.IOErrorEnum.CLOSED,
+                    message: 'Channel is closed',
+                });
+            }
+
             if (cancellable?.is_cancelled()) {
                 throw new Gio.IOErrorEnum({
                     code: Gio.IOErrorEnum.CANCELLED,
@@ -457,6 +505,7 @@ class ConnectionMultiplexer {
         this.closed = false;
         this.receivedProtocolVersion = false;
         this.writeQueue = [];
+        this.writeQueueIndex = 0;
         this.writeLock = false;
 
         this._sendMessage(MESSAGE_PROTOCOL_VERSION, DEFAULT_CHANNEL_UUID, [
@@ -507,11 +556,18 @@ class ConnectionMultiplexer {
         this.writeLock = true;
 
         try {
-            let message;
+            while (this.writeQueueIndex < this.writeQueue.length) {
+                const message = this.writeQueue[this.writeQueueIndex];
 
-            while ((message = this.writeQueue.shift())) {
-                await this.output_stream.write_all_async(message,
-                    GLib.PRIORITY_DEFAULT, this.cancellable);
+                await _writeBytesAsync(this.output_stream, message, this.cancellable);
+
+                this.writeQueue[this.writeQueueIndex] = null;
+                this.writeQueueIndex++;
+                
+                if (this.writeQueueIndex > 500) {
+                    this.writeQueue = this.writeQueue.slice(this.writeQueueIndex);
+                    this.writeQueueIndex = 0;
+                }
             }
 
             for (const [uuid, channel] of this.channels) {
@@ -534,7 +590,7 @@ class ConnectionMultiplexer {
         } finally {
             this.writeLock = false;
 
-            if (this.writeQueue.length > 0 ||
+            if (this.writeQueue.length > this.writeQueueIndex ||
                 Array.from(this.channels.values())
                     .some(channel => channel.writeLength > 0 &&
                           channel.freeWriteAmount > 0))
@@ -1162,8 +1218,12 @@ export const Channel = GObject.registerClass({
         while (transferred < packet.payloadSize) {
             const data = await source.read(Math.min(BUFFER_SIZE,
                 packet.payloadSize - transferred), cancellable);
-            await target.write_all_async(data, GLib.PRIORITY_DEFAULT,
-                cancellable);
+
+            if (data.length === 0)
+                break;
+
+            await _writeBytesAsync(target, data, cancellable);
+
             transferred += data.length;
         }
 
