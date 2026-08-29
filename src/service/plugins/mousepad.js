@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import Gdk from 'gi://Gdk?version=4.0';
-import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import * as Components from '../components/index.js';
@@ -112,8 +111,6 @@ const KeyMapCodes = new Map([
     [31, 87],
     [32, 88],
 ]);
-
-const BLUETOOTH_POINTER_INTERVAL = 8; // 125 Hz (previously 33ms/30Hz, increased after fixing backend bottleneck)
 
 /**
  * Mousepad Plugin

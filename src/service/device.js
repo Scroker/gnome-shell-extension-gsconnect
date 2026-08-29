@@ -499,21 +499,21 @@ const Device = GObject.registerClass({
                 'kdeconnect.mpris.',
                 'kdeconnect.presenter',
                 'kdeconnect.runcommand.',
-                'kdeconnect.systemvolume.'
+                'kdeconnect.systemvolume.',
             ];
-            
+
             const isInteractive = interactivePrefixes.some(p => pkt.type.startsWith(p));
-            
+
             if (isInteractive) {
-                // Inserisci prima del primo pacchetto NON interattivo nella coda
-                const index = this._outputQueue.findIndex(p => 
+                // Inserisci prima del primo pacchetto NON interattivo
+                const index = this._outputQueue.findIndex(p =>
                     !interactivePrefixes.some(prefix => p.type.startsWith(prefix))
                 );
-                if (index === -1) {
+                if (index === -1)
                     this._outputQueue.push(pkt);
-                } else {
+                else
                     this._outputQueue.splice(index, 0, pkt);
-                }
+
             } else {
                 this._outputQueue.push(pkt);
             }

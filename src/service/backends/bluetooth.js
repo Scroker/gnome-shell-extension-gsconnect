@@ -114,7 +114,8 @@ export function _uuidToBytes(uuid) {
     const bytes = new Uint8Array(16);
     let i = 0;
     for (let j = 0; j < uuid.length; j++) {
-        if (uuid[j] === '-') continue;
+        if (uuid[j] === '-')
+            continue;
         bytes[i++] = parseInt(uuid.substring(j, j + 2), 16);
         j++;
     }
@@ -132,7 +133,8 @@ export function _bytesToUuid(bytes) {
            HEX_MAP[bytes[4]] + HEX_MAP[bytes[5]] + '-' +
            HEX_MAP[bytes[6]] + HEX_MAP[bytes[7]] + '-' +
            HEX_MAP[bytes[8]] + HEX_MAP[bytes[9]] + '-' +
-           HEX_MAP[bytes[10]] + HEX_MAP[bytes[11]] + HEX_MAP[bytes[12]] + HEX_MAP[bytes[13]] + HEX_MAP[bytes[14]] + HEX_MAP[bytes[15]];
+           HEX_MAP[bytes[10]] + HEX_MAP[bytes[11]] + HEX_MAP[bytes[12]] +
+           HEX_MAP[bytes[13]] + HEX_MAP[bytes[14]] + HEX_MAP[bytes[15]];
 }
 
 /**
@@ -228,13 +230,24 @@ async function _readBytes(stream, size, cancellable = null) {
 /**
  * Safely write a Uint8Array to a Gio.OutputStream asynchronously.
  * Workaround for GJS bug where write_all_async corrupts memory.
+ *
+ * @param stream
+ * @param data
+ * @param cancellable
  */
 async function _writeBytesAsync(stream, data, cancellable = null) {
+    /**
+     * @param {Gio.InputStream|Gio.OutputStream} stream
+     * @param {Uint8Array} data
+     * @param {Gio.Cancellable} [cancellable=null]
+     */
     let offset = 0;
     while (offset < data.length) {
-        const chunk = data instanceof Uint8Array ? data.slice(offset) : new Uint8Array(data).slice(offset);
+        const chunk = data instanceof Uint8Array
+            ? data.slice(offset)
+            : new Uint8Array(data).slice(offset);
         const bytes = new GLib.Bytes(chunk);
-        
+
         const written = await new Promise((resolve, reject) => {
             stream.write_bytes_async(bytes, GLib.PRIORITY_DEFAULT, cancellable, (s, res) => {
                 try {
@@ -251,7 +264,7 @@ async function _writeBytesAsync(stream, data, cancellable = null) {
                 message: 'Stream is closed',
             });
         }
-        
+
         offset += written;
     }
 }
@@ -296,7 +309,8 @@ class MultiplexChannel {
 
     _consumeRead(size) {
         const amount = Math.min(size, this.readLength);
-        if (amount === 0) return new Uint8Array(0);
+        if (amount === 0)
+            return new Uint8Array(0);
 
         const firstChunk = this.readBuffer[this.readBufferIndex];
         if (firstChunk.length === amount) {
@@ -341,7 +355,8 @@ class MultiplexChannel {
 
     _consumeWrite(size) {
         const amount = Math.min(size, this.writeLength);
-        if (amount === 0) return new Uint8Array(0);
+        if (amount === 0)
+            return new Uint8Array(0);
 
         const firstChunk = this.writeBuffer[this.writeBufferIndex];
         if (firstChunk.length === amount) {
@@ -388,8 +403,9 @@ class MultiplexChannel {
 
         const pending = this.readLength + this.requestedReadAmount;
 
-        // Optimization: For bulk transfers, wait until half the buffer is consumed.
-        // For the default control channel (mouse), refill the window earlier (at 75%)
+        // Optimization: For bulk transfers, wait until half the buffer
+        // is consumed.
+        // For the default channel (mouse), refill earlier (at 75%)
         // to prevent window starvation which causes micro-stutters.
         const threshold = this.uuid === DEFAULT_CHANNEL_UUID
             ? this.bufferSize * 0.75
@@ -481,9 +497,9 @@ class MultiplexChannel {
             break;
         }
 
-        if (chunks.length === 1) {
+        if (chunks.length === 1)
             return new TextDecoder().decode(chunks[0]);
-        }
+
 
         const result = new Uint8Array(length);
         let offset = 0;
@@ -614,7 +630,7 @@ class ConnectionMultiplexer {
 
                 this.writeQueue[this.writeQueueIndex] = null;
                 this.writeQueueIndex++;
-                
+
                 if (this.writeQueueIndex > 500) {
                     this.writeQueue = this.writeQueue.slice(this.writeQueueIndex);
                     this.writeQueueIndex = 0;
@@ -623,8 +639,13 @@ class ConnectionMultiplexer {
 
             // 1. Dedicated lane for Default Channel (Mouse/Control)
             const defaultChannel = this.channels.get(DEFAULT_CHANNEL_UUID);
-            if (defaultChannel && defaultChannel.writeLength > 0 && defaultChannel.freeWriteAmount > 0) {
-                const amount = Math.min(defaultChannel.writeLength, defaultChannel.freeWriteAmount, defaultChannel.bufferSize);
+            const hasData = defaultChannel && defaultChannel.writeLength > 0;
+            if (hasData && defaultChannel.freeWriteAmount > 0) {
+                const amount = Math.min(
+                    defaultChannel.writeLength,
+                    defaultChannel.freeWriteAmount,
+                    defaultChannel.bufferSize
+                );
                 const data = defaultChannel._consumeWrite(amount);
 
                 defaultChannel.freeWriteAmount -= amount;
@@ -634,10 +655,15 @@ class ConnectionMultiplexer {
 
             // 2. Process ONE Payload Channel (File Transfers) per flush cycle
             for (const [uuid, channel] of this.channels) {
-                if (uuid === DEFAULT_CHANNEL_UUID) continue;
-                
+                if (uuid === DEFAULT_CHANNEL_UUID)
+                    continue;
+
                 if (channel.writeLength > 0 && channel.freeWriteAmount > 0) {
-                    const amount = Math.min(channel.writeLength, channel.freeWriteAmount, channel.bufferSize);
+                    const amount = Math.min(
+                        channel.writeLength,
+                        channel.freeWriteAmount,
+                        channel.bufferSize
+                    );
                     const data = channel._consumeWrite(amount);
 
                     channel.freeWriteAmount -= amount;

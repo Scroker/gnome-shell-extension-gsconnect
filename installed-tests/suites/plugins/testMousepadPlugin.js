@@ -5,7 +5,6 @@
 import * as Utils from '../fixtures/utils.js';
 
 import Gdk from 'gi://Gdk';
-import GLib from 'gi://GLib';
 
 
 describe('The mousepad plugin', function () {
@@ -193,27 +192,6 @@ describe('The mousepad plugin', function () {
 
             await remotePlugin.awaitPacket('kdeconnect.mousepad.request');
             expect(remotePlugin._input.movePointer).toHaveBeenCalledWith(1, -1);
-        });
-
-        it('coalesces Bluetooth movement', function () {
-            remotePlugin.device.settings.set_string(
-                'last-connection',
-                'bluetooth://00:11:22:33:44:55'
-            );
-
-            remotePlugin._handleInput({dx: 1, dy: -1});
-            remotePlugin._handleInput({dx: 2, dy: -2});
-
-            if (remotePlugin._bluetoothPointerSource > 0) {
-                GLib.Source.remove(remotePlugin._bluetoothPointerSource);
-                remotePlugin._bluetoothPointerSource = 0;
-            }
-
-            remotePlugin._flushBluetoothPointer();
-
-            expect(remotePlugin._input.movePointer).toHaveBeenCalledOnceWith(3, -3);
-
-            remotePlugin.device.settings.set_string('last-connection', 'mock://127.0.0.1');
         });
 
         it('for scrolling', async function () {
