@@ -157,9 +157,23 @@ describe('A Bluetooth multiplexer', function () {
                 },
             },
             output_stream: {
-                write_all_async(data) {
+                write_bytes_async(bytes, priority, cancellable, callback) {
+                    const data = bytes.toArray();
                     writes.push(data);
-                    return Promise.resolve([true, data.length]);
+
+                    const task = {
+                        propagate_int() {
+                            return data.length;
+                        },
+                    };
+
+                    GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                        callback(this, task);
+                        return GLib.SOURCE_REMOVE;
+                    });
+                },
+                write_bytes_finish(res) {
+                    return res.propagate_int();
                 },
             },
             close_async() {},
@@ -167,14 +181,22 @@ describe('A Bluetooth multiplexer', function () {
         const multiplexer = new Bluetooth._testInternals.ConnectionMultiplexer(
             connection, new Gio.Cancellable());
 
-        await new Promise(resolve => GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-            resolve();
-            return GLib.SOURCE_REMOVE;
-        }));
+        const waitForRead = async () => {
+            const index = writes.findIndex(data => data[0] === 3);
+            if (index !== -1 && writes.length > index + 1)
+                return;
+            await new Promise(resolve => GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            }));
+            await waitForRead();
+        };
+        await waitForRead();
 
-        const readFrame = writes.find(data => data[0] === 3);
+        const readHeaderIndex = writes.findIndex(data => data[0] === 3);
+        const readPayload = writes[readHeaderIndex + 1];
 
-        expect(Bluetooth._readUint16(readFrame, 19)).toBe(1024);
+        expect(Bluetooth._readUint16(readPayload, 0)).toBe(4096);
         multiplexer.close();
     });
 
@@ -187,9 +209,23 @@ describe('A Bluetooth multiplexer', function () {
                 },
             },
             output_stream: {
-                write_all_async(data) {
+                write_bytes_async(bytes, priority, cancellable, callback) {
+                    const data = bytes.toArray();
                     writes.push(data);
-                    return Promise.resolve([true, data.length]);
+
+                    const task = {
+                        propagate_int() {
+                            return data.length;
+                        },
+                    };
+
+                    GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                        callback(this, task);
+                        return GLib.SOURCE_REMOVE;
+                    });
+                },
+                write_bytes_finish(res) {
+                    return res.propagate_int();
                 },
             },
             close_async() {},
@@ -198,20 +234,28 @@ describe('A Bluetooth multiplexer', function () {
             connection, new Gio.Cancellable());
         const uuid = multiplexer.newChannel();
         const channel = multiplexer.getChannel(uuid);
-        const payload = new Uint8Array(5000);
+        const payload = new Uint8Array(70000);
 
         writes.splice(0);
-        channel.freeWriteAmount = 5000;
+        channel.freeWriteAmount = 70000;
         channel._appendWrite(payload);
 
-        await new Promise(resolve => GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-            resolve();
-            return GLib.SOURCE_REMOVE;
-        }));
+        const waitForWrite = async () => {
+            const index = writes.findIndex(data => data[0] === 4);
+            if (index !== -1)
+                return;
+            await new Promise(resolve => GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            }));
+            await waitForWrite();
+        };
+        await waitForWrite();
 
-        const writeFrame = writes.find(data => data[0] === 4);
+        const writeHeaderIndex = writes.findIndex(data => data[0] === 4);
+        const writeHeader = writes[writeHeaderIndex];
 
-        expect(Bluetooth._readUint16(writeFrame, 1)).toBe(4096);
+        expect(Bluetooth._readUint16(writeHeader, 1)).toBe(65535);
         multiplexer.close();
     });
 });

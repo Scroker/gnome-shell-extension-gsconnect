@@ -518,7 +518,32 @@ const Device = GObject.registerClass({
             if (this._shouldDropBluetoothPointerRequest(packet))
                 return;
 
-            this._outputQueue.push(new Core.Packet(packet));
+            const pkt = new Core.Packet(packet);
+            const interactivePrefixes = [
+                'kdeconnect.mousepad.',
+                'kdeconnect.ping',
+                'kdeconnect.telephony.',
+                'kdeconnect.mpris.',
+                'kdeconnect.presenter',
+                'kdeconnect.runcommand.',
+                'kdeconnect.systemvolume.',
+            ];
+
+            const isInteractive = interactivePrefixes.some(p => pkt.type.startsWith(p));
+
+            if (isInteractive) {
+                // Inserisci prima del primo pacchetto NON interattivo
+                const index = this._outputQueue.findIndex(p =>
+                    !interactivePrefixes.some(prefix => p.type.startsWith(prefix))
+                );
+                if (index === -1)
+                    this._outputQueue.push(pkt);
+                else
+                    this._outputQueue.splice(index, 0, pkt);
+
+            } else {
+                this._outputQueue.push(pkt);
+            }
 
             if (this._outputLock)
                 return;
