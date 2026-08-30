@@ -134,7 +134,7 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     GTypeName: 'GSConnectAudioMixer',
 }, class Mixer extends Gvc.MixerControl {
     _init(params) {
-        super._init({ name: 'GSConnect' });
+        super._init({name: 'GSConnect'});
 
         this._previousVolume = undefined;
         this._previousApplicationVolumes = new Map();
@@ -223,8 +223,10 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     _isCallStream(stream, btIdentifier = null) {
         const streamId = this._streamIdentifier(stream);
 
-        if (!btIdentifier) return false;
-        if (streamId.includes(btIdentifier.toLowerCase())) return true;
+        if (!btIdentifier)
+            return false;
+        if (streamId.includes(btIdentifier.toLowerCase()))
+            return true;
         return false;
     }
 
@@ -268,7 +270,7 @@ const Mixer = !Gvc ? null : GObject.registerClass({
     /**
      * Restore audible playback on Bluetooth call streams without changing
      * global devices, microphones or unrelated application streams.
-     * 
+     *
      * @param {string} [btIdentifier] - The name of the Bluetooth device
      */
     unmuteCallOutputStreams(btIdentifier = null) {
@@ -307,7 +309,8 @@ const Mixer = !Gvc ? null : GObject.registerClass({
      * Store current application output volumes then lower them to %15.
      *
      * @param {number} duration - Duration in seconds to fade
-     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to
+     * exclude
      */
     lowerApplicationVolumes(duration = 1, btIdentifier = null) {
         try {
@@ -340,8 +343,9 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     /**
      * Mute application output streams.
-     * 
-     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
+     *
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to
+     * exclude
      */
     muteApplicationVolumes(btIdentifier = null) {
         try {
@@ -376,8 +380,9 @@ const Mixer = !Gvc ? null : GObject.registerClass({
 
     /**
      * Mute application recording streams without muting the input device.
-     * 
-     * @param {string} [btIdentifier] - The name of the Bluetooth device to exclude
+     *
+     * @param {string} [btIdentifier] - The name of the Bluetooth device to
+     * exclude
      */
     muteApplicationMicrophones(btIdentifier = null) {
         try {
