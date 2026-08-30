@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-import Gdk from 'gi://Gdk?version=4.0';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
@@ -175,12 +174,12 @@ export const ContactChooser = GObject.registerClass({
     },
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/contact-chooser.ui',
     Children: [
-        'button-search', 'search-bar', 'search-entry',
+        'search-bar', 'search-entry',
         'confirm-button', 'selection-label', 'selection-mode-button',
         'selection-bar', 'scrolled', 'list', 'header-bar',
 
     ],
-}, class ContactChooser extends Adw.NavigationPage {
+}, class ContactChooser extends Adw.Bin {
 
     _init(params) {
         super._init(params);
@@ -202,23 +201,8 @@ export const ContactChooser = GObject.registerClass({
             GObject.BindingFlags.SYNC_CREATE
         );
 
-        // Make sure we're using the correct contacts store
-        this.button_search.bind_property(
-            'active',
-            this.search_bar,
-            'search-mode-enabled',
-            GObject.BindingFlags.SYNC_CREATE
-        );
-
         // Cleanup on ::destroy
         this.connect('destroy', this._onDestroy);
-
-        const search_esc_controller = new Gtk.EventControllerKey();
-        search_esc_controller.connect('key-pressed', (controller, keyval, keycode, state) => {
-            if (keyval === Gdk.KEY_Escape)
-                this.button_search.active = false;
-        });
-        this.search_entry.add_controller(search_esc_controller);
 
         this.search_entry.connect('search-changed', this._onSearchChanged.bind(this));
     }
