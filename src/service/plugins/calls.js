@@ -934,11 +934,6 @@ const CallWindow = GObject.registerClass({
             'number-label': _('Call %s'),
         });
         this._chooser.header_bar.visible = false;
-        this._chooser.button_search.active = true;
-        this._chooser.button_search.connect('notify::active', () => {
-            if (!this._chooser.button_search.active)
-                this._chooser.button_search.active = true;
-        });
 
         this._numberSelectedId = this._chooser.connect(
             'number-selected',
