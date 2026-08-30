@@ -13,6 +13,8 @@ import system from 'system';
 import Config from '../config.js';
 import {DeviceNavigationPage, DevicePairPage} from './device.js';
 import {Service} from '../utils/remote.js';
+import {getDefaultCountry} from '../service/utils/phone.js';
+import {getCountries} from '../vendor/libphonenumber-esm.js';
 
 
 /*
@@ -98,7 +100,7 @@ const SettingsDialog = GObject.registerClass({
     GTypeName: 'GSConnectSettingsDialog',
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/preferences-settings.ui',
     Children: [
-        'display-mode-toggle', 'rename-entry',
+        'country-row', 'display-mode-toggle', 'rename-entry',
     ],
 }, class SettingsDialog extends Adw.PreferencesDialog {
 
@@ -115,6 +117,8 @@ const SettingsDialog = GObject.registerClass({
                 this.display_mode = name;
 
         });
+
+        this._initCountryRow();
     }
 
     get display_mode() {
@@ -126,6 +130,38 @@ const SettingsDialog = GObject.registerClass({
 
     set display_mode(mode) {
         this.settings.set_boolean('show-indicators', (mode === 'panel'));
+    }
+
+    _initCountryRow() {
+        const currentCountry = (
+            this.settings.get_string('default-country') ||
+            getDefaultCountry()
+        ).toUpperCase();
+        const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+        const names = new Intl.DisplayNames([locale], {type: 'region'});
+        const model = new Gtk.StringList();
+
+        this._countryCodes = getCountries()
+            .map(code => ({code, name: names.of(code) || code}))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        let selected = 0;
+
+        this._countryCodes.forEach(({code, name}, index) => {
+            model.append(`${name} (${code})`);
+
+            if (code === currentCountry)
+                selected = index;
+        });
+
+        this.country_row.set_model(model);
+        this.country_row.set_selected(selected);
+        this.country_row.connect('notify::selected', () => {
+            const item = this._countryCodes[this.country_row.selected];
+
+            if (item)
+                this.settings.set_string('default-country', item.code);
+        });
     }
 
     _onSetServiceName(widget) {

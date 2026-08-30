@@ -7,6 +7,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
 import Config from '../../config.js';
+import {normalizePhoneNumber, phoneNumbersEqual} from '../utils/phone.js';
 
 let HAVE_EDS = true;
 let EBook = null;
@@ -362,12 +363,8 @@ const Store = GObject.registerClass({
         // First look for an existing contact by number
         const contacts = this.contacts;
         const matches = [];
-        let qnumber = null;
-        if (query.number)
-            qnumber = query.number.toPhoneNumber();
-        let qname = null;
-        if (query.name)
-            qname = query.name;
+        const qnumber = normalizePhoneNumber(query.number);
+        const qname = query.name ?? null;
 
         for (let i = 0, len = contacts.length; i < len; i++) {
 
@@ -377,10 +374,8 @@ const Store = GObject.registerClass({
 
             if (qnumber) {
                 for (const num of contact.numbers) {
-                    const cnumber = num.value.toPhoneNumber();
-
-                    if (qnumber.endsWith(cnumber) || cnumber.endsWith(qnumber)) {
-                    // If no query name or exact match, return immediately
+                    if (phoneNumbersEqual(qnumber, num.value)) {
+                        // If no query name or exact match, return immediately
                         if (!qname)
                             return contact;
 

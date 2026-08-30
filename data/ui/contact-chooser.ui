@@ -10,9 +10,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
 
-  <template class="GSConnectContactChooser" parent="AdwNavigationPage">
-    <property name="title" translatable="yes">Contacts</property>
-    <property name="tag">contact-chooser</property>
+  <template class="GSConnectContactChooser" parent="AdwBin">
     <child>
       <object class="AdwToolbarView">
         <property name="visible">True</property>
@@ -23,15 +21,25 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <child>
               <object class="AdwHeaderBar" id="header-bar">
                 <property name="visible">True</property>
-                <child type="start">
-                  <object class="GtkToggleButton" id="button-search">
-                    <property name="visible">True</property>
-                    <property name="icon-name">edit-find-symbolic</property>
+                <child type="end">
+                  <object class="GtkToggleButton" id="selection-mode-button">
+                    <property name="visible">False</property>
+                    <property name="icon-name">object-select-symbolic</property>
                     <property name="has-tooltip">True</property>
-                    <property name="tooltip-text" translatable="yes">Search contact</property>
+                    <property name="tooltip-text" translatable="yes">Select multiple recipients</property>
+                    <signal name="toggled" handler="_onSelectionModeToggled" swapped="no"/>
                     <accessibility>
-                      <property name="label" translatable="yes">Search contact</property>
+                      <property name="label" translatable="yes">Select multiple recipients</property>
                     </accessibility>
+                  </object>
+                </child>
+                <child type="end">
+                  <object class="GtkLabel" id="selection-label">
+                    <property name="visible">False</property>
+                    <property name="xalign">1</property>
+                    <style>
+                      <class name="dim-label"/>
+                    </style>
                   </object>
                 </child>
               </object>
@@ -82,6 +90,35 @@ SPDX-License-Identifier: GPL-2.0-or-later
                     </style>
                   </object>
                 </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child type="bottom">
+          <object class="AdwClamp" id="selection-bar">
+            <property name="visible">False</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">10</property>
+            <property name="margin-start">12</property>
+            <property name="margin-end">12</property>
+            <child>
+              <object class="GtkButton" id="confirm-button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="halign">center</property>
+                <property name="hexpand">False</property>
+                <property name="label" translatable="yes">Confirm</property>
+                <property name="has-tooltip">True</property>
+                <property name="tooltip-text" translatable="yes">Confirm</property>
+                <signal name="clicked" handler="_onConfirmSelection" swapped="no"/>
+                <accessibility>
+                  <property name="label" translatable="yes">Confirm</property>
+                </accessibility>
+                <style>
+                  <class name="suggested-action"/>
+                  <class name="circular"/>
+                  <class name="selection-confirm-button"/>
+                </style>
               </object>
             </child>
           </object>

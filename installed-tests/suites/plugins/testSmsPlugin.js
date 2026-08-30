@@ -44,6 +44,29 @@ const Packets = {
             version: 2,
         },
     },
+    single_summary: {
+        type: 'kdeconnect.sms.messages',
+        body: {
+            messages: [
+                {
+                    addresses: [
+                        {
+                            address: '555-555-5555',
+                        },
+                    ],
+                    body: 'incoming message of thread 1',
+                    date: 1588334621800,
+                    type: 1,
+                    read: 0,
+                    thread_id: 1,
+                    _id: 1,
+                    sub_id: 1,
+                    event: 1,
+                },
+            ],
+            version: 2,
+        },
+    },
     thread_one: {
         type: 'kdeconnect.sms.messages',
         body: {
@@ -122,6 +145,9 @@ const Packets = {
     },
 };
 
+let sendSingleSummary = false;
+let dropThreadRequests = false;
+
 
 /**
  * Mocked packet handling for the test device
@@ -131,10 +157,16 @@ const Packets = {
 function handlePacket(packet) {
     switch (packet.type) {
         case 'kdeconnect.sms.request_conversations':
-            this.sendPacket(Packets.summary);
+            if (sendSingleSummary)
+                this.sendPacket(Packets.single_summary);
+            else
+                this.sendPacket(Packets.summary);
             break;
 
         case 'kdeconnect.sms.request_conversation':
+            if (dropThreadRequests)
+                return;
+
             if (packet.body.threadID === '1')
                 this.sendPacket(Packets.thread_one);
 
@@ -240,12 +272,16 @@ describe('The sms plugin', function () {
 
         await localPlugin.awaitPacket('kdeconnect.sms.messages');
         expect(localPlugin._handleDigest).toHaveBeenCalled();
-        expect(localPlugin._requestConversation).toHaveBeenCalledTimes(2);
+        expect(localPlugin._requestConversation).not.toHaveBeenCalled();
 
         localPlugin.handlePacket.calls.reset();
 
+        localPlugin.requestConversation('1');
+        expect(localPlugin.isThreadLoading('1')).toBeTrue();
+
         await localPlugin.awaitPacket('kdeconnect.sms.messages');
         expect(localPlugin._handleThread).toHaveBeenCalled();
+        expect(localPlugin.isThreadLoading('1')).toBeFalse();
     });
 
     it('only requests new or updated converations', async function () {
@@ -261,6 +297,132 @@ describe('The sms plugin', function () {
         expect(localPlugin._requestConversation).not.toHaveBeenCalled();
     });
 
+    it('requests full history for single-conversation summaries', async function () {
+        sendSingleSummary = true;
+
+        spyOn(localPlugin, '_handleDigest').and.callThrough();
+        spyOn(localPlugin, '_handleThread').and.callThrough();
+        spyOn(localPlugin, '_requestConversation').and.callThrough();
+
+        try {
+            localPlugin.clearCache();
+            localPlugin._requestConversations();
+
+            await localPlugin.awaitPacket('kdeconnect.sms.messages');
+            expect(localPlugin._handleDigest).toHaveBeenCalled();
+            expect(localPlugin._requestConversation).not.toHaveBeenCalled();
+            expect(localPlugin.threads['1'].length).toBe(1);
+            expect(localPlugin.isThreadLoading('1')).toBeFalse();
+
+            localPlugin.handlePacket.calls.reset();
+
+            localPlugin.requestConversation('1');
+            expect(localPlugin.isThreadLoading('1')).toBeTrue();
+
+            await localPlugin.awaitPacket('kdeconnect.sms.messages');
+            expect(localPlugin._handleThread).toHaveBeenCalled();
+            expect(localPlugin.threads['1'].length).toBe(2);
+            expect(localPlugin.isThreadLoading('1')).toBeFalse();
+        } finally {
+            sendSingleSummary = false;
+        }
+    });
+
+    it('does not prune cached conversations from partial digests', function () {
+        localPlugin.clearCache();
+        localPlugin.threads['1'] = [{
+            ...Packets.single_summary.body.messages[0],
+            thread_id: '1',
+        }];
+        localPlugin.threads['2'] = [{
+            ...Packets.summary.body.messages[1],
+            thread_id: '2',
+        }];
+        localPlugin._pendingThreads.add('2');
+        localPlugin._completeThreads.add('2');
+        spyOn(localPlugin, '_requestPendingConversations');
+
+        localPlugin._handleDigest([Packets.single_summary.body.messages[0]],
+            ['1']);
+
+        expect(localPlugin.threads['1']).toBeDefined();
+        expect(localPlugin.threads['2']).toBeDefined();
+        expect(localPlugin.isThreadLoading('2')).toBeTrue();
+        expect(localPlugin._completeThreads.has('2')).toBeTrue();
+    });
+
+    it('retries unanswered conversation requests', function () {
+        localPlugin.clearCache();
+        localPlugin.threads['1'] = [{
+            ...Packets.single_summary.body.messages[0],
+            thread_id: '1',
+        }];
+
+        dropThreadRequests = true;
+        spyOn(localPlugin.device, 'sendPacket').and.callThrough();
+
+        try {
+            localPlugin.requestConversation('1');
+            expect(localPlugin.isThreadLoading('1')).toBeTrue();
+            expect(localPlugin.device.sendPacket).not.toHaveBeenCalled();
+
+            localPlugin._sendQueuedConversationRequest('1');
+            expect(localPlugin.device.sendPacket).toHaveBeenCalledTimes(1);
+
+            localPlugin._retryThreadRequest('1');
+            expect(localPlugin.isThreadLoading('1')).toBeTrue();
+            expect(localPlugin.device.sendPacket).toHaveBeenCalledTimes(2);
+
+            localPlugin._retryThreadRequest('1');
+            expect(localPlugin.isThreadLoading('1')).toBeTrue();
+            expect(localPlugin.device.sendPacket).toHaveBeenCalledTimes(3);
+
+            localPlugin._retryThreadRequest('1');
+            expect(localPlugin.isThreadLoading('1')).toBeFalse();
+            expect(localPlugin.device.sendPacket).toHaveBeenCalledTimes(3);
+        } finally {
+            dropThreadRequests = false;
+            localPlugin.clearCache();
+        }
+    });
+
+    it('only retries the active conversation request', function () {
+        localPlugin.clearCache();
+        localPlugin.threads['1'] = [{
+            ...Packets.single_summary.body.messages[0],
+            thread_id: '1',
+        }];
+        localPlugin.threads['2'] = [{
+            ...Packets.summary.body.messages[1],
+            thread_id: '2',
+        }];
+
+        dropThreadRequests = true;
+        spyOn(localPlugin.device, 'sendPacket').and.callThrough();
+
+        try {
+            localPlugin.requestConversation('1');
+            localPlugin.requestConversation('2');
+
+            expect(localPlugin.isThreadLoading('1')).toBeFalse();
+            expect(localPlugin.isThreadLoading('2')).toBeTrue();
+            expect(localPlugin.device.sendPacket).not.toHaveBeenCalled();
+
+            localPlugin._sendQueuedConversationRequest('1');
+            localPlugin._retryThreadRequest('1');
+            expect(localPlugin.device.sendPacket).not.toHaveBeenCalled();
+
+            localPlugin._sendQueuedConversationRequest('2');
+            expect(localPlugin.device.sendPacket).toHaveBeenCalledTimes(1);
+
+            localPlugin._retryThreadRequest('2');
+            expect(localPlugin.device.sendPacket).toHaveBeenCalledTimes(2);
+        } finally {
+            dropThreadRequests = false;
+            localPlugin.clearCache();
+        }
+    });
+
     it('can send SMS messages', async function () {
         spyOn(remoteDevice, 'handlePacket').and.callThrough();
 
@@ -269,6 +431,26 @@ describe('The sms plugin', function () {
         await remoteDevice.awaitPacket('kdeconnect.sms.request', {
             sendSms: true,
             phoneNumber: '555-555-5555',
+            messageBody: 'message body',
+        });
+    });
+
+    it('can send SMS messages to multiple recipients', async function () {
+        spyOn(remoteDevice, 'handlePacket').and.callThrough();
+
+        localPlugin.sendMessage([
+            {address: '555-555-5555'},
+            {address: '555-555-5556'},
+        ], 'message body');
+
+        await remoteDevice.awaitPacket('kdeconnect.sms.request', {
+            sendSms: true,
+            phoneNumber: '555-555-5555',
+            messageBody: 'message body',
+        });
+        await remoteDevice.awaitPacket('kdeconnect.sms.request', {
+            sendSms: true,
+            phoneNumber: '555-555-5556',
             messageBody: 'message body',
         });
     });

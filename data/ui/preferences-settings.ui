@@ -63,6 +63,18 @@ SPDX-License-Identifier: GPL-2.0-or-later
         </child>
         <child>
           <object class="AdwPreferencesGroup">
+            <property name="title" translatable="yes">Telephony</property>
+            <property name="description" translatable="yes">Phone number parsing and dialing preferences</property>
+            <child>
+              <object class="AdwComboRow" id="country-row">
+                <property name="title" translatable="yes">Phone Country Code</property>
+                <property name="subtitle" translatable="yes">Default fallback region for ambiguous numbers</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwPreferencesGroup">
             <property name="title" translatable="yes">Experimental</property>
             <child>
               <object class="AdwSwitchRow" id="bluetooth-row">

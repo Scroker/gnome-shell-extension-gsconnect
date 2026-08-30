@@ -29,6 +29,10 @@ SPDX-License-Identifier: GPL-2.0-or-later
     <key name="name" type="s">
       <default>""</default>
     </key>
+    <key name="default-country" type="s">
+      <default>""</default>
+      <summary>Phone Number Parsing Default Country</summary>
+    </key>
     <key name="devices" type="as">
       <default>[]</default>
     </key>

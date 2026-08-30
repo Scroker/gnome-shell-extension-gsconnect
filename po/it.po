@@ -325,6 +325,15 @@ msgstr "Notifiche"
 msgid "Contacts"
 msgstr "Contatti"
 
+#: data/ui/contact-chooser.ui:42 data/ui/contact-chooser.ui:45
+msgid "Select multiple recipients"
+msgstr "Seleziona più destinatari"
+
+#: data/ui/contact-chooser.ui:118 data/ui/contact-chooser.ui:120
+#: data/ui/contact-chooser.ui:123
+msgid "Confirm"
+msgstr "Conferma"
+
 #: data/ui/preferences-device-panel.ui:1447
 msgid "Incoming Calls"
 msgstr "Chiamate in entrata"
