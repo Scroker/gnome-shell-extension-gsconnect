@@ -141,7 +141,7 @@ describe('The calls plugin', function () {
             .calls.mostRecent().args[0];
 
         expect(notification.title).toBe('Name');
-        expect(notification.body).toBe('Incoming call');
+        expect(notification.body).toBe(_('Incoming call'));
         expect(notification.id).toBe('ringing|/mock/call');
         expect(notification.buttons.map(button => button.action)).toEqual([
             'answerCall',
@@ -208,7 +208,7 @@ describe('The calls plugin', function () {
         await localPlugin._syncBluetoothCallNotification();
 
         expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalledTimes(1);
-        expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
+        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalledTimes(1);
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
     });
 
@@ -241,7 +241,7 @@ describe('The calls plugin', function () {
         expect(localMixer.muteMicrophone).not.toHaveBeenCalled();
     });
 
-    it('does not adjust HFP mixer state when Telephony is unavailable', function () {
+    it('adjusts HFP mixer state even when Telephony is unavailable', function () {
         const localMixer = localPlugin._mixer;
         const telephonyPlugin = localPlugin.device._plugins.get('telephony');
 
@@ -253,19 +253,24 @@ describe('The calls plugin', function () {
         localPlugin.device._plugins.delete('telephony');
 
         try {
-            localPlugin.telephony_settings.set_string('ringing-volume', 'lower');
+            telephonyPlugin.settings.set_string('ringing-volume', 'lower');
             localPlugin._setMediaState('ringing', true);
         } finally {
             localPlugin.device._plugins.set('telephony', telephonyPlugin);
         }
 
         expect(localMixer.unmuteCallOutputStreams).toHaveBeenCalled();
-        expect(localMixer.lowerApplicationVolumes).not.toHaveBeenCalled();
+        expect(localMixer.lowerApplicationVolumes).toHaveBeenCalledTimes(1);
         expect(localMixer.lowerVolume).not.toHaveBeenCalled();
     });
 
     it('restores HFP call output while watching an active call', async function () {
         const localMixer = localPlugin._mixer;
+
+        spyOn(localPlugin._bluetoothTelephony, 'findCallInfo').and.returnValue(Promise.resolve({
+            path: '/mock/call',
+            state: 'active',
+        }));
 
         spyOn(localMixer, 'unmuteCallOutputStreams');
         localPlugin._watchBluetoothCall('555-555-5555', '/mock/call');
