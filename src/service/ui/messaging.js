@@ -1063,6 +1063,12 @@ export const MessagingWindow = GObject.registerClass({
             'show-selection-mode-button': true,
         });
 
+        this.contact_chooser_page = new Adw.NavigationPage({
+            title: _('Contacts'),
+            tag: 'contact-chooser',
+            child: this.contact_chooser,
+        });
+
         // Make sure we're using the correct contacts store
         this._searchBinding = this.button_search.bind_property(
             'active',
@@ -1215,7 +1221,7 @@ export const MessagingWindow = GObject.registerClass({
         this.contact_chooser.selection_mode = 'single';
         this.search_entry.set_key_capture_widget(null);
         this.button_search.active = false;
-        this.split_view.set_content(this.contact_chooser);
+        this.split_view.set_content(this.contact_chooser_page);
         this.split_view.set_show_content(true);
         this.thread_list.select_row(null);
     }
