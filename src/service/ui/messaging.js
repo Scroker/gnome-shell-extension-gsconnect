@@ -193,11 +193,17 @@ const ConversationMessage = GObject.registerClass({
     }
 
     _onActivateLink(label, uri) {
-        Gtk.show_uri_on_window(
-            this.get_toplevel(),
-            uri.includes('://') ? uri : `https://${uri}`,
-            Gtk.get_current_event_time()
-        );
+        const launcher = new Gtk.UriLauncher({
+            uri: uri.includes('://') ? uri : `https://${uri}`,
+        });
+
+        launcher.launch(this.get_root(), null, (obj, res) => {
+            try {
+                launcher.launch_finish(res);
+            } catch (e) {
+                debug(e);
+            }
+        });
 
         return true;
     }
@@ -227,7 +233,7 @@ const ConversationMessage = GObject.registerClass({
         else if (has_attachments)
             this.message_label.label = '';
         else
-            this.message_label.body = empty_placeholder;
+            this.message_label.label = empty_placeholder;
 
         this.message_label.tooltip_text = getDetailedTime(message.date);
 
