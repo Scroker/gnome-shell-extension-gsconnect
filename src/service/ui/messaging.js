@@ -419,6 +419,47 @@ const MessagingConversation = GObject.registerClass({
         this.list.set_header_func(this._headerMessages);
         this.list.set_sort_func(this._sortMessages);
         this._populateMessages();
+
+        // Fetch the thread from the device a page at a time: the newest page
+        // now, older ones when scrolled to the top. Messages of a page reach
+        // the conversation through addMessage(), like new messages.
+        this._anchorBottom = null;
+        this._edgeReachedId = this.scrolled.connect('edge-reached',
+            this._onEdgeReached.bind(this));
+        this._upperId = this._vadj.connect('notify::upper',
+            this._onUpperChanged.bind(this));
+        this._requestPage();
+    }
+
+    /**
+     * Request a page of this thread from the device. The plugin ignores the
+     * request if one is already pending or the thread is fully loaded.
+     *
+     * @returns {boolean} %true if a page is pending
+     */
+    _requestPage() {
+        if (this.thread_id === null)
+            return false;
+
+        return this.plugin.requestThreadPage(this.thread_id);
+    }
+
+    _onEdgeReached(scrolled, position) {
+        if (position !== Gtk.PositionType.TOP)
+            return;
+
+        // Keep the visible messages in place as older ones are prepended
+        if (this._requestPage())
+            this._anchorBottom = this._vadj.get_upper() - this._vadj.get_value();
+    }
+
+    _onUpperChanged(adjustment) {
+        if (this._anchorBottom === null)
+            return;
+
+        this._adjusting = true;
+        adjustment.set_value(adjustment.get_upper() - this._anchorBottom);
+        this._adjusting = false;
     }
 
     get message_bar() {
@@ -688,6 +729,11 @@ const MessagingConversation = GObject.registerClass({
 
     _holdPosition() {
         this.__pos = this._vadj.get_upper() - this._vadj.get_value();
+
+        // The user scrolled; stop keeping the old position
+        if (!this._adjusting && this._anchorBottom !== null &&
+            this._vadj.get_value() > 0)
+            this._anchorBottom = null;
     }
 
     _releasePosition() {
@@ -766,6 +812,8 @@ const MessagingConversation = GObject.registerClass({
         this.participants_button.disconnect(this._participantsId);
         this.device.disconnect(this._connectedId);
         this._vadj.disconnect(this._scrolledId);
+        this._vadj.disconnect(this._upperId);
+        this.scrolled.disconnect(this._edgeReachedId);
         this._deviceBinding.unbind();
     }
 });
