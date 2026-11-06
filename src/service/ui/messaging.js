@@ -457,9 +457,7 @@ const MessagingConversation = GObject.registerClass({
                 continue;
 
             for (const contactNumber of contact.numbers) {
-                const cnumber = contactNumber.value.toPhoneNumber();
-
-                if (cnumber && (number.endsWith(cnumber) || cnumber.endsWith(number))) {
+                if (number.equalsPhoneNumber(contactNumber.value)) {
                     number = contactNumber.value;
                     break;
                 }
@@ -1293,15 +1291,10 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _includesAddress(addresses, addressObj) {
-        const number = addressObj.address.toPhoneNumber();
-
         for (const haystackObj of addresses) {
-            const tnumber = haystackObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (addressObj.address.equalsPhoneNumber(haystackObj.address))
                 return true;
         }
-
         return false;
     }
 
