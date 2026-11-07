@@ -336,6 +336,34 @@ const ConversationMessage = GObject.registerClass({
         return button;
     }
 
+    /**
+     * Open a file with the default application for its type, as set in the
+     * system settings. Only if there is none, let the user choose one.
+     *
+     * @param {Gio.File} file - The file to open
+     * @param {string} contentType - The file's content type
+     */
+    async _launchFile(file, contentType) {
+        const appInfo = Gio.AppInfo.get_default_for_type(contentType, false);
+
+        if (appInfo !== null) {
+            const context = this.get_display().get_app_launch_context();
+            appInfo.launch([file], context);
+            return;
+        }
+
+        const launcher = new Gtk.FileLauncher({file: file});
+        await new Promise((resolve, reject) => {
+            launcher.launch(this.get_root(), null, (obj, res) => {
+                try {
+                    resolve(launcher.launch_finish(res));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+    }
+
     async _openAttachment(button, progress, attachment) {
         button.sensitive = false;
         progress.label.label = '0%';
@@ -356,16 +384,7 @@ const ConversationMessage = GObject.registerClass({
             if (!isMediaType(contentType))
                 throw new Error(`Refusing to open ${contentType} attachment`);
 
-            const launcher = new Gtk.FileLauncher({file: file});
-            await new Promise((resolve, reject) => {
-                launcher.launch(this.get_root(), null, (obj, res) => {
-                    try {
-                        resolve(launcher.launch_finish(res));
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            });
+            await this._launchFile(file, contentType);
             button.tooltip_text = _('Open');
         } catch (e) {
             debug(e);
