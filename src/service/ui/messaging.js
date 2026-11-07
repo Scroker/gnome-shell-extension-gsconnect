@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import Gdk from 'gi://Gdk?version=4.0';
+import GdkPixbuf from 'gi://GdkPixbuf';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
@@ -270,8 +271,14 @@ const ConversationMessage = GObject.registerClass({
 
         if (attachment.encoded_thumbnail) {
             try {
-                const texture = Gdk.Texture.new_from_bytes(new GLib.Bytes(
+                const loader = new GdkPixbuf.PixbufLoader();
+                loader.write_bytes(new GLib.Bytes(
                     GLib.base64_decode(attachment.encoded_thumbnail)));
+                loader.close();
+
+                // Honour the EXIF orientation of photos taken sideways
+                const pixbuf = loader.get_pixbuf().apply_embedded_orientation();
+                const texture = Gdk.Texture.new_for_pixbuf(pixbuf);
                 const scale = Math.min(1, 240 / Math.max(texture.width,
                     texture.height));
 
