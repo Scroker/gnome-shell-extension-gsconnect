@@ -526,15 +526,10 @@ const SMSPlugin = GObject.registerClass({
         if (!thread?.[0]?.addresses)
             return false;
 
-        const number = addressObj.address.toPhoneNumber();
-
         for (const taddressObj of thread[0].addresses) {
-            const tnumber = taddressObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (addressObj.address?.equalsPhoneNumber(taddressObj.address))
                 return true;
         }
-
         return false;
     }
 

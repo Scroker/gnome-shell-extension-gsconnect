@@ -3,10 +3,46 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 import Gdk from 'gi://Gdk?version=4.0';
+import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw';
+
+
+const _avatarTextures = new Map();
+
+
+/**
+ * Show a contact's name and, if there is one, photo in an avatar.
+ *
+ * @param {Adw.Avatar} avatar - The avatar widget
+ * @param {object} [contact] - A contact object
+ * @param {string} [text] - The text for initials, if not the contact's name
+ */
+export function setAvatarContact(avatar, contact, text = null) {
+    avatar.text = text ?? contact?.name ?? '';
+
+    const path = contact?.avatar;
+    let texture = null;
+
+    if (path) {
+        texture = _avatarTextures.get(path);
+
+        if (texture === undefined) {
+            try {
+                texture = Gdk.Texture.new_from_filename(path);
+            } catch (e) {
+                debug(e, path);
+                texture = null;
+            }
+
+            _avatarTextures.set(path, texture);
+        }
+    }
+
+    avatar.custom_image = texture;
+}
 
 /**
  * Return a localized string for a phone number type
@@ -44,15 +80,10 @@ function getNumberTypeLabel(type) {
  * @returns {string} A (possibly) better display number for the address
  */
 export function getDisplayNumber(contact, address) {
-    const number = address.toPhoneNumber();
-
     for (const contactNumber of contact.numbers) {
-        const cnumber = contactNumber.value.toPhoneNumber();
-
-        if (number.endsWith(cnumber) || cnumber.endsWith(number))
+        if (address?.equalsPhoneNumber(contactNumber.value))
             return GLib.markup_escape_text(contactNumber.value, -1);
     }
-
     return GLib.markup_escape_text(address, -1);
 }
 
@@ -87,7 +118,7 @@ const AddressRow = GObject.registerClass({
         this._contact = contact;
 
         if (this._index === 0) {
-            this.avatar.text = contact.name;
+            setAvatarContact(this.avatar, contact);
             this.title = GLib.markup_escape_text(contact.name, -1);
         }
 
@@ -430,3 +461,188 @@ export const ContactChooser = GObject.registerClass({
         }
     }
 });
+
+
+/**
+ * Find the GNOME Contacts application, if installed.
+ *
+ * @returns {string[]|null} The command line to run it, or %null
+ */
+function getGnomeContactsCommand() {
+    const appInfo = Gio.DesktopAppInfo.new('org.gnome.Contacts.desktop');
+
+    if (appInfo === null)
+        return null;
+
+    if (appInfo.has_key('X-Flatpak')) {
+        const flatpak = GLib.find_program_in_path('flatpak');
+
+        if (flatpak !== null)
+            return [flatpak, 'run', 'org.gnome.Contacts'];
+    }
+
+    const path = GLib.find_program_in_path('gnome-contacts');
+
+    return path !== null ? [path] : null;
+}
+
+
+/**
+ * A dialog with the details of a contact, offering to install GNOME Contacts.
+ */
+const ContactDialog = GObject.registerClass({
+    GTypeName: 'GSConnectContactDialog',
+}, class ContactDialog extends Adw.Dialog {
+
+    _init(params) {
+        super._init({
+            title: params.contact.name,
+            content_width: 400,
+        });
+
+        this.device = params.device;
+        this.contact = params.contact;
+
+        this._toasts = new Adw.ToastOverlay();
+
+        const page = new Adw.PreferencesPage();
+        this._toasts.child = page;
+
+        const toolbar = new Adw.ToolbarView({content: this._toasts});
+        toolbar.add_top_bar(new Adw.HeaderBar());
+        this.child = toolbar;
+
+        // Avatar and name
+        const header = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 12,
+            halign: Gtk.Align.CENTER,
+        });
+        const avatar = new Adw.Avatar({size: 96, show_initials: true});
+        setAvatarContact(avatar, this.contact);
+        header.append(avatar);
+        header.append(new Gtk.Label({
+            label: this.contact.name,
+            css_classes: ['title-1'],
+            wrap: true,
+            justify: Gtk.Justification.CENTER,
+        }));
+
+        const headerGroup = new Adw.PreferencesGroup();
+        headerGroup.add(header);
+        page.add(headerGroup);
+
+        // Phone numbers
+        const numbers = new Adw.PreferencesGroup({title: _('Phone Numbers')});
+
+        for (const number of this.contact.numbers)
+            numbers.add(this._createNumberRow(number));
+
+        page.add(numbers);
+
+        // Suggest GNOME Contacts
+        const suggestion = new Adw.PreferencesGroup();
+        const row = new Adw.ActionRow({
+            title: _('GNOME Contacts'),
+            subtitle: _('Install GNOME Contacts to open contacts from your address book'),
+        });
+        row.add_prefix(new Gtk.Image({
+            icon_name: 'x-office-address-book-symbolic',
+        }));
+
+        const install = new Gtk.Button({
+            label: _('Install'),
+            valign: Gtk.Align.CENTER,
+        });
+        install.connect('clicked', this._onInstall.bind(this));
+        row.add_suffix(install);
+        suggestion.add(row);
+        page.add(suggestion);
+    }
+
+    _createNumberRow(number) {
+        const row = new Adw.ActionRow({
+            title: GLib.markup_escape_text(number.value, -1),
+            subtitle: getNumberTypeLabel(number.type),
+            subtitle_selectable: false,
+            title_selectable: true,
+        });
+
+        const copy = new Gtk.Button({
+            icon_name: 'edit-copy-symbolic',
+            tooltip_text: _('Copy'),
+            valign: Gtk.Align.CENTER,
+            css_classes: ['flat'],
+        });
+        copy.connect('clicked', () => {
+            this.get_clipboard().set(number.value);
+            this._toasts.add_toast(new Adw.Toast({title: _('Copied')}));
+        });
+        row.add_suffix(copy);
+
+        const message = new Gtk.Button({
+            icon_name: 'chat-bubbles-text-symbolic',
+            tooltip_text: _('Send Message'),
+            valign: Gtk.Align.CENTER,
+            css_classes: ['flat'],
+        });
+        message.connect('clicked', () => {
+            this.device.activate_action('uriSms',
+                new GLib.Variant('s', `sms:${number.value}`));
+            this.close();
+        });
+        row.add_suffix(message);
+
+        return row;
+    }
+
+    _onInstall() {
+        const launcher = new Gtk.UriLauncher({uri: 'appstream://org.gnome.Contacts'});
+
+        launcher.launch(this.get_root(), null, (obj, res) => {
+            try {
+                launcher.launch_finish(res);
+            } catch (e) {
+                debug(e);
+                this._toasts.add_toast(new Adw.Toast({
+                    // TRANSLATORS: Shown when no software center can install
+                    // GNOME Contacts
+                    title: _('Install the gnome-contacts package'),
+                    timeout: 0,
+                }));
+            }
+        });
+    }
+});
+
+
+/**
+ * Show a contact: in GNOME Contacts if it is installed, otherwise in a dialog.
+ *
+ * @param {Gtk.Widget} parent - The widget to present the dialog for
+ * @param {Gio.ActionGroup} device - The device the contact belongs to
+ * @param {object} contact - A contact object
+ * @param {string} [address] - The phone number the contact was found by
+ */
+export function showContact(parent, device, contact, address = null) {
+    const command = getGnomeContactsCommand();
+
+    if (command !== null) {
+        // Contacts from the phone have no ID in the address book, so search
+        // by name, or by number for unknown contacts
+        const query = contact.origin === 'gsconnect'
+            ? (address ?? contact.numbers[0]?.value ?? contact.name)
+            : contact.name;
+
+        try {
+            Gio.Subprocess.new([...command, '--search', query],
+                Gio.SubprocessFlags.NONE);
+            return;
+        } catch (e) {
+            debug(e, 'Launching GNOME Contacts');
+        }
+    }
+
+    const dialog = new ContactDialog({device, contact});
+    dialog.present(parent);
+}
