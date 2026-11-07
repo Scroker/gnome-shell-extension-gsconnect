@@ -150,11 +150,17 @@ const ReplyDialog = GObject.registerClass({
     }
 
     _onActivateLink(label, uri) {
-        Gtk.show_uri_on_window(
-            this.get_toplevel(),
-            uri.includes('://') ? uri : `https://${uri}`,
-            Gtk.get_current_event_time()
-        );
+        const launcher = new Gtk.UriLauncher({
+            uri: uri.includes('://') ? uri : `https://${uri}`,
+        });
+
+        launcher.launch(this.get_root(), null, (obj, res) => {
+            try {
+                launcher.launch_finish(res);
+            } catch (e) {
+                debug(e);
+            }
+        });
 
         return true;
     }

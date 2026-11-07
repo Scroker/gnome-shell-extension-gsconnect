@@ -361,40 +361,41 @@ const Store = GObject.registerClass({
     query(query) {
         // First look for an existing contact by number
         const contacts = this.contacts;
-        const matches = [];
-        let qnumber = null;
-        if (query.number)
-            qnumber = query.number.toPhoneNumber();
-        let qname = null;
-        if (query.name)
-            qname = query.name;
+        const qname = query.name || null;
+        const qnumber = query.number ? query.number.toPhoneNumber() : null;
+        let match = null;
+        let matchScore = 0;
 
         for (let i = 0, len = contacts.length; i < len; i++) {
-
             const contact = contacts[i];
-            if (qname === contact.name)
+
+            if (qname !== null && qname === contact.name)
                 return contact;
 
-            if (qnumber) {
-                for (const num of contact.numbers) {
-                    const cnumber = num.value.toPhoneNumber();
+            if (!qnumber)
+                continue;
 
-                    if (qnumber.endsWith(cnumber) || cnumber.endsWith(qnumber)) {
-                    // If no query name or exact match, return immediately
-                        if (!qname)
-                            return contact;
+            for (const num of contact.numbers) {
+                if (!query.number.equalsPhoneNumber(num.value))
+                    continue;
 
-                        // Otherwise we might find an exact name match
-                        // that shares the number with another contact
-                        matches.push(contact);
-                    }
+                // Prefer an exact number match over one number merely ending
+                // with the other; on a tie keep the first match (pretty much
+                // what Android does)
+                let score = 1;
+
+                if (num.value.toPhoneNumber() === qnumber)
+                    score += 1;
+
+                if (score > matchScore) {
+                    match = contact;
+                    matchScore = score;
                 }
             }
         }
 
-        // Return the first match (pretty much what Android does)
-        if (matches.length > 0)
-            return matches[0];
+        if (match !== null)
+            return match;
 
         // No match; return a mock contact with a unique ID
         let id = GLib.uuid_string_random();
