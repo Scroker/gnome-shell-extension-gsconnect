@@ -24,6 +24,9 @@ const TIME_SPAN_HOUR = 3600000;
 const TIME_SPAN_DAY = 86400000;
 const TIME_SPAN_WEEK = 604800000;
 
+// How many cached messages to show at a time
+const MESSAGE_PAGE_SIZE = 50;
+
 
 // Less than an hour (eg. 42 minutes ago)
 const _lthLong = new Intl.RelativeTimeFormat('default', {
@@ -177,6 +180,17 @@ function getShortTime(time) {
  */
 function getDetailedTime(time) {
     return _cFormat.format(time);
+}
+
+/**
+ * Whether a message is of a type the conversation can show.
+ *
+ * @param {object} message - A message object
+ * @returns {boolean} %true if the message is incoming or sent
+ */
+function isSupportedMessage(message) {
+    return message.type === Sms.MessageBox.INBOX ||
+        message.type === Sms.MessageBox.SENT;
 }
 
 /**
@@ -421,9 +435,18 @@ const MessagingConversation = GObject.registerClass({
         this._populateMessages();
 
         // Fetch the thread from the device a page at a time: the newest page
-        // now, older ones when scrolled to the top. Messages of a page reach
-        // the conversation through addMessage(), like new messages.
+        // now, older ones when scrolled to the top. Messages of a page are
+        // merged into the conversation when the plugin's threads change.
         this._anchorBottom = null;
+
+        // Open at the newest message, and follow new ones while the view is
+        // at the bottom
+        this._stickBottom = true;
+        this._pageSizeId = this._vadj.connect('notify::page-size',
+            this._onUpperChanged.bind(this));
+
+        this._threadsChangedId = this.plugin.connect('notify::threads',
+            this._onThreadsChanged.bind(this));
         this._edgeReachedId = this.scrolled.connect('edge-reached',
             this._onEdgeReached.bind(this));
         this._upperId = this._vadj.connect('notify::upper',
@@ -449,17 +472,93 @@ const MessagingConversation = GObject.registerClass({
             return;
 
         // Keep the visible messages in place as older ones are prepended
-        if (this._requestPage())
-            this._anchorBottom = this._vadj.get_upper() - this._vadj.get_value();
+        const anchor = this._vadj.get_upper() - this._vadj.get_value();
+
+        // Show older cached messages first, then ask the device for more
+        if (this._backlog.length > 0) {
+            this._anchorBottom = anchor;
+            this._revealBacklog();
+        } else if (this._requestPage()) {
+            this._anchorBottom = anchor;
+        }
+    }
+
+    /**
+     * Show the newest page of the cached messages that aren't shown yet.
+     */
+    _revealBacklog() {
+        const page = this._backlog.splice(-MESSAGE_PAGE_SIZE);
+
+        for (const message of page)
+            this.addMessage(message, false);
+
+        this.list.invalidate_headers();
+    }
+
+    /**
+     * Merge messages added to the thread, such as new messages or a page
+     * from the device, into the conversation. Messages older than those
+     * shown are queued, to be shown when scrolled to the top.
+     */
+    _onThreadsChanged() {
+        const thread = this.plugin.threads[this.thread_id];
+
+        if (thread === undefined)
+            return;
+
+        const queued = new Set(this._backlog.map(message => message._id));
+        let shown = 0;
+        let backlogged = 0;
+
+        for (const message of thread) {
+            if (!isSupportedMessage(message) || this._ids.has(message._id) ||
+                queued.has(message._id))
+                continue;
+
+            if (this._ids.size === 0 || message.date >= this.earliest) {
+                this.addMessage(message, false);
+                shown++;
+            } else {
+                this._backlog.push(message);
+                backlogged++;
+            }
+        }
+
+        if (shown > 0)
+            this.list.invalidate_headers();
+
+        if (backlogged > 0) {
+            this._backlog.sort((a, b) => a.date - b.date);
+
+            // Scrolled to the top, waiting for this page
+            if (this._anchorBottom !== null && this._vadj.get_value() === 0)
+                this._revealBacklog();
+        }
     }
 
     _onUpperChanged(adjustment) {
-        if (this._anchorBottom === null)
-            return;
+        const upper = adjustment.get_upper();
+        const pageSize = adjustment.get_page_size();
 
         this._adjusting = true;
-        adjustment.set_value(adjustment.get_upper() - this._anchorBottom);
+
+        if (this._anchorBottom !== null)
+            adjustment.set_value(upper - this._anchorBottom);
+        else if (this._stickBottom)
+            adjustment.set_value(upper - pageSize);
+
         this._adjusting = false;
+
+        // Show more cached messages until the view can scroll; this is
+        // called during allocation, so add the rows afterwards
+        if (upper <= pageSize && this._backlog.length > 0 &&
+            this._fillId === undefined) {
+            this._fillId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                this._fillId = undefined;
+                this._revealBacklog();
+                return GLib.SOURCE_REMOVE;
+            });
+        }
     }
 
     get message_bar() {
@@ -691,12 +790,15 @@ const MessagingConversation = GObject.registerClass({
         if (this.thread_id === null && this.addresses.length)
             this._thread_id = this.plugin.getThreadIdForAddresses(this.addresses);
 
-        // Fill the window with messages from the thread
-        if (this.thread_id !== null && this.plugin.threads[this.thread_id]) {
-            const messages = this.plugin.threads[this.thread_id].slice(0);
+        // Show the newest messages of the thread; older ones are shown a
+        // page at a time when scrolled to the top, since adding thousands of
+        // rows at once blocks the window
+        this._backlog = [];
 
-            for (const message of messages)
-                this.addMessage(message);
+        if (this.thread_id !== null && this.plugin.threads[this.thread_id]) {
+            this._backlog = this.plugin.threads[this.thread_id]
+                .filter(isSupportedMessage);
+            this._revealBacklog();
         }
     }
 
@@ -730,6 +832,11 @@ const MessagingConversation = GObject.registerClass({
     _holdPosition() {
         this.__pos = this._vadj.get_upper() - this._vadj.get_value();
 
+        if (!this._adjusting) {
+            this._stickBottom = this._vadj.get_value() >=
+                this._vadj.get_upper() - this._vadj.get_page_size() - 1;
+        }
+
         // The user scrolled; stop keeping the old position
         if (!this._adjusting && this._anchorBottom !== null &&
             this._vadj.get_value() > 0)
@@ -751,12 +858,13 @@ const MessagingConversation = GObject.registerClass({
      * Add a message to the conversation.
      *
      * @param {object} message - A message object
+     * @param {boolean} [invalidate] - Whether to update the date headers;
+     *   when adding many messages, do it once afterwards instead
      */
-    addMessage(message) {
+    addMessage(message, invalidate = true) {
         try {
             // TODO: Unsupported MessageBox
-            if (message.type !== Sms.MessageBox.INBOX &&
-                message.type !== Sms.MessageBox.SENT)
+            if (!isSupportedMessage(message))
                 throw TypeError(`invalid message box ${message.type}`);
 
             // Skip already-shown messages
@@ -790,8 +898,8 @@ const MessagingConversation = GObject.registerClass({
             if (message.date < this.earliest || this.earliest < 0)
                 this.earliest = message.date;
 
-
-            this.list.invalidate_headers();
+            if (invalidate)
+                this.list.invalidate_headers();
         } catch (e) {
             debug(e);
         }
@@ -813,7 +921,12 @@ const MessagingConversation = GObject.registerClass({
         this.device.disconnect(this._connectedId);
         this._vadj.disconnect(this._scrolledId);
         this._vadj.disconnect(this._upperId);
+        this._vadj.disconnect(this._pageSizeId);
+
+        if (this._fillId !== undefined)
+            GLib.source_remove(this._fillId);
         this.scrolled.disconnect(this._edgeReachedId);
+        this.plugin.disconnect(this._threadsChangedId);
         this._deviceBinding.unbind();
     }
 });
