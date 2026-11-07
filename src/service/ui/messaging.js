@@ -338,7 +338,7 @@ const ConversationMessage = GObject.registerClass({
 
     async _openAttachment(button, progress, attachment) {
         button.sensitive = false;
-        progress.label.label = '';
+        progress.label.label = '0%';
         progress.visible = true;
         progress.spinner.spinning = true;
 
