@@ -297,15 +297,25 @@ const ConversationMessage = GObject.registerClass({
         if (!isMediaType(attachment.mime_type) || this._plugin === null)
             return image;
 
-        const spinner = new Gtk.Spinner({
+        // Shown over the thumbnail while the attachment is downloaded
+        const progress = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 6,
             halign: Gtk.Align.CENTER,
             valign: Gtk.Align.CENTER,
-            width_request: 32,
-            height_request: 32,
+            css_classes: ['osd'],
             visible: false,
         });
+        progress.spinner = new Gtk.Spinner({
+            width_request: 24,
+            height_request: 24,
+        });
+        progress.label = new Gtk.Label();
+        progress.append(progress.spinner);
+        progress.append(progress.label);
+
         const overlay = new Gtk.Overlay({child: image});
-        overlay.add_overlay(spinner);
+        overlay.add_overlay(progress);
 
         const button = new Gtk.Button({
             child: overlay,
@@ -313,22 +323,28 @@ const ConversationMessage = GObject.registerClass({
             tooltip_text: _('Open'),
         });
         button.connect('clicked', () => {
-            this._openAttachment(button, spinner, attachment);
+            this._openAttachment(button, progress, attachment);
         });
 
         return button;
     }
 
-    async _openAttachment(button, spinner, attachment) {
+    async _openAttachment(button, progress, attachment) {
         button.sensitive = false;
-        spinner.visible = true;
-        spinner.spinning = true;
+        progress.label.label = '';
+        progress.visible = true;
+        progress.spinner.spinning = true;
 
         try {
-            const file = await this._plugin.requestAttachment(attachment);
+            const file = await this._plugin.requestAttachment(attachment,
+                fraction => {
+                    progress.label.label = `${Math.floor(fraction * 100)}%`;
+                });
 
-            // Don't trust the device-provided type alone
-            const [contentType] = Gio.content_type_guess(file.get_path(), null);
+            // Don't trust the device-provided type alone. The files have no
+            // extension, so the type has to be sniffed from the contents.
+            const contentType = file.query_info('standard::content-type',
+                Gio.FileQueryInfoFlags.NONE, null).get_content_type();
 
             if (!isMediaType(contentType))
                 throw new Error(`Refusing to open ${contentType} attachment`);
@@ -348,8 +364,8 @@ const ConversationMessage = GObject.registerClass({
             debug(e);
             button.tooltip_text = _('Failed to download attachment');
         } finally {
-            spinner.spinning = false;
-            spinner.visible = false;
+            progress.spinner.spinning = false;
+            progress.visible = false;
             button.sensitive = true;
         }
     }
