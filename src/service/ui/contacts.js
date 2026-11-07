@@ -8,6 +8,41 @@ import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk?version=4.0';
 import Adw from 'gi://Adw';
 
+
+const _avatarTextures = new Map();
+
+
+/**
+ * Show a contact's name and, if there is one, photo in an avatar.
+ *
+ * @param {Adw.Avatar} avatar - The avatar widget
+ * @param {object} [contact] - A contact object
+ * @param {string} [text] - The text for initials, if not the contact's name
+ */
+export function setAvatarContact(avatar, contact, text = null) {
+    avatar.text = text ?? contact?.name ?? '';
+
+    const path = contact?.avatar;
+    let texture = null;
+
+    if (path) {
+        texture = _avatarTextures.get(path);
+
+        if (texture === undefined) {
+            try {
+                texture = Gdk.Texture.new_from_filename(path);
+            } catch (e) {
+                debug(e, path);
+                texture = null;
+            }
+
+            _avatarTextures.set(path, texture);
+        }
+    }
+
+    avatar.custom_image = texture;
+}
+
 /**
  * Return a localized string for a phone number type
  * See: http://www.ietf.org/rfc/rfc2426.txt
@@ -44,15 +79,10 @@ function getNumberTypeLabel(type) {
  * @returns {string} A (possibly) better display number for the address
  */
 export function getDisplayNumber(contact, address) {
-    const number = address.toPhoneNumber();
-
     for (const contactNumber of contact.numbers) {
-        const cnumber = contactNumber.value.toPhoneNumber();
-
-        if (number.endsWith(cnumber) || cnumber.endsWith(number))
+        if (address?.equalsPhoneNumber(contactNumber.value))
             return GLib.markup_escape_text(contactNumber.value, -1);
     }
-
     return GLib.markup_escape_text(address, -1);
 }
 
@@ -87,7 +117,7 @@ const AddressRow = GObject.registerClass({
         this._contact = contact;
 
         if (this._index === 0) {
-            this.avatar.text = contact.name;
+            setAvatarContact(this.avatar, contact);
             this.title = GLib.markup_escape_text(contact.name, -1);
         }
 
