@@ -291,6 +291,11 @@ const ConversationParticipants = GObject.registerClass({
             const avatar = new Adw.Avatar({size: 40, show_initials: true});
             Contacts.setAvatarContact(avatar, contact);
             row.add_prefix(avatar);
+            row.add_suffix(new Gtk.Image({icon_name: 'go-next-symbolic'}));
+            row.activatable = true;
+            row.connect('activated', () => {
+                Contacts.showContact(this, this.device, contact, item.address);
+            });
             this.contacts_list.append(row);
         });
     }
@@ -365,6 +370,12 @@ const MessagingConversation = GObject.registerClass({
         const contact = this.device.contacts.query({number: address});
 
         this._participantsId = this.participants_button.connect('clicked', () => {
+            // A single contact: show it directly
+            if (this.addresses.length === 1) {
+                Contacts.showContact(this, this.device, contact, address);
+                return;
+            }
+
             if (this._participants_dialog === undefined) {
                 this._participants_dialog = new ConversationParticipants({
                     device: this.device,
@@ -378,6 +389,7 @@ const MessagingConversation = GObject.registerClass({
             this.content_title.set_title(contact.name);
             this.content_title.set_subtitle(Contacts.getDisplayNumber(contact, address));
             Contacts.setAvatarContact(this.avatar, contact);
+            this.participants_button.tooltip_text = _('Show contact');
         } else {
             const otherLength = this.addresses.length - 1;
             this.content_title.set_title(contact.name);
