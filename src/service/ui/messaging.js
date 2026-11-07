@@ -352,7 +352,7 @@ const MessagingConversation = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/messaging-conversation.ui',
     Children: [
         'list', 'scrolled', 'pending', 'pending-box', 'avatar', 'content-title',
-        'spinner', 'spinner-anim', 'content-stack', 'participants-button', 'bottom-bar',
+        'spinner', 'spinner-anim', 'content-stack', 'loading-status', 'participants-button', 'bottom-bar',
     ],
 }, class MessagingConversation extends Adw.NavigationPage {
 
@@ -445,6 +445,7 @@ const MessagingConversation = GObject.registerClass({
         // Open at the newest message, and follow new ones while the view is
         // at the bottom
         this._stickBottom = true;
+        this.scrolled.get_child().scroll_to_focus = false;
         this._pageSizeId = this._vadj.connect('notify::page-size',
             this._onUpperChanged.bind(this));
 
@@ -466,7 +467,7 @@ const MessagingConversation = GObject.registerClass({
     showLatest() {
         this._anchorBottom = null;
         this._stickBottom = true;
-        this._vadj.set_value(this._vadj.get_upper() - this._vadj.get_page_size());
+        this._scrollToEnd();
 
         if (this.thread_id !== null &&
             this.plugin.requestNewestThreadPage(this.thread_id))
@@ -486,8 +487,18 @@ const MessagingConversation = GObject.registerClass({
         }
 
         if (loading) {
+            this._loadingCount = 0;
+            this._loadingSeconds = 0;
+            this._updateLoadingStatus();
+
             this._loadingId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,
-                LOADING_TIMEOUT, () => {
+                1, () => {
+                    this._loadingSeconds++;
+                    this._updateLoadingStatus();
+
+                    if (this._loadingSeconds < LOADING_TIMEOUT)
+                        return GLib.SOURCE_CONTINUE;
+
                     this._loadingId = undefined;
                     this._setLoading(false);
                     return GLib.SOURCE_REMOVE;
@@ -500,7 +511,23 @@ const MessagingConversation = GObject.registerClass({
         if (!loading) {
             this._anchorBottom = null;
             this._stickBottom = true;
+            this._scrollToEnd();
         }
+    }
+
+    _updateLoadingStatus() {
+        // TRANSLATORS: Shown while waiting for the newest messages of a
+        // conversation; %d is the number of seconds waited
+        let status = _('Waiting for the device… %d s').format(this._loadingSeconds);
+
+        if (this._loadingCount > 0) {
+            // TRANSLATORS: Number of messages received so far, then the number
+            // of seconds waited
+            status = _('Received: %d · %d s').format(this._loadingCount,
+                this._loadingSeconds);
+        }
+
+        this.loading_status.label = status;
     }
 
     _onPageDone(plugin, thread_id) {
@@ -527,6 +554,12 @@ const MessagingConversation = GObject.registerClass({
 
     _onEdgeReached(scrolled, position) {
         if (position !== Gtk.PositionType.TOP)
+            return;
+
+        // Reaching the top while following the end happens while the list is
+        // laid out, not because the user scrolled up
+        if (this._stickBottom &&
+            this._vadj.get_upper() > this._vadj.get_page_size())
             return;
 
         // Keep the visible messages in place as older ones are prepended
@@ -585,6 +618,11 @@ const MessagingConversation = GObject.registerClass({
         if (shown > 0)
             this.list.invalidate_headers();
 
+        if (this._loadingId !== undefined && shown + backlogged > 0) {
+            this._loadingCount += shown + backlogged;
+            this._updateLoadingStatus();
+        }
+
         if (backlogged > 0) {
             this._backlog.sort((a, b) => a.date - b.date);
 
@@ -592,6 +630,15 @@ const MessagingConversation = GObject.registerClass({
             if (this._anchorBottom !== null && this._vadj.get_value() === 0)
                 this._revealBacklog();
         }
+    }
+
+    _scrollToEnd() {
+        if (!this._stickBottom)
+            return;
+
+        this._adjusting = true;
+        this._vadj.set_value(this._vadj.get_upper() - this._vadj.get_page_size());
+        this._adjusting = false;
     }
 
     _onUpperChanged(adjustment) {
@@ -606,6 +653,16 @@ const MessagingConversation = GObject.registerClass({
             adjustment.set_value(upper - pageSize);
 
         this._adjusting = false;
+
+        // The value may be reset while the list is allocated; scroll again
+        // once the frame is laid out
+        if (this._stickBottom && this._tickId === undefined) {
+            this._tickId = this.scrolled.add_tick_callback(() => {
+                this._tickId = undefined;
+                this._scrollToEnd();
+                return GLib.SOURCE_REMOVE;
+            });
+        }
 
         // Show more cached messages until the view can scroll; this is
         // called during allocation, so add the rows afterwards
@@ -989,6 +1046,9 @@ const MessagingConversation = GObject.registerClass({
 
         if (this._loadingId !== undefined)
             GLib.source_remove(this._loadingId);
+
+        if (this._tickId !== undefined)
+            this.scrolled.remove_tick_callback(this._tickId);
         this._deviceBinding.unbind();
     }
 });

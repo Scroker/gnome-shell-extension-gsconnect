@@ -1284,3 +1284,17 @@ msgstr "Otwórz w przeglądarce"
 #: data/ui/messaging-conversation.ui
 msgid "Downloading new messages…"
 msgstr "Pobieranie nowych wiadomości…"
+
+#. TRANSLATORS: Shown while waiting for the newest messages of a
+#. conversation; %d is the number of seconds waited
+#: src/service/ui/messaging.js
+#, c-format
+msgid "Waiting for the device… %d s"
+msgstr "Czekam na telefon… %d s"
+
+#. TRANSLATORS: Number of messages received so far, then the number
+#. of seconds waited
+#: src/service/ui/messaging.js
+#, c-format
+msgid "Received: %d · %d s"
+msgstr "Pobrano: %d · %d s"

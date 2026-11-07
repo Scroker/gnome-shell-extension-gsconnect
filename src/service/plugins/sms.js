@@ -402,17 +402,6 @@ const SMSPlugin = GObject.registerClass({
     }
 
     /**
-     * Request a page of messages for a thread, if one isn't already pending.
-     *
-     * The first request for a thread on each connection fetches its newest
-     * messages; later requests fetch messages older than the oldest cached
-     * one, so the full history is only downloaded as it's scrolled through.
-     *
-     * @param {string} thread_id - The thread ID
-     * @returns {boolean} %true if a page is pending, %false if there is nothing
-     *   (more) to request
-     */
-    /**
      * Whether a page of a thread has been requested and not yet received.
      *
      * @param {string} thread_id - The thread ID
@@ -451,6 +440,17 @@ const SMSPlugin = GObject.registerClass({
         return true;
     }
 
+    /**
+     * Request a page of messages for a thread, if one isn't already pending.
+     *
+     * The first request for a thread on each connection fetches its newest
+     * messages; later requests fetch messages older than the oldest cached
+     * one, so the full history is only downloaded as it's scrolled through.
+     *
+     * @param {string} thread_id - The thread ID
+     * @returns {boolean} %true if a page is pending, %false if there is nothing
+     *   (more) to request
+     */
     requestThreadPage(thread_id) {
         if (!this.device.connected || thread_id === null)
             return false;
