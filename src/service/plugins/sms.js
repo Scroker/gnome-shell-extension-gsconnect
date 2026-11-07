@@ -155,6 +155,11 @@ const SMSPlugin = GObject.registerClass({
             GObject.ParamFlags.READABLE
         ),
     },
+    Signals: {
+        'thread-page-done': {
+            param_types: [GObject.TYPE_STRING],
+        },
+    },
 }, class SMSPlugin extends Plugin {
 
     _init(device) {
@@ -242,6 +247,8 @@ const SMSPlugin = GObject.registerClass({
     }
 
     _resetThreadRequests() {
+        const pending = [...this._pageRequests?.keys() ?? []];
+
         if (this._pageRequests !== undefined) {
             for (const request of this._pageRequests.values())
                 GLib.source_remove(request.timeoutId);
@@ -255,6 +262,9 @@ const SMSPlugin = GObject.registerClass({
 
         // Threads known to be loaded back to their first message
         this._completeThreads = new Set();
+
+        for (const thread_id of pending)
+            this.emit('thread-page-done', thread_id);
     }
 
     handlePacket(packet) {
@@ -350,8 +360,12 @@ const SMSPlugin = GObject.registerClass({
         // as the response; the protocol has no request IDs to match on
         const request = this._pageRequests?.get(thread_id);
 
-        if (request !== undefined)
+        if (request !== undefined) {
             this._handleThreadPage(thread_id, request, messages, known);
+
+            // Let the conversation know it may stop waiting for the device
+            this.emit('thread-page-done', thread_id);
+        }
     }
 
     /**
@@ -398,6 +412,45 @@ const SMSPlugin = GObject.registerClass({
      * @returns {boolean} %true if a page is pending, %false if there is nothing
      *   (more) to request
      */
+    /**
+     * Whether a page of a thread has been requested and not yet received.
+     *
+     * @param {string} thread_id - The thread ID
+     * @returns {boolean} %true if a page is pending
+     */
+    isThreadPagePending(thread_id) {
+        return this._pageRequests?.has(`${thread_id}`) ?? false;
+    }
+
+    /**
+     * Request the newest page of a thread, unless it was already fetched on
+     * this connection.
+     *
+     * @param {string} thread_id - The thread ID
+     * @returns {boolean} %true if the newest page is pending
+     */
+    requestNewestThreadPage(thread_id) {
+        if (!this.device.connected || thread_id === null)
+            return false;
+
+        if (this._pageRequests === undefined)
+            this._resetThreadRequests();
+
+        thread_id = `${thread_id}`;
+
+        const pending = this._pageRequests.get(thread_id);
+
+        if (pending !== undefined)
+            return !pending.older;
+
+        if (this._freshThreads.has(thread_id))
+            return false;
+
+        this._freshThreads.add(thread_id);
+        this._sendThreadPageRequest(thread_id, -1);
+        return true;
+    }
+
     requestThreadPage(thread_id) {
         if (!this.device.connected || thread_id === null)
             return false;
@@ -439,6 +492,7 @@ const SMSPlugin = GObject.registerClass({
             timeoutId: GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,
                 THREAD_PAGE_TIMEOUT, () => {
                     this._pageRequests.delete(thread_id);
+                    this.emit('thread-page-done', thread_id);
                     return GLib.SOURCE_REMOVE;
                 }),
         };

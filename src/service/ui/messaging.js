@@ -27,6 +27,9 @@ const TIME_SPAN_WEEK = 604800000;
 // How many cached messages to show at a time
 const MESSAGE_PAGE_SIZE = 50;
 
+// How long to wait for the newest messages before showing the cached ones
+const LOADING_TIMEOUT = 10;
+
 
 // Less than an hour (eg. 42 minutes ago)
 const _lthLong = new Intl.RelativeTimeFormat('default', {
@@ -349,7 +352,7 @@ const MessagingConversation = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/messaging-conversation.ui',
     Children: [
         'list', 'scrolled', 'pending', 'pending-box', 'avatar', 'content-title',
-        'spinner', 'spinner-anim', 'participants-button', 'bottom-bar',
+        'spinner', 'spinner-anim', 'content-stack', 'participants-button', 'bottom-bar',
     ],
 }, class MessagingConversation extends Adw.NavigationPage {
 
@@ -447,11 +450,66 @@ const MessagingConversation = GObject.registerClass({
 
         this._threadsChangedId = this.plugin.connect('notify::threads',
             this._onThreadsChanged.bind(this));
+        this._pageDoneId = this.plugin.connect('thread-page-done',
+            this._onPageDone.bind(this));
         this._edgeReachedId = this.scrolled.connect('edge-reached',
             this._onEdgeReached.bind(this));
         this._upperId = this._vadj.connect('notify::upper',
             this._onUpperChanged.bind(this));
-        this._requestPage();
+        this.showLatest();
+    }
+
+    /**
+     * Show the end of the conversation. If the newest messages are being
+     * fetched from the device, show that instead until they arrive.
+     */
+    showLatest() {
+        this._anchorBottom = null;
+        this._stickBottom = true;
+        this._vadj.set_value(this._vadj.get_upper() - this._vadj.get_page_size());
+
+        if (this.thread_id !== null &&
+            this.plugin.requestNewestThreadPage(this.thread_id))
+            this._setLoading(true);
+    }
+
+    /**
+     * Show a placeholder instead of the messages while the newest messages
+     * are fetched. If the device doesn't answer soon, show what we have.
+     *
+     * @param {boolean} loading - Whether messages are being fetched
+     */
+    _setLoading(loading) {
+        if (this._loadingId !== undefined) {
+            GLib.source_remove(this._loadingId);
+            this._loadingId = undefined;
+        }
+
+        if (loading) {
+            this._loadingId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,
+                LOADING_TIMEOUT, () => {
+                    this._loadingId = undefined;
+                    this._setLoading(false);
+                    return GLib.SOURCE_REMOVE;
+                });
+        }
+
+        this.content_stack.visible_child_name = loading ? 'loading' : 'messages';
+
+        // Open at the newest message
+        if (!loading) {
+            this._anchorBottom = null;
+            this._stickBottom = true;
+        }
+    }
+
+    _onPageDone(plugin, thread_id) {
+        if (thread_id !== `${this.thread_id}` || this._loadingId === undefined)
+            return;
+
+        // More pages may be needed to reach the cached messages
+        if (!plugin.isThreadPagePending(thread_id))
+            this._setLoading(false);
     }
 
     /**
@@ -927,6 +985,10 @@ const MessagingConversation = GObject.registerClass({
             GLib.source_remove(this._fillId);
         this.scrolled.disconnect(this._edgeReachedId);
         this.plugin.disconnect(this._threadsChangedId);
+        this.plugin.disconnect(this._pageDoneId);
+
+        if (this._loadingId !== undefined)
+            GLib.source_remove(this._loadingId);
         this._deviceBinding.unbind();
     }
 });
@@ -1234,8 +1296,9 @@ export const MessagingWindow = GObject.registerClass({
             });
 
             this.stack.set(thread_id, conversation);
+        } else {
+            conversation.showLatest();
         }
-
 
         // Select the conversation and entry active
         this.split_view.set_content(conversation);
