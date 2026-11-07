@@ -193,11 +193,17 @@ const ConversationMessage = GObject.registerClass({
     }
 
     _onActivateLink(label, uri) {
-        Gtk.show_uri_on_window(
-            this.get_toplevel(),
-            uri.includes('://') ? uri : `https://${uri}`,
-            Gtk.get_current_event_time()
-        );
+        const launcher = new Gtk.UriLauncher({
+            uri: uri.includes('://') ? uri : `https://${uri}`,
+        });
+
+        launcher.launch(this.get_root(), null, (obj, res) => {
+            try {
+                launcher.launch_finish(res);
+            } catch (e) {
+                debug(e);
+            }
+        });
 
         return true;
     }
@@ -227,7 +233,7 @@ const ConversationMessage = GObject.registerClass({
         else if (has_attachments)
             this.message_label.label = '';
         else
-            this.message_label.body = empty_placeholder;
+            this.message_label.label = empty_placeholder;
 
         this.message_label.tooltip_text = getDetailedTime(message.date);
 
@@ -457,9 +463,7 @@ const MessagingConversation = GObject.registerClass({
                 continue;
 
             for (const contactNumber of contact.numbers) {
-                const cnumber = contactNumber.value.toPhoneNumber();
-
-                if (cnumber && (number.endsWith(cnumber) || cnumber.endsWith(number))) {
+                if (number.equalsPhoneNumber(contactNumber.value)) {
                     number = contactNumber.value;
                     break;
                 }
@@ -938,6 +942,7 @@ export const MessagingWindow = GObject.registerClass({
         this.stack = new Map();
         this.sidebar_title.set_subtitle(this.device.name);
         this.insert_action_group('device', this.device);
+        this._setupSidebarResize();
 
         // Device Status
 
@@ -999,6 +1004,101 @@ export const MessagingWindow = GObject.registerClass({
         this._sync();
         this._onThreadsChanged();
         this.restoreGeometry('messaging');
+    }
+
+    /*
+     * Let the user drag the edge of the conversation list to resize it. The
+     * width is stored in the plugin settings; 0 keeps the automatic width.
+     */
+    _setupSidebarResize() {
+        const HANDLE = 6;
+        const MIN_SIDEBAR = 220;
+        const MIN_CONTENT = 360;
+        const settings = this.plugin.settings;
+        const view = this.split_view;
+        const defaults = {
+            unit: view.sidebar_width_unit,
+            min: view.min_sidebar_width,
+            max: view.max_sidebar_width,
+            fraction: view.sidebar_width_fraction,
+        };
+
+        // Only cap the sidebar at the chosen width: forcing its minimum would
+        // also force the minimum width of the window
+        const applyWidth = width => {
+            if (width > 0) {
+                view.sidebar_width_unit = Adw.LengthUnit.PX;
+                view.min_sidebar_width = MIN_SIDEBAR;
+                view.max_sidebar_width = Math.max(MIN_SIDEBAR, width);
+                view.sidebar_width_fraction = 1.0;
+            } else {
+                view.sidebar_width_unit = defaults.unit;
+                view.min_sidebar_width = defaults.min;
+                view.max_sidebar_width = defaults.max;
+                view.sidebar_width_fraction = defaults.fraction;
+            }
+        };
+        applyWidth(settings.get_int('sidebar-width'));
+
+        const nearEdge = x => {
+            if (view.collapsed)
+                return false;
+
+            const edge = view.sidebar.get_width();
+            return Math.abs(x - edge) <= HANDLE;
+        };
+
+        const resizeCursor = Gdk.Cursor.new_from_name('col-resize', null);
+        const motion = new Gtk.EventControllerMotion();
+        motion.connect('motion', (controller, x) => {
+            view.cursor = nearEdge(x) ? resizeCursor : null;
+        });
+        motion.connect('leave', () => {
+            view.cursor = null;
+        });
+        view.add_controller(motion);
+
+        let startWidth = 0;
+        const drag = new Gtk.GestureDrag({
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        drag.connect('drag-begin', (gesture, x) => {
+            if (!nearEdge(x)) {
+                gesture.set_state(Gtk.EventSequenceState.DENIED);
+                return;
+            }
+
+            gesture.set_state(Gtk.EventSequenceState.CLAIMED);
+            startWidth = view.sidebar.get_width();
+        });
+        drag.connect('drag-update', (gesture, offsetX) => {
+            const [contentMin] = view.content.measure(
+                Gtk.Orientation.HORIZONTAL, -1);
+            const max = Math.max(MIN_SIDEBAR,
+                view.get_width() - Math.max(MIN_CONTENT, contentMin));
+            const width = Math.round(Math.min(max,
+                Math.max(MIN_SIDEBAR, startWidth + offsetX)));
+            applyWidth(width);
+        });
+        drag.connect('drag-end', () => {
+            if (startWidth > 0)
+                settings.set_int('sidebar-width', view.sidebar.get_width());
+            startWidth = 0;
+        });
+        view.add_controller(drag);
+
+        // Double-click the edge to go back to the automatic width
+        const click = new Gtk.GestureClick({
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        click.connect('pressed', (gesture, nPress, x) => {
+            if (nPress === 2 && nearEdge(x)) {
+                gesture.set_state(Gtk.EventSequenceState.CLAIMED);
+                settings.set_int('sidebar-width', 0);
+                applyWidth(0);
+            }
+        });
+        view.add_controller(click);
     }
 
     vfunc_close_request(event) {
@@ -1293,15 +1393,10 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _includesAddress(addresses, addressObj) {
-        const number = addressObj.address.toPhoneNumber();
-
         for (const haystackObj of addresses) {
-            const tnumber = haystackObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (addressObj.address.equalsPhoneNumber(haystackObj.address))
                 return true;
         }
-
         return false;
     }
 
