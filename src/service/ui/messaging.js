@@ -445,7 +445,9 @@ const MessagingConversation = GObject.registerClass({
         // Open at the newest message, and follow new ones while the view is
         // at the bottom
         this._stickBottom = true;
+        this._userScrolled = false;
         this.scrolled.get_child().scroll_to_focus = false;
+        this._addScrollControllers();
         this._pageSizeId = this._vadj.connect('notify::page-size',
             this._onUpperChanged.bind(this));
 
@@ -467,6 +469,7 @@ const MessagingConversation = GObject.registerClass({
     showLatest() {
         this._anchorBottom = null;
         this._stickBottom = true;
+        this._userScrolled = false;
         this._scrollToEnd();
 
         if (this.thread_id !== null &&
@@ -511,6 +514,7 @@ const MessagingConversation = GObject.registerClass({
         if (!loading) {
             this._anchorBottom = null;
             this._stickBottom = true;
+            this._userScrolled = false;
             this._scrollToEnd();
         }
     }
@@ -556,10 +560,9 @@ const MessagingConversation = GObject.registerClass({
         if (position !== Gtk.PositionType.TOP)
             return;
 
-        // Reaching the top while following the end happens while the list is
-        // laid out, not because the user scrolled up
-        if (this._stickBottom &&
-            this._vadj.get_upper() > this._vadj.get_page_size())
+        // Reaching the top before the user scrolled happens while the list
+        // is laid out; keeping that position would leave the view there
+        if (!this._userScrolled)
             return;
 
         // Keep the visible messages in place as older ones are prepended
@@ -630,6 +633,44 @@ const MessagingConversation = GObject.registerClass({
             if (this._anchorBottom !== null && this._vadj.get_value() === 0)
                 this._revealBacklog();
         }
+    }
+
+    /**
+     * Track scrolling by the user, so the view only stops following the end
+     * of the conversation when the user scrolls away from it, not when the
+     * scroll position changes while the list is laid out.
+     */
+    _addScrollControllers() {
+        const onInput = () => {
+            this._userScrolled = true;
+            return false;
+        };
+
+        const scroll = new Gtk.EventControllerScroll({
+            flags: Gtk.EventControllerScrollFlags.VERTICAL,
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        scroll.connect('scroll', onInput);
+        this.scrolled.add_controller(scroll);
+
+        const drag = new Gtk.GestureDrag({
+            touch_only: true,
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        drag.connect('drag-begin', onInput);
+        this.scrolled.add_controller(drag);
+
+        const key = new Gtk.EventControllerKey({
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        key.connect('key-pressed', onInput);
+        this.scrolled.add_controller(key);
+
+        const click = new Gtk.GestureClick({
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        click.connect('pressed', onInput);
+        this.scrolled.get_vscrollbar().add_controller(click);
     }
 
     _scrollToEnd() {
@@ -947,7 +988,7 @@ const MessagingConversation = GObject.registerClass({
     _holdPosition() {
         this.__pos = this._vadj.get_upper() - this._vadj.get_value();
 
-        if (!this._adjusting) {
+        if (!this._adjusting && this._userScrolled) {
             this._stickBottom = this._vadj.get_value() >=
                 this._vadj.get_upper() - this._vadj.get_page_size() - 1;
         }
