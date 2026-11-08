@@ -24,6 +24,13 @@ const TIME_SPAN_HOUR = 3600000;
 const TIME_SPAN_DAY = 86400000;
 const TIME_SPAN_WEEK = 604800000;
 
+// How many cached messages to show at a time
+const MESSAGE_PAGE_SIZE = 15;
+
+// Fetch older messages from the device ahead of time when fewer than this
+// many cached messages are left to show, as in KDE Connect's SMS app
+const MESSAGE_LOW_WATER_MARK = 25;
+
 
 // Less than an hour (eg. 42 minutes ago)
 const _lthLong = new Intl.RelativeTimeFormat('default', {
@@ -180,6 +187,17 @@ function getDetailedTime(time) {
 }
 
 /**
+ * Whether a message is of a type the conversation can show.
+ *
+ * @param {object} message - A message object
+ * @returns {boolean} %true if the message is incoming or sent
+ */
+function isSupportedMessage(message) {
+    return message.type === Sms.MessageBox.INBOX ||
+        message.type === Sms.MessageBox.SENT;
+}
+
+/**
  * A ListBoxRow for each message of a conversation
  */
 const ConversationMessage = GObject.registerClass({
@@ -193,11 +211,17 @@ const ConversationMessage = GObject.registerClass({
     }
 
     _onActivateLink(label, uri) {
-        Gtk.show_uri_on_window(
-            this.get_toplevel(),
-            uri.includes('://') ? uri : `https://${uri}`,
-            Gtk.get_current_event_time()
-        );
+        const launcher = new Gtk.UriLauncher({
+            uri: uri.includes('://') ? uri : `https://${uri}`,
+        });
+
+        launcher.launch(this.get_root(), null, (obj, res) => {
+            try {
+                launcher.launch_finish(res);
+            } catch (e) {
+                debug(e);
+            }
+        });
 
         return true;
     }
@@ -227,7 +251,7 @@ const ConversationMessage = GObject.registerClass({
         else if (has_attachments)
             this.message_label.label = '';
         else
-            this.message_label.body = empty_placeholder;
+            this.message_label.label = empty_placeholder;
 
         this.message_label.tooltip_text = getDetailedTime(message.date);
 
@@ -329,7 +353,7 @@ const MessagingConversation = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/messaging-conversation.ui',
     Children: [
         'list', 'scrolled', 'pending', 'pending-box', 'avatar', 'content-title',
-        'spinner', 'spinner-anim', 'participants-button', 'bottom-bar',
+        'spinner', 'spinner-anim', 'sync-revealer', 'participants-button', 'bottom-bar',
     ],
 }, class MessagingConversation extends Adw.NavigationPage {
 
@@ -343,13 +367,6 @@ const MessagingConversation = GObject.registerClass({
         this._sendmessageId = this.message_bar.connect(
             'message-send',
             this._onSendMessage.bind(this)
-        );
-
-        this._deviceBinding = this.device.bind_property(
-            'connected',
-            this.message_bar,
-            'sensitive',
-            GObject.BindingFlags.SYNC_CREATE
         );
 
         this.bottom_bar.child = this.message_bar;
@@ -413,6 +430,281 @@ const MessagingConversation = GObject.registerClass({
         this.list.set_header_func(this._headerMessages);
         this.list.set_sort_func(this._sortMessages);
         this._populateMessages();
+
+        // Fetch the thread from the device a page at a time: the newest page
+        // now, older ones when scrolled to the top. Messages of a page are
+        // merged into the conversation when the plugin's threads change.
+        this._anchorBottom = null;
+
+        // Open at the newest message, and follow new ones while the view is
+        // at the bottom
+        this._stickBottom = true;
+        this._userScrolled = false;
+        this.scrolled.get_child().scroll_to_focus = false;
+        this._addScrollControllers();
+        this._pageSizeId = this._vadj.connect('notify::page-size',
+            this._onUpperChanged.bind(this));
+
+        this._threadsChangedId = this.plugin.connect('notify::threads',
+            this._onThreadsChanged.bind(this));
+        this._pageDoneId = this.plugin.connect('thread-page-done',
+            this._onPageDone.bind(this));
+        this._edgeReachedId = this.scrolled.connect('edge-reached',
+            this._onEdgeReached.bind(this));
+        this._upperId = this._vadj.connect('notify::upper',
+            this._onUpperChanged.bind(this));
+        this.showLatest();
+    }
+
+    /**
+     * Show the end of the conversation, and fetch its newest messages from
+     * the device; they are added below as they arrive.
+     */
+    showLatest() {
+        this._anchorBottom = null;
+        this._stickBottom = true;
+        this._userScrolled = false;
+        this._scrollToEnd();
+
+        if (this.thread_id !== null)
+            this.plugin.requestNewestThreadPage(this.thread_id);
+
+        this._updateSpinner();
+        this._queueFill();
+    }
+
+    /**
+     * Show what is being fetched from the device: messages newer than the
+     * cached ones below the conversation, older ones above it. Don't send
+     * messages until the conversation is up to date.
+     */
+    _updateSpinner() {
+        const pending = this.thread_id !== null &&
+            this.plugin.isThreadPagePending(this.thread_id);
+        const syncing = pending &&
+            this.plugin.isThreadSyncing(this.thread_id);
+
+        this.spinner.visible = pending && !syncing;
+        this.spinner_anim.visible = pending && !syncing;
+        this.sync_revealer.reveal_child = syncing;
+        this.message_bar.sensitive = this.device.connected && !syncing;
+    }
+
+    _onPageDone(plugin, thread_id) {
+        if (thread_id !== `${this.thread_id}`)
+            return;
+
+        this._updateSpinner();
+        this._queueFill();
+    }
+
+    /**
+     * Fill the space above the messages: while they don't fill the view,
+     * show older cached messages, then fetch older ones from the device.
+     */
+    _queueFill() {
+        if (this._fillId !== undefined)
+            return;
+
+        // This may be called during allocation, so add the rows afterwards
+        this._fillId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this._fillId = undefined;
+
+            if (!this.scrolled.get_mapped())
+                return GLib.SOURCE_REMOVE;
+
+            // The view is full: keep some older messages ready
+            if (this._vadj.get_upper() > this._vadj.get_page_size()) {
+                if (this._backlog.length < MESSAGE_LOW_WATER_MARK)
+                    this._requestPage();
+
+                return GLib.SOURCE_REMOVE;
+            }
+
+            if (this._backlog.length > 0)
+                this._revealBacklog();
+            else
+                this._requestPage();
+
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    /**
+     * Request a page of this thread from the device. The plugin ignores the
+     * request if one is already pending or the thread is fully loaded.
+     *
+     * @returns {boolean} %true if a page is pending
+     */
+    _requestPage() {
+        if (this.thread_id === null)
+            return false;
+
+        const pending = this.plugin.requestThreadPage(this.thread_id);
+        this._updateSpinner();
+
+        return pending;
+    }
+
+    _onEdgeReached(scrolled, position) {
+        if (position !== Gtk.PositionType.TOP)
+            return;
+
+        // Reaching the top before the user scrolled happens while the list
+        // is laid out; keeping that position would leave the view there
+        if (!this._userScrolled)
+            return;
+
+        // Keep the visible messages in place as older ones are prepended
+        const anchor = this._vadj.get_upper() - this._vadj.get_value();
+
+        // Show older cached messages first, then ask the device for more
+        if (this._backlog.length > 0) {
+            this._anchorBottom = anchor;
+            this._revealBacklog();
+        } else if (this._requestPage()) {
+            this._anchorBottom = anchor;
+        }
+    }
+
+    /**
+     * Show the newest page of the cached messages that aren't shown yet.
+     */
+    _revealBacklog() {
+        const page = this._backlog.splice(-MESSAGE_PAGE_SIZE);
+
+        for (const message of page)
+            this.addMessage(message, false);
+
+        this.list.invalidate_headers();
+
+        // Fetch the next older messages before they're needed
+        if (this._backlog.length < MESSAGE_LOW_WATER_MARK)
+            this._requestPage();
+    }
+
+    /**
+     * Merge messages added to the thread, such as new messages or a page
+     * from the device, into the conversation. Messages older than those
+     * shown are queued, to be shown when scrolled to the top.
+     */
+    _onThreadsChanged() {
+        const thread = this.plugin.threads[this.thread_id];
+
+        if (thread === undefined)
+            return;
+
+        const queued = new Set(this._backlog.map(message => message._id));
+        let shown = 0;
+        let backlogged = 0;
+
+        for (const message of thread) {
+            if (!isSupportedMessage(message) || this._ids.has(message._id) ||
+                queued.has(message._id))
+                continue;
+
+            if (this._ids.size === 0 || message.date >= this.earliest) {
+                this.addMessage(message, false);
+                shown++;
+            } else {
+                this._backlog.push(message);
+                backlogged++;
+            }
+        }
+
+        if (shown > 0)
+            this.list.invalidate_headers();
+
+        if (backlogged > 0) {
+            this._backlog.sort((a, b) => a.date - b.date);
+
+            // Scrolled to the top, waiting for this page
+            if (this._anchorBottom !== null && this._vadj.get_value() === 0)
+                this._revealBacklog();
+        }
+    }
+
+    /**
+     * Track scrolling by the user, so the view only stops following the end
+     * of the conversation when the user scrolls away from it, not when the
+     * scroll position changes while the list is laid out.
+     */
+    _addScrollControllers() {
+        const onInput = () => {
+            this._userScrolled = true;
+            return false;
+        };
+
+        const scroll = new Gtk.EventControllerScroll({
+            flags: Gtk.EventControllerScrollFlags.VERTICAL,
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        scroll.connect('scroll', onInput);
+        this.scrolled.add_controller(scroll);
+
+        const drag = new Gtk.GestureDrag({
+            touch_only: true,
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        drag.connect('drag-begin', onInput);
+        this.scrolled.add_controller(drag);
+
+        const key = new Gtk.EventControllerKey({
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        key.connect('key-pressed', onInput);
+        this.scrolled.add_controller(key);
+
+        const click = new Gtk.GestureClick({
+            propagation_phase: Gtk.PropagationPhase.CAPTURE,
+        });
+        click.connect('pressed', onInput);
+        this.scrolled.get_vscrollbar().add_controller(click);
+    }
+
+    _scrollToEnd() {
+        if (!this._stickBottom)
+            return;
+
+        this._adjusting = true;
+        this._vadj.set_value(this._vadj.get_upper() - this._vadj.get_page_size());
+        this._adjusting = false;
+    }
+
+    _onUpperChanged(adjustment) {
+        const upper = adjustment.get_upper();
+        const pageSize = adjustment.get_page_size();
+
+        this._adjusting = true;
+
+        // Keep the end in view, or the visible messages in place as older
+        // ones are added above them
+        if (this._anchorBottom !== null)
+            adjustment.set_value(upper - this._anchorBottom);
+        else if (this._stickBottom)
+            adjustment.set_value(upper - pageSize);
+        else
+            adjustment.set_value(upper - this.__pos);
+
+        this._adjusting = false;
+
+        // The value may be reset while the list is allocated; scroll again
+        // once the frame is laid out
+        if (this._tickId === undefined) {
+            this._tickId = this.scrolled.add_tick_callback(() => {
+                this._tickId = undefined;
+                this._scrollToEnd();
+
+                // The viewport placed the list before the value was set
+                // while it was allocated, so place it again
+                this.scrolled.get_child().queue_allocate();
+                return GLib.SOURCE_REMOVE;
+            });
+        }
+
+        // Show more messages until the view can scroll
+        if (upper <= pageSize)
+            this._queueFill();
     }
 
     get message_bar() {
@@ -457,9 +749,7 @@ const MessagingConversation = GObject.registerClass({
                 continue;
 
             for (const contactNumber of contact.numbers) {
-                const cnumber = contactNumber.value.toPhoneNumber();
-
-                if (cnumber && (number.endsWith(cnumber) || cnumber.endsWith(number))) {
+                if (number.equalsPhoneNumber(contactNumber.value)) {
                     number = contactNumber.value;
                     break;
                 }
@@ -539,6 +829,8 @@ const MessagingConversation = GObject.registerClass({
     }
 
     _onConnected(device) {
+        this._updateSpinner();
+
         if (device.connected) {
             this.pending_messages.forEach(row =>  {
                 this.pending_box.remove(row);
@@ -646,12 +938,15 @@ const MessagingConversation = GObject.registerClass({
         if (this.thread_id === null && this.addresses.length)
             this._thread_id = this.plugin.getThreadIdForAddresses(this.addresses);
 
-        // Fill the window with messages from the thread
-        if (this.thread_id !== null && this.plugin.threads[this.thread_id]) {
-            const messages = this.plugin.threads[this.thread_id].slice(0);
+        // Show the newest messages of the thread; older ones are shown a
+        // page at a time when scrolled to the top, since adding thousands of
+        // rows at once blocks the window
+        this._backlog = [];
 
-            for (const message of messages)
-                this.addMessage(message);
+        if (this.thread_id !== null && this.plugin.threads[this.thread_id]) {
+            this._backlog = this.plugin.threads[this.thread_id]
+                .filter(isSupportedMessage);
+            this._revealBacklog();
         }
     }
 
@@ -684,6 +979,16 @@ const MessagingConversation = GObject.registerClass({
 
     _holdPosition() {
         this.__pos = this._vadj.get_upper() - this._vadj.get_value();
+
+        if (!this._adjusting && this._userScrolled) {
+            this._stickBottom = this._vadj.get_value() >=
+                this._vadj.get_upper() - this._vadj.get_page_size() - 1;
+        }
+
+        // The user scrolled; stop keeping the old position
+        if (!this._adjusting && this._anchorBottom !== null &&
+            this._vadj.get_value() > 0)
+            this._anchorBottom = null;
     }
 
     _releasePosition() {
@@ -691,8 +996,11 @@ const MessagingConversation = GObject.registerClass({
     }
 
     _sortMessages(row1, row2) {
+        // The loading indicator is above the messages
         if (row1.message === undefined)
             return -1;
+        else if (row2.message === undefined)
+            return 1;
         else
             return (row1.message.date > row2.message.date) ? 1 : -1;
     }
@@ -701,12 +1009,13 @@ const MessagingConversation = GObject.registerClass({
      * Add a message to the conversation.
      *
      * @param {object} message - A message object
+     * @param {boolean} [invalidate] - Whether to update the date headers;
+     *   when adding many messages, do it once afterwards instead
      */
-    addMessage(message) {
+    addMessage(message, invalidate = true) {
         try {
             // TODO: Unsupported MessageBox
-            if (message.type !== Sms.MessageBox.INBOX &&
-                message.type !== Sms.MessageBox.SENT)
+            if (!isSupportedMessage(message))
                 throw TypeError(`invalid message box ${message.type}`);
 
             // Skip already-shown messages
@@ -740,8 +1049,8 @@ const MessagingConversation = GObject.registerClass({
             if (message.date < this.earliest || this.earliest < 0)
                 this.earliest = message.date;
 
-
-            this.list.invalidate_headers();
+            if (invalidate)
+                this.list.invalidate_headers();
         } catch (e) {
             debug(e);
         }
@@ -762,7 +1071,17 @@ const MessagingConversation = GObject.registerClass({
         this.participants_button.disconnect(this._participantsId);
         this.device.disconnect(this._connectedId);
         this._vadj.disconnect(this._scrolledId);
-        this._deviceBinding.unbind();
+        this._vadj.disconnect(this._upperId);
+        this._vadj.disconnect(this._pageSizeId);
+
+        if (this._fillId !== undefined)
+            GLib.source_remove(this._fillId);
+        this.scrolled.disconnect(this._edgeReachedId);
+        this.plugin.disconnect(this._threadsChangedId);
+        this.plugin.disconnect(this._pageDoneId);
+
+        if (this._tickId !== undefined)
+            this.scrolled.remove_tick_callback(this._tickId);
     }
 });
 
@@ -1069,8 +1388,9 @@ export const MessagingWindow = GObject.registerClass({
             });
 
             this.stack.set(thread_id, conversation);
+        } else {
+            conversation.showLatest();
         }
-
 
         // Select the conversation and entry active
         this.split_view.set_content(conversation);
@@ -1293,15 +1613,10 @@ export const MessagingWindow = GObject.registerClass({
     }
 
     _includesAddress(addresses, addressObj) {
-        const number = addressObj.address.toPhoneNumber();
-
         for (const haystackObj of addresses) {
-            const tnumber = haystackObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (addressObj.address.equalsPhoneNumber(haystackObj.address))
                 return true;
         }
-
         return false;
     }
 

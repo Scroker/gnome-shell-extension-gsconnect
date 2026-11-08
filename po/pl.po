@@ -1280,3 +1280,7 @@ msgstr "Usługa jest niedostępna"
 msgid "Open in Browser"
 msgstr "Otwórz w przeglądarce"
 
+
+#: data/ui/messaging-conversation.ui
+msgid "Downloading new messages…"
+msgstr "Pobieranie nowych wiadomości…"
