@@ -353,7 +353,7 @@ const MessagingConversation = GObject.registerClass({
     Template: 'resource:///org/gnome/Shell/Extensions/GSConnect/ui/messaging-conversation.ui',
     Children: [
         'list', 'scrolled', 'pending', 'pending-box', 'avatar', 'content-title',
-        'spinner', 'spinner-anim', 'sync-revealer', 'participants-button', 'bottom-bar',
+        'spinner', 'spinner-anim', 'thread-start', 'sync-revealer', 'participants-button', 'bottom-bar',
     ],
 }, class MessagingConversation extends Adw.NavigationPage {
 
@@ -476,16 +476,22 @@ const MessagingConversation = GObject.registerClass({
     /**
      * Show what is being fetched from the device: messages newer than the
      * cached ones below the conversation, older ones above it. Don't send
-     * messages until the conversation is up to date.
+     * messages until the conversation is up to date. Once every message is
+     * shown, mark the beginning of the conversation.
      */
     _updateSpinner() {
         const pending = this.thread_id !== null &&
             this.plugin.isThreadPagePending(this.thread_id);
         const syncing = pending &&
             this.plugin.isThreadSyncing(this.thread_id);
+        const loading = pending && !syncing;
+        const start = !pending && this._ids.size > 0 &&
+            this._backlog.length === 0 &&
+            this.plugin.isThreadComplete(this.thread_id);
 
-        this.spinner.visible = pending && !syncing;
-        this.spinner_anim.visible = pending && !syncing;
+        this.spinner.visible = loading || start;
+        this.spinner_anim.visible = loading;
+        this.thread_start.visible = start;
         this.sync_revealer.reveal_child = syncing;
         this.message_bar.sensitive = this.device.connected && !syncing;
     }
@@ -581,6 +587,8 @@ const MessagingConversation = GObject.registerClass({
         // Fetch the next older messages before they're needed
         if (this._backlog.length < MESSAGE_LOW_WATER_MARK)
             this._requestPage();
+        else
+            this._updateSpinner();
     }
 
     /**
