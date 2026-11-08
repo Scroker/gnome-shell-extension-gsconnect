@@ -319,6 +319,14 @@ export const Window = GObject.registerClass({
         // Restore window size/maximized/position
         this._restoreGeometry();
 
+        // Close with Ctrl+W or Ctrl+Q, as other GNOME applications
+        const shortcuts = new Gtk.ShortcutController();
+        shortcuts.add_shortcut(new Gtk.Shortcut({
+            trigger: Gtk.ShortcutTrigger.parse_string('<Control>w|<Control>q'),
+            action: Gtk.NamedAction.new('window.close'),
+        }));
+        this.add_controller(shortcuts);
+
         // Prime the service
         this._initService();
     }
