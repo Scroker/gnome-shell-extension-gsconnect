@@ -132,6 +132,7 @@ const Service = GObject.registerClass({
             ['device', this._device.bind(this), new GLib.VariantType('(ssbv)')],
             ['error', this._error.bind(this), new GLib.VariantType('a{ss}')],
             ['preferences', this._preferences, null],
+            ['device-preferences', this._preferences, new GLib.VariantType('(ss)')],
             ['quit', () => this.quit(), null],
             ['refresh', this._identify.bind(this), null],
         ];
@@ -214,12 +215,24 @@ const Service = GObject.registerClass({
         }
     }
 
-    _preferences() {
+    _preferences(action, parameter) {
+        const argv = ['gjs', '-m', 'gsconnect-preferences.js'];
         const _launcher = Gio.SubprocessLauncher.new(
             {flags: Gio.SubprocessFlags.NONE}
         );
         _launcher.set_cwd(Config.PACKAGE_DATADIR);
-        _launcher.spawnv(['gjs', '-m', 'gsconnect-preferences.js']);
+
+        // Open the settings of a device. The activation token lets an open
+        // preferences window raise itself.
+        if (parameter instanceof GLib.Variant) {
+            const [deviceId, token] = parameter.deepUnpack();
+            argv.push('--device', deviceId);
+
+            if (token)
+                _launcher.setenv('XDG_ACTIVATION_TOKEN', token, true);
+        }
+
+        _launcher.spawnv(argv);
     }
 
     /**
