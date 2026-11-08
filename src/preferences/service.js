@@ -319,6 +319,14 @@ export const Window = GObject.registerClass({
         // Restore window size/maximized/position
         this._restoreGeometry();
 
+        // Close with Ctrl+W or Ctrl+Q, as other GNOME applications
+        const shortcuts = new Gtk.ShortcutController();
+        shortcuts.add_shortcut(new Gtk.Shortcut({
+            trigger: Gtk.ShortcutTrigger.parse_string('<Control>w|<Control>q'),
+            action: Gtk.NamedAction.new('window.close'),
+        }));
+        this.add_controller(shortcuts);
+
         // Prime the service
         this._initService();
     }
@@ -557,6 +565,24 @@ export const Window = GObject.registerClass({
         this.device_menu.set_menu_model(panel.menu);
     }
 
+    /**
+     * Show the settings of a device, once the service reports it.
+     *
+     * @param {string} id - The id of the device
+     */
+    showDevice(id) {
+        const row = this.rows[id];
+
+        if (row === undefined) {
+            this._pendingDevice = id;
+        } else {
+            this._pendingDevice = undefined;
+            // Show the page even if the row is already selected
+            this.device_list.select_row(row);
+            this._onDeviceSelected(this.device_list, row);
+        }
+    }
+
     _onDeviceChanged(device, paramspec) {
         const row = this.rows[device.id];
         switch (false) {
@@ -599,6 +625,9 @@ export const Window = GObject.registerClass({
             this.rows[device.id] = row;
             this.device_list.append(row);
             this._onDeviceChanged(device, null);
+
+            if (this._pendingDevice === device.id)
+                this.showDevice(device.id);
         } catch (e) {
             logError(e);
         }

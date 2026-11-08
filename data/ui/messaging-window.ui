@@ -65,9 +65,53 @@ SPDX-License-Identifier: GPL-2.0-or-later
                               </object>
                             </child>
                             <property name="title-widget">
-                              <object class="AdwWindowTitle" id="sidebar-title">
-                                <property name="visible">True</property>
-                                <property name="title" translatable="yes">Messaging</property>
+                              <object class="GtkButton" id="device-button">
+                                <property name="tooltip-text" translatable="yes">Device Settings</property>
+                                <signal name="clicked" handler="_onDeviceSettings" swapped="no"/>
+                                <style>
+                                  <class name="flat"/>
+                                </style>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="valign">center</property>
+                                    <child>
+                                      <object class="GtkLabel" id="device-name">
+                                        <property name="ellipsize">end</property>
+                                        <property name="single-line-mode">True</property>
+                                        <style>
+                                          <class name="heading"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="halign">center</property>
+                                        <property name="spacing">4</property>
+                                        <child>
+                                          <object class="GtkLabel" id="device-status-light">
+                                            <property name="label">●</property>
+                                            <accessibility>
+                                              <property name="hidden">True</property>
+                                            </accessibility>
+                                            <style>
+                                              <class name="caption"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel" id="device-status">
+                                            <property name="ellipsize">end</property>
+                                            <style>
+                                              <class name="caption"/>
+                                              <class name="dim-label"/>
+                                            </style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
                               </object>
                             </property>
                           </object>

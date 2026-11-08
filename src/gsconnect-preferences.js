@@ -31,7 +31,17 @@ const Preferences = GObject.registerClass({
         super._init({
             application_id: 'org.gnome.Shell.Extensions.GSConnect.Preferences',
             resource_base_path: '/org/gnome/Shell/Extensions/GSConnect',
+            flags: Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
         });
+
+        this.add_main_option(
+            'device',
+            0,
+            GLib.OptionFlags.NONE,
+            GLib.OptionArg.STRING,
+            _('Show the settings of a device'),
+            'ID'
+        );
 
         GLib.set_prgname('gsconnect-preferences');
         GLib.set_application_name(_('GSConnect Preferences'));
@@ -44,6 +54,18 @@ const Preferences = GObject.registerClass({
             });
         }
         this._window.present();
+    }
+
+    vfunc_command_line(command_line) {
+        const options = command_line.get_options_dict();
+        const device = options.lookup_value('device', null)?.unpack();
+
+        this.activate();
+
+        if (device)
+            this._window.showDevice(device);
+
+        return 0;
     }
 
     vfunc_startup() {
