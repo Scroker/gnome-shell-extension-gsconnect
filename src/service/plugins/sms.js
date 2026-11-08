@@ -185,6 +185,7 @@ const SMSPlugin = GObject.registerClass({
     clearCache() {
         this._threads = {};
         this.notify('threads');
+        this.queueCacheWrite();
     }
 
     cacheLoaded() {
@@ -325,6 +326,9 @@ const SMSPlugin = GObject.registerClass({
         // Sort the thread by ascending date and notify
         this.threads[thread_id] = cache.sort((a, b) => a.date - b.date);
         this.notify('threads');
+
+        // Keep each fetched page if the service stops unexpectedly
+        this.queueCacheWrite();
     }
 
     /**
@@ -526,15 +530,10 @@ const SMSPlugin = GObject.registerClass({
         if (!thread?.[0]?.addresses)
             return false;
 
-        const number = addressObj.address.toPhoneNumber();
-
         for (const taddressObj of thread[0].addresses) {
-            const tnumber = taddressObj.address.toPhoneNumber();
-
-            if (number.endsWith(tnumber) || tnumber.endsWith(number))
+            if (addressObj.address?.equalsPhoneNumber(taddressObj.address))
                 return true;
         }
-
         return false;
     }
 
