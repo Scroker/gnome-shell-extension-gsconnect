@@ -44,6 +44,12 @@ SPDX-License-Identifier: GPL-2.0-or-later
             <property name="hexpand">True</property>
             <property name="accepts-tab">False</property>
             <property name="wrap-mode">word</property>
+            <!-- Text margins rather than CSS padding, which GtkTextView
+                 leaves out of its scrolling and makes it scroll needlessly -->
+            <property name="top-margin">8</property>
+            <property name="bottom-margin">8</property>
+            <property name="left-margin">8</property>
+            <property name="right-margin">8</property>
             <accessibility>
               <property name="label" translatable="yes">Message Composer</property>
             </accessibility>

@@ -23,20 +23,37 @@ export const MessagingInputText = GObject.registerClass({
         super._init();
         Object.assign(this, params);
 
+        // Enter sends the message; Shift+Enter is left to the text view,
+        // which inserts a new line at the cursor
         const keyController = new Gtk.EventControllerKey();
         keyController.connect('key-pressed', (controller, keyval, keycode, state) => {
-            this._onStateChanged();
-            if (keyval === Gdk.KEY_Return) {
-                if (state & Gdk.ModifierType.SHIFT_MASK) {
-                    const text = this.message_entry.buffer.text;
-                    this.message_entry.buffer.text = text + '\n';
-                } else {
-                    this._onSendMessage();
-                    return Gdk.EVENT_STOP;
-                }
-            }
+            if (keyval !== Gdk.KEY_Return && keyval !== Gdk.KEY_KP_Enter)
+                return Gdk.EVENT_PROPAGATE;
+
+            if (state & Gdk.ModifierType.SHIFT_MASK)
+                return Gdk.EVENT_PROPAGATE;
+
+            this._onSendMessage();
+            return Gdk.EVENT_STOP;
         });
         this.message_entry.add_controller(keyController);
+
+        this.message_entry.buffer.connect('changed',
+            this._onStateChanged.bind(this));
+
+        // The entry grows with the message, but scrolls to the cursor before
+        // growing; while the whole message fits, keep it scrolled to the top
+        const vadj = this.message_entry.get_vadjustment();
+        const holdTop = () => {
+            const scrolled = this.message_entry.get_parent();
+            const [, natural] = this.message_entry.measure(
+                Gtk.Orientation.VERTICAL, this.message_entry.get_width());
+
+            if (vadj.value > 0 && natural <= scrolled.get_height())
+                vadj.value = 0;
+        };
+        vadj.connect('value-changed', holdTop);
+        vadj.connect('changed', holdTop);
     }
 
     get text() {
