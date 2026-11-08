@@ -27,6 +27,10 @@ const TIME_SPAN_WEEK = 604800000;
 // How many cached messages to show at a time
 const MESSAGE_PAGE_SIZE = 15;
 
+// Fetch older messages from the device ahead of time when fewer than this
+// many cached messages are left to show, as in KDE Connect's SMS app
+const MESSAGE_LOW_WATER_MARK = 25;
+
 
 // Less than an hour (eg. 42 minutes ago)
 const _lthLong = new Intl.RelativeTimeFormat('default', {
@@ -506,9 +510,16 @@ const MessagingConversation = GObject.registerClass({
         this._fillId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
             this._fillId = undefined;
 
-            if (this._vadj.get_upper() > this._vadj.get_page_size() ||
-                !this.scrolled.get_mapped())
+            if (!this.scrolled.get_mapped())
                 return GLib.SOURCE_REMOVE;
+
+            // The view is full: keep some older messages ready
+            if (this._vadj.get_upper() > this._vadj.get_page_size()) {
+                if (this._backlog.length < MESSAGE_LOW_WATER_MARK)
+                    this._requestPage();
+
+                return GLib.SOURCE_REMOVE;
+            }
 
             if (this._backlog.length > 0)
                 this._revealBacklog();
@@ -566,6 +577,10 @@ const MessagingConversation = GObject.registerClass({
             this.addMessage(message, false);
 
         this.list.invalidate_headers();
+
+        // Fetch the next older messages before they're needed
+        if (this._backlog.length < MESSAGE_LOW_WATER_MARK)
+            this._requestPage();
     }
 
     /**

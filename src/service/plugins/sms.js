@@ -13,15 +13,23 @@ import SmsURI from '../utils/uri.js';
 
 
 /**
- * Number of messages requested per page of a thread: about a screenful. The
- * device includes thumbnails of attachments, so larger pages take longer.
+ * Number of messages requested for the first page of a thread. Later pages
+ * request as many messages as are cached, up to THREAD_PAGE_MAX, so a long
+ * thread takes few requests, as in KDE Connect's SMS app
+ * (`MIN_NUMBER_TO_REQUEST`). The device prepares each request slowly when the
+ * thread has attachments.
  */
-const THREAD_PAGE_SIZE = 10;
+const THREAD_PAGE_SIZE = 25;
+
+/**
+ * Most messages requested for a page of a thread.
+ */
+const THREAD_PAGE_MAX = 200;
 
 /**
  * Seconds to wait for a page of a thread before allowing a new request.
  */
-const THREAD_PAGE_TIMEOUT = 30;
+const THREAD_PAGE_TIMEOUT = 60;
 
 
 export const Metadata = {
@@ -428,7 +436,7 @@ const SMSPlugin = GObject.registerClass({
 
         // A short page, or one with nothing older than we had, means we've
         // reached the start of the thread
-        if (messages.length < THREAD_PAGE_SIZE ||
+        if (messages.length < request.size ||
             (request.older && !added.some(m => m.date < request.start))) {
             this._completeThreads.add(thread_id);
 
@@ -541,6 +549,23 @@ const SMSPlugin = GObject.registerClass({
     }
 
     /**
+     * Get the number of messages to request for a page of a thread: a small
+     * first page, then as many as are cached, so each page doubles them.
+     *
+     * @param {string} thread_id - The thread ID
+     * @param {number} start - The start of the page, or -1 for the newest
+     * @returns {number} The number of messages to request
+     */
+    _getThreadPageSize(thread_id, start) {
+        if (start < 0)
+            return THREAD_PAGE_SIZE;
+
+        const cached = this.threads[thread_id]?.length ?? 0;
+
+        return Math.min(Math.max(cached, THREAD_PAGE_SIZE), THREAD_PAGE_MAX);
+    }
+
+    /**
      * Send a `request_conversation` packet for a page of a thread.
      *
      * @param {string} thread_id - The thread ID
@@ -557,6 +582,7 @@ const SMSPlugin = GObject.registerClass({
             newer: newer,
             syncTo: syncTo,
             start: start,
+            size: this._getThreadPageSize(thread_id, start),
             timeoutId: GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,
                 THREAD_PAGE_TIMEOUT, () => {
                     this._pageRequests.delete(thread_id);
@@ -568,7 +594,7 @@ const SMSPlugin = GObject.registerClass({
 
         const body = {
             threadID: thread_id,
-            numberToRequest: THREAD_PAGE_SIZE,
+            numberToRequest: request.size,
         };
 
         if (start >= 0)
