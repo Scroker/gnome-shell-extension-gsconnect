@@ -5,7 +5,6 @@
 import Gio from 'gi://Gio';
 import GjsPrivate from 'gi://GjsPrivate';
 import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
 
 
 /*
@@ -45,46 +44,35 @@ function toUnderscoreCase(string) {
  * DBus.Interface represents a DBus interface bound to an object instance, meant
  * to be exported over DBus.
  */
-export const Interface = GObject.registerClass({
-    GTypeName: 'GSConnectDBusInterface',
-    Implements: [Gio.DBusInterface],
-    Properties: {
-        'g-instance': GObject.ParamSpec.object(
-            'g-instance',
-            'Instance',
-            'The delegate GObject',
-            GObject.ParamFlags.READWRITE,
-            GObject.Object.$gtype
-        ),
-    },
-}, class Interface extends GjsPrivate.DBusImplementation {
-
-    _init(params) {
-        super._init({
-            g_instance: params.g_instance,
+export class Interface {
+    constructor(params) {
+        this._dbus = new GjsPrivate.DBusImplementation({
             g_interface_info: params.g_interface_info,
         });
+        this._instance = params.g_instance;
 
         // Cache member lookups
         this._instanceHandlers = [];
         this._instanceMethods = {};
         this._instanceProperties = {};
 
-        const info = this.get_info();
-        this.connect('handle-method-call', this._call.bind(this._instance, info));
-        this.connect('handle-property-get', this._get.bind(this._instance, info));
-        this.connect('handle-property-set', this._set.bind(this._instance, info));
+        const info = params.g_interface_info;
+        this._dbus.connect('handle-method-call',
+            this._call.bind(this, info));
+        this._dbus.connect('handle-property-get',
+            this._get.bind(this, info));
+        this._dbus.connect('handle-property-set',
+            this._set.bind(this, info));
 
         // Automatically forward known signals
-        const id = this._instance.connect('notify', this._notify.bind(this));
+        const id = this._instance.connect('notify',
+            this._notify.bind(this));
         this._instanceHandlers.push(id);
 
         for (const signal of info.signals) {
             const type = `(${signal.args.map(arg => arg.signature).join('')})`;
-            const id = this._instance.connect(
-                signal.name,
-                this._emit.bind(this, signal.name, type)
-            );
+            const id = this._instance.connect(signal.name,
+                this._emit.bind(this, signal.name, type));
 
             this._instanceHandlers.push(id);
         }
@@ -94,15 +82,16 @@ export const Interface = GObject.registerClass({
             this.export(params.g_connection, params.g_object_path);
     }
 
-    get g_instance() {
-        if (this._instance === undefined)
-            this._instance = null;
-
-        return this._instance;
+    get dbus() {
+        return this._dbus;
     }
 
-    set g_instance(instance) {
-        this._instance = instance;
+    export(connection, objectPath) {
+        this._dbus.export(connection, objectPath);
+    }
+
+    flush() {
+        this._dbus.flush();
     }
 
     /**
@@ -116,7 +105,7 @@ export const Interface = GObject.registerClass({
      * @param {Gio.DBusMethodInvocation|GLib.Variant} param2
      *        - The method invocation or parameters (GNOME 50+ changed order)
      */
-    async _call(info, iface, name, param1, param2) {
+    async _call(info, _iface, name, param1, param2) {
         let retval;
         let invocation, parameters;
 
@@ -147,7 +136,7 @@ export const Interface = GObject.registerClass({
                 }
             });
 
-            retval = await this[name](...args);
+            retval = await this._instance[name](...args);
         } catch (e) {
             if (e instanceof GLib.Error) {
                 invocation.return_gerror(e);
@@ -159,7 +148,7 @@ export const Interface = GObject.registerClass({
                 invocation.return_dbus_error(e.name, e.message);
             }
 
-            logError(e, `${this}: ${name}`);
+            logError(e, `${this._instance}: ${name}`);
             return;
         }
 
@@ -188,17 +177,17 @@ export const Interface = GObject.registerClass({
         }
     }
 
-    _nativeProp(obj, name) {
+    _nativeProp(name) {
         if (this._instanceProperties[name] === undefined) {
             let propName = name;
 
-            if (propName in obj)
+            if (propName in this._instance)
                 this._instanceProperties[name] = propName;
 
             if (this._instanceProperties[name] === undefined) {
                 propName = toUnderscoreCase(name);
 
-                if (propName in obj)
+                if (propName in this._instance)
                     this._instanceProperties[name] = propName;
             }
         }
@@ -207,11 +196,11 @@ export const Interface = GObject.registerClass({
     }
 
     _emit(name, type, obj, ...args) {
-        this.emit_signal(name, new GLib.Variant(type, args));
+        this._dbus.emit_signal(name, new GLib.Variant(type, args));
     }
 
-    _get(info, iface, name) {
-        const nativeValue = this[iface._nativeProp(this, name)];
+    _get(info, _iface, name) {
+        const nativeValue = this._instance[this._nativeProp(name)];
         const propertyInfo = info.lookup_property(name);
 
         if (nativeValue === undefined || propertyInfo === null)
@@ -220,20 +209,20 @@ export const Interface = GObject.registerClass({
         return new GLib.Variant(propertyInfo.signature, nativeValue);
     }
 
-    _set(info, iface, name, value) {
+    _set(info, _iface, name, value) {
         const nativeValue = value.recursiveUnpack();
 
-        this[iface._nativeProp(this, name)] = nativeValue;
+        this._instance[this._nativeProp(name)] = nativeValue;
     }
 
     _notify(obj, pspec) {
         const name = toDBusCase(pspec.name);
-        const propertyInfo = this.get_info().lookup_property(name);
+        const propertyInfo = this._dbus.get_info().lookup_property(name);
 
         if (propertyInfo === null)
             return;
 
-        this.emit_property_changed(
+        this._dbus.emit_property_changed(
             name,
             new GLib.Variant(
                 propertyInfo.signature,
@@ -250,12 +239,12 @@ export const Interface = GObject.registerClass({
             this._instanceHandlers = [];
 
             this.flush();
-            this.unexport();
+            this._dbus.unexport();
         } catch (e) {
             logError(e);
         }
     }
-});
+}
 
 /**
  * Get a new, dedicated DBus connection on {@link busType}

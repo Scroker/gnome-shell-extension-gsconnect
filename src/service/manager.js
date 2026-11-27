@@ -390,7 +390,7 @@ const Manager = GObject.registerClass({
             g_instance: device,
             g_interface_info: DEVICE_IFACE,
         });
-        info.object.add_interface(info.interface);
+        info.object.add_interface(info.interface.dbus);
 
         this._exported.set(device, info);
     }
@@ -415,7 +415,7 @@ const Manager = GObject.registerClass({
 
         // Unexport the Device interface and object
         info.interface.flush();
-        info.object.remove_interface(info.interface);
+        info.object.remove_interface(info.interface.dbus);
         info.object.flush();
         this.unexport(info.object.g_object_path);
 

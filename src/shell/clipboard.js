@@ -5,7 +5,6 @@
 import Gio from 'gi://Gio';
 import GjsPrivate from 'gi://GjsPrivate';
 import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
 
 import Meta from 'gi://Meta';
 
@@ -61,12 +60,9 @@ const TEXT_MIMETYPES = [
  * A simple clipboard portal, especially useful on Wayland where GtkClipboard
  * doesn't work in the background.
  */
-export const Clipboard = GObject.registerClass({
-    GTypeName: 'GSConnectShellClipboard',
-}, class GSConnectShellClipboard extends GjsPrivate.DBusImplementation {
-
-    _init(params = {}) {
-        super._init({
+export class Clipboard {
+    constructor() {
+        this._dbus = new GjsPrivate.DBusImplementation({
             g_interface_info: DBUS_INFO,
         });
 
@@ -80,7 +76,7 @@ export const Clipboard = GObject.registerClass({
         );
 
         // Prepare DBus interface
-        this._handleMethodCallId = this.connect(
+        this._handleMethodCallId = this._dbus.connect(
             'handle-method-call',
             this._onHandleMethodCall.bind(this)
         );
@@ -114,7 +110,7 @@ export const Clipboard = GObject.registerClass({
          * we'll end up with the previous selection's content.
          */
         GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
-            this.emit_signal('OwnerChange', null);
+            this._dbus.emit_signal('OwnerChange', null);
             this._transferring = false;
 
             return GLib.SOURCE_REMOVE;
@@ -123,7 +119,7 @@ export const Clipboard = GObject.registerClass({
 
     _onBusAcquired(connection, name) {
         try {
-            this.export(connection, DBUS_PATH);
+            this._dbus.export(connection, DBUS_PATH);
         } catch (e) {
             logError(e);
         }
@@ -131,7 +127,7 @@ export const Clipboard = GObject.registerClass({
 
     _onNameLost(connection, name) {
         try {
-            this.unexport();
+            this._dbus.unexport();
         } catch (e) {
             logError(e);
         }
@@ -359,12 +355,12 @@ export const Clipboard = GObject.registerClass({
         }
 
         if (this._handleMethodCallId > 0) {
-            this.disconnect(this._handleMethodCallId);
+            this._dbus.disconnect(this._handleMethodCallId);
             this._handleMethodCallId = 0;
-            this.unexport();
+            this._dbus.unexport();
         }
     }
-});
+}
 
 
 let _portal = null;
