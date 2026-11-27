@@ -77,6 +77,9 @@ function _installResource(dirname, basename, relativePath) {
     try {
         const contents = getResource(relativePath);
 
+        if (contents === null)
+            return false;
+
         return _installFile(dirname, basename, contents);
     } catch (e) {
         logError(e, 'GSConnect');
@@ -205,8 +208,8 @@ export function installService() {
         _installResource(appDir, appPrefsFile, appPrefsFile);
 
         // Application Icon
-        _installResource(iconDir, iconFull, `icons/${iconFull}`);
-        _installResource(iconDir, iconSym, `icons/${iconSym}`);
+        _installResource(iconDir, iconFull, `icons/scalable/apps/${iconFull}`);
+        _installResource(iconDir, iconSym, `icons/symbolic/apps/${iconSym}`);
 
         // File Manager Extensions
         const target = `${Config.PACKAGE_DATADIR}/nautilus-gsconnect.py`;

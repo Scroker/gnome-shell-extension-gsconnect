@@ -57,9 +57,10 @@ export const Clipboard = GObject.registerClass(
     {
         GTypeName: 'GSConnectShellClipboard',
     },
-    class GSConnectShellClipboard extends GjsPrivate.DBusImplementation {
+    class Clipboard extends GObject.Object {
         _init() {
-            super._init({
+            super._init();
+            this._dbus = new GjsPrivate.DBusImplementation({
                 g_interface_info: DBUS_INFO,
             });
 
@@ -75,7 +76,7 @@ export const Clipboard = GObject.registerClass(
             ], Gio.SubprocessFlags.NONE);
 
             // Prepare DBus interface
-            this._handleMethodCallId = this.connect(
+            this._handleMethodCallId = this._dbus.connect(
                 'handle-method-call',
                 this._onHandleMethodCall.bind(this)
             );
@@ -92,7 +93,7 @@ export const Clipboard = GObject.registerClass(
 
         _onBusAcquired(connection, name) {
             try {
-                this.export(connection, DBUS_PATH);
+                this._dbus.export(connection, DBUS_PATH);
             } catch (e) {
                 logError(e);
             }
@@ -100,7 +101,7 @@ export const Clipboard = GObject.registerClass(
 
         _onNameLost(connection, name) {
             try {
-                this.unexport();
+                this._dbus.unexport();
             } catch (e) {
                 logError(e);
             }
@@ -259,9 +260,9 @@ export const Clipboard = GObject.registerClass(
             }
 
             if (this._handleMethodCallId > 0) {
-                this.disconnect(this._handleMethodCallId);
+                this._dbus.disconnect(this._handleMethodCallId);
                 this._handleMethodCallId = 0;
-                this.unexport();
+                this._dbus.unexport();
             }
             if (this.watcher)
                 this.watcher.force_exit();
